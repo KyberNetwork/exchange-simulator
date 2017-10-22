@@ -3,3 +3,6 @@ ethereum
 requests
 jsonrpc
 rlp
+flask
+flask_restful
+redis
