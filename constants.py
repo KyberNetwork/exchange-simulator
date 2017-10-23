@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-LIQUI_ADDRESS = "F3019C224501ED2D8881D0896026d144E5e5D353"
-BANK_ADDRESS = 0x7ffdb79da310995b0d5778b87f69a1340b639266
+LIQUI_ADDRESS = 0xdee7f99acc05b3450536fa3e4c55a646786b1e29
+BANK_ADDRESS = 0xe8fa477a586a9dc171145b8b86fae4a307984c32
 
 OREDER_BOOK_IP = "TODO"
 
-TOKEN_TO_ADDRESS = { "KNC" : 0xbd46bb7cf321b4acf0a703422f4c2dd69ad0dba0,
-                     "ETH" : 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee }
+TOKEN_TO_ADDRESS = {"KNC": 0x9f615d16f2ad6005c7a88a35948af252c0278a73,
+                    "ETH": 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee}

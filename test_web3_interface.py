@@ -1,0 +1,47 @@
+#!/usr/bin/python3
+import json
+import unittest
+import web3_interface
+import constants
+
+
+class TestWeb3(unittest.TestCase):
+
+    def test_get_balance_and_withdraw(self):
+        knc = constants.TOKEN_TO_ADDRESS["KNC"]
+        balance0 = web3_interface.get_balances(
+            constants.LIQUI_ADDRESS, [knc])[0]
+        # withdraw 2 knc to deposit address
+        tx = web3_interface.withdraw(constants.LIQUI_ADDRESS,
+                                     knc,
+                                     2,
+                                     constants.LIQUI_ADDRESS)
+        web3_interface.wait_for_tx_confirmation(tx)
+        balance1 = web3_interface.get_balances(
+            constants.LIQUI_ADDRESS, [knc])[0]
+        self.assertEqual(balance0 + 2, balance1)
+
+        # withdraw 2 knc to dummy address
+        balance_dummy0 = web3_interface.get_balances(0xdeadbeef, [knc])[0]
+
+        tx = web3_interface.withdraw(constants.LIQUI_ADDRESS,
+                                     knc,
+                                     2,
+                                     0xdeadbeef)
+        web3_interface.wait_for_tx_confirmation(tx)
+
+        balance_dummy1 = web3_interface.get_balances(0xdeadbeef, [knc])[0]
+        self.assertEqual(balance_dummy0 + 2, balance_dummy1)
+
+        # clear deposit
+        tx = web3_interface.clear_deposits(constants.LIQUI_ADDRESS, [knc], [1])
+        web3_interface.wait_for_tx_confirmation(tx)
+
+        balance2 = web3_interface.get_balances(
+            constants.LIQUI_ADDRESS, [knc])[0]
+
+        self.assertEqual(balance0 + 1, balance2)
+
+
+if __name__ == '__main__':
+    unittest.main()
