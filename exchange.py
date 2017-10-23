@@ -181,7 +181,8 @@ class OrderBook:
         def rate_exceed_threshold(rate, threshold):
             return ((rate - threshold) *
                     (-1 if self.price_type == OrderBook.BUY else 1)) > 0
-
+        if required_qty < 0:
+            return 0, 0
         total_cost = 0
         total_quantity = 0
         for command in self.order_book:

@@ -10,5 +10,4 @@ TOKEN_TO_ADDRESS = {"KNC": 0xbd46bb7cf321b4acf0a703422f4c2dd69ad0dba0,
 
 SUPPORTED_PAIR = ['BAT-ETH', 'CVC-ETH', 'DGD-ETH',  'EOS-ETH', 'ADX-ETH',
                   'FUN-ETH', 'GNT-ETH',  'KNC-ETH', 'LINK-ETH', 'MCO-ETH',
-                  'OMG-ETH', 'PAY-ETH',
-                  ]
+                  'OMG-ETH', 'PAY-ETH']
