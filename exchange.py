@@ -120,6 +120,7 @@ class Exchange:
 
                 self.db.set(
                     self.name + "," + "last_deposit_check", current_time)
+
             result = True
         except Exception as e:
             print(e)

@@ -15,13 +15,6 @@ from ethereum.utils import mk_contract_address
 local_url = "https://kovan.infura.io"
 
 
-def merge_two_dicts(x, y):
-    '''Given two dicts, merge them into a new dict as a shallow copy.'''
-    z = x.copy()
-    z.update(y)
-    return z
-
-
 def json_call(method_name, params):
     url = local_url
     headers = {'content-type': 'application/json'}
@@ -134,14 +127,11 @@ reserve_abi = \
 
 #
 
-ERC0_abi = \
-    '[{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"totalSupply","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_spender","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Approval","type":"event"}]'
-
-
 #
 
+
 def to_hex_address(integer):
-    return "%40x" % integer
+    return "%040x" % integer
 
 #
 
@@ -208,3 +198,12 @@ def clear_deposits(exchange_address, token_array, amounts):
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "clearBalances",
                          [token_array, amounts])
+
+
+def withdraw(exchange_address, token, amount, destiniation):
+    # this is not a real key.
+    amount = int(amount * 10**18)
+    key = h2b(
+        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
+    return call_function(key, 0, exchange_address, reserve_abi, "withdraw",
+                         [token, amount, destiniation])
