@@ -38,18 +38,63 @@ class LiquiTrade(Resource):
                 "error": "Invalid api_key in  'Key' Header"
             })
 
-        request_all = json.loads(request.data)
+        try:
+            request_all = json.loads(request.data)
+        except json.JSONDecodeError:
+            return jsonify({
+                "success": 0,
+                "error": "Invalid data format in your request"
+            })
+
+
         request_all['api_key'] = request.headers['key']
         exmethod.parse_method(method, request_all)
         if 'error' in exmethod.exchange_actions:
             return jsonify(exmethod.exchange_actions['errormsg'])
         else:
-            if method.lower() == 'trade':
-                trade_data = exchange_api_interface.TradeParams(
+            method = method.lower()
+            if method == 'trade':
+                exchange_params = exchange_api_interface.TradeParams(
                     **exmethod.exchange_actions)
+                # ex.execute_trade(exchange_params)
+                return jsonify(vars(exchange_params))
 
-                # ex.execute_trade(exchange_api_interface)
-        return jsonify(vars(trade_data))
+            elif method == 'withdrawcoin':
+                exchange_params = exchange_api_interface.WithdrawParams(
+                    **exmethod.exchange_actions)
+                # ex.withdraw(exchange_params)
+                return jsonify(vars(exchange_params))
+
+            elif method == 'getinfo':
+                exchange_params = exchange_api_interface.GetBalanceParams(
+                    **exmethod.exchange_actions)
+                # ex.get_user_balance(exchange_params)
+                return jsonify(vars(exchange_params))
+
+            elif method == 'cancelorder':
+                exchange_params = exchange_api_interface.CancelTradeParams(
+                    **exmethod.exchange_actions)
+                # ex.cancel_trade(exchange_params)
+                return jsonify(vars(exchange_params))
+
+            elif method == 'activeorders':
+                exchange_params = exchange_api_interface.GetOrders_Open_Params(
+                    **exmethod.exchange_actions)
+                # ex.get_orders_allopen(exchange_params)
+                return jsonify(vars(exchange_params))
+
+            elif method == 'orderinfo':
+                exchange_params = exchange_api_interface.GetOrder_Single_Params(
+                    **exmethod.exchange_actions)
+                # ex.get_order_single(exchange_params)
+                return jsonify(vars(exchange_params))
+
+            elif method == 'tradehistory':
+                exchange_params = exchange_api_interface.GetHistoryParams(
+                    **exmethod.exchange_actions)
+                # ex.get_trade_history(exchange_params)
+                return jsonify(vars(exchange_params))
+
 
 
 api.add_resource(Employees, '/employees')  # Route_1

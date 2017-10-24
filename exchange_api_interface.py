@@ -30,10 +30,18 @@ class TradeParams:
 
 ##########################################################################
 
-class GetBalanceParams:
-    def __init__(self, api_key, token):
+
+class CancelTradeParams:
+    def __init__(self, api_key, order_id):
         self.api_key = api_key
-        self.token = token
+        self.order_id = order_id
+
+
+##########################################################################
+
+class GetBalanceParams:
+    def __init__(self, api_key):
+        self.api_key = api_key
 
 ##########################################################################
 
@@ -57,11 +65,35 @@ class WithdrawParams:
 
 ##########################################################################
 
+
+class GetOrder_Single_Params:
+    def __init__(self, api_key, order_id):
+        self.api_key = api_key
+        self.order_id = order_id
+
+
+##########################################################################
+
+class GetOrders_Open_Params:
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+
+##########################################################################
+
+class GetHistoryParams:
+    def __init__(self, api_key):
+        self.api_key = api_key
+
+
+##########################################################################
 class LiquiApiInterface(ExchangeApiInterface):
     def __init__(self):
         self.name = "Liqui"
         self.args = {}
         self.exchange_actions = {}
+        self.exchange_replies = {}
+        self.method_error = {}
 
     def check_args(post_args, required_post_keys):
         """Checks the arguments passed and returns True if they are valid
@@ -164,52 +196,106 @@ class LiquiApiInterface(ExchangeApiInterface):
 
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
-
         else:
             self.exchange_actions = {'errormsg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
-            self.exchange_actions = {'error': True}
-
+            self.exchange_actions.update({'error': True})
         return self.exchange_actions
 
     def parse_cancel_args(self, args):
-        # TODO
         self.args = args
-        pass
+        parameters = ['order_id', 'api_key']
+
+        if LiquiApiInterface.check_args(self.args, parameters):
+            self.exchange_actions = self.parse_args(self.args, parameters)
+        else:
+            self.exchange_actions = {'errormsg': {
+                'success': 0, 'error': 'Invalid parameters in post request'}}
+            self.exchange_actions.update({'error': True})
+        return self.exchange_actions
 
     def parse_get_balance_args(self, args):
-        # TODO
-        pass
+        self.args = args
+        parameters = ['api_key']
+
+        if LiquiApiInterface.check_args(self.args, parameters):
+            self.exchange_actions = self.parse_args(self.args, parameters)
+        else:
+            self.exchange_actions = {'errormsg': {
+                'success': 0, 'error': 'Invalid parameters in post request'}}
+            self.exchange_actions.update({'error': True})
+        return self.exchange_actions
 
     def parse_withdraw_args(self, args):
-        # TODO
-        pass
+        self.args = args
+        parameters = ['coinname', 'address', 'amount', 'api_key']
 
-    def parse_get_orders_args(self, args):
-        # TODO
-        pass
+        if LiquiApiInterface.check_args(self.args, parameters):
+            self.exchange_actions = self.parse_args(self.args, parameters)
+        else:
+            self.exchange_actions = {'errormsg': {
+                'success': 0, 'error': 'Invalid parameters in post request'}}
+            self.exchange_actions.update({'error': True})
+        return self.exchange_actions
 
-    def parse_get_order_args(self, args):
-        # TODO
-        pass
-    # def parse_deposit_args(self, args):
-    #     # TODO
-    #     pass
+    def parse_getorders_open_args(self, args):
+        self.args = args
+        parameters = ['api_key']
+
+        if LiquiApiInterface.check_args(self.args, parameters):
+            self.exchange_actions = self.parse_args(self.args, parameters)
+        else:
+            self.exchange_actions = {'errormsg': {
+                'success': 0, 'error': 'Invalid parameters in post request'}}
+            self.exchange_actions.update({'error': True})
+        return self.exchange_actions
+
+    def parse_getorder_single_args(self, args):
+        self.args = args
+        parameters = ['api_key', 'order_id']
+
+        if LiquiApiInterface.check_args(self.args, parameters):
+            self.exchange_actions = self.parse_args(self.args, parameters)
+        else:
+            self.exchange_actions = {'errormsg': {
+                'success': 0, 'error': 'Invalid parameters in post request'}}
+            self.exchange_actions.update({'error': True})
+        return self.exchange_actions
+
+    def parse_gethistory_args(self, args):
+        self.args = args
+        parameters = ['api_key']
+
+        if LiquiApiInterface.check_args(self.args, parameters):
+            self.exchange_actions = self.parse_args(self.args, parameters)
+        else:
+            self.exchange_actions = {'errormsg': {
+                'success': 0, 'error': 'Invalid parameters in post request'}}
+            self.exchange_actions.update({'error': True})
+        return self.exchange_actions
 
     def parse_method(self, method, args):
-        if method.lower() == 'trade':
+        method = method.lower()
+        if method == 'trade':
             'inside trade'
             self.parse_trade_args(args)
-        elif method.lower() == 'getinfo':
+        elif method == 'getinfo':
             self.parse_get_balance_args(args)
         elif method.lower() == 'cancelorder':
-            self.parse_get_cancel_args(args)
-        elif method.lower() == 'getinfo':
-            self.parse_get_balance_args(args)
+            self.parse_cancel_args(args)
+        elif method.lower() == 'orderinfo':
+            self.parse_getorder_single_args(args)
         elif method.lower() == 'withdrawcoin':
-            self.parse_get_withdraw_args(args)
+            self.parse_withdraw_args(args)
+        elif method.lower() == 'activeorders':
+            self.parse_getorders_open_args(args)
+        elif method.lower() == 'tradehistory':
+            self.parse_gethistory_args(args)
         else:
-            return ('unknown method')
+            self.exchange_actions = {'errormsg': {
+                'success': 0, 'error': 'Unsupported method requested'}}
+            self.exchange_actions.update({'error': True})
+        return self.exchange_actions
 
 ##########################################################################
 # TESTING
