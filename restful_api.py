@@ -46,62 +46,51 @@ class LiquiTrade(Resource):
                 "error": "Invalid data format in your request"
             })
 
-
         request_all['api_key'] = request.headers['key']
         exmethod.parse_method(method, request_all)
         if 'error' in exmethod.exchange_actions:
             return jsonify(exmethod.exchange_actions['errormsg'])
         else:
             method = method.lower()
-            if method == 'trade':
+            if method == 'Trade':
                 exchange_params = exchange_api_interface.TradeParams(
                     **exmethod.exchange_actions)
                 # ex.execute_trade(exchange_params)
-                return jsonify(vars(exchange_params))
 
-            elif method == 'withdrawcoin':
+            elif method == 'WithdrawCoin':
                 exchange_params = exchange_api_interface.WithdrawParams(
                     **exmethod.exchange_actions)
                 # ex.withdraw(exchange_params)
-                return jsonify(vars(exchange_params))
 
-            elif method == 'getinfo':
+            elif method == 'getInfo':
                 exchange_params = exchange_api_interface.GetBalanceParams(
                     **exmethod.exchange_actions)
                 # ex.get_user_balance(exchange_params)
-                return jsonify(vars(exchange_params))
 
-            elif method == 'cancelorder':
+            elif method == 'CancelOrder':
                 exchange_params = exchange_api_interface.CancelTradeParams(
                     **exmethod.exchange_actions)
                 # ex.cancel_trade(exchange_params)
-                return jsonify(vars(exchange_params))
 
-            elif method == 'activeorders':
-                exchange_params = exchange_api_interface.GetOrders_Open_Params(
+            elif method == 'ActiveOrders':
+                exchange_params = exchange_api_interface.GetOrdersOpenParams(
                     **exmethod.exchange_actions)
                 # ex.get_orders_allopen(exchange_params)
-                return jsonify(vars(exchange_params))
 
-            elif method == 'orderinfo':
-                exchange_params = exchange_api_interface.GetOrder_Single_Params(
+            elif method == 'OrderInfo':
+                exchange_params = exchange_api_interface.GetOrderSingleParams(
                     **exmethod.exchange_actions)
                 # ex.get_order_single(exchange_params)
-                return jsonify(vars(exchange_params))
 
-            elif method == 'tradehistory':
+            elif method == 'TradeHistory':
                 exchange_params = exchange_api_interface.GetHistoryParams(
                     **exmethod.exchange_actions)
                 # ex.get_trade_history(exchange_params)
-                return jsonify(vars(exchange_params))
 
-
+            return jsonify(vars(exchange_params))
 
 api.add_resource(Employees, '/employees')  # Route_1
 api.add_resource(LiquiTrade, '/liqui/<method>')
-# api.add_resource(Employees2, '/bittrex/employees') # Route_1
-# api.add_resource(Tracks, '/tracks') # Route_2
-# api.add_resource(Employees_Name, '/employees/<employee_id>') # Route_3
 
 
 if __name__ == '__main__':
