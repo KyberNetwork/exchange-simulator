@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import unittest
+import constants
 
 
 class ExchangeApiInterface:
@@ -27,6 +28,19 @@ class TradeParams:
         self.rate = rate
         self.buy = buy
 
+##########################################################################
+
+
+class TradeResults:
+    def __init__(self, error, errormsg, order_id):
+        """
+        :param error: True or False
+        :param errormsg: String containing the error message
+        :order_id: integer for the order ID
+        """
+        self.error = error
+        self.errormsg = errormsg
+        self.order_id = order_id
 
 ##########################################################################
 
@@ -39,12 +53,42 @@ class CancelTradeParams:
 
 ##########################################################################
 
+class CancelTradeResults:
+    def __init__(self, error, errormsg, order_id):
+        """
+       :param error: True or False
+       :param errormsg: String containing the error message
+       :order_id: integer for the order ID
+       """
+        self.error = error
+        self.errormsg = errormsg
+        self.order_id = order_id
+
+###########################################################################
+
+
 class GetBalanceParams:
     def __init__(self, api_key):
         self.api_key = api_key
 
 ##########################################################################
 
+
+class GetBalanceResults:
+    def __init__(self, error, errormsg, balance):
+        """
+        :param error: True or False
+        :param errormsg: String containing the error message
+        :param balance: Dictionary with { token1: amount1, token2: amount2} where
+        token1,token2 is str according to constants.py for  KN exchange and
+        amount1, amount2 is round(float, 8)
+        """
+        self.error = error
+        self.errormsg = errormsg
+        self.balance = balance
+
+
+##########################################################################
 
 class DepositParams:
     def __init__(self, api_key, token, qty):
@@ -65,8 +109,24 @@ class WithdrawParams:
 
 ##########################################################################
 
+class WithdrawResults:
+    def __init__(self, error, errormsg, transaction_id, qty):
+        """
+        :param error: True or False
+        :param errormsg: String containing the error message
+        :param transaction_id: integer, a transaction ID for the withdrawal
+        :param qty: round(float, 8) with the qty withdraws
+        """
+        self.error = error
+        self.errormsg = errormsg
+        self.transaction_id = transaction_id
+        self.qty = qty
 
-class GetOrder_Single_Params:
+
+##########################################################################
+
+
+class GetOrderSingleParams:
     def __init__(self, api_key, order_id):
         self.api_key = api_key
         self.order_id = order_id
@@ -74,7 +134,32 @@ class GetOrder_Single_Params:
 
 ##########################################################################
 
-class GetOrders_Open_Params:
+class GetOrderSingleResults:
+    def __init__(self, error, errormsg, pair, type, original_qty,
+                 remaining_qty):
+        """
+        :param error: True or False
+        :param errormsg: String containing the error message
+        :param original_qty: round(float, 8) with the qty requested originally
+         for execution
+        :param remaining_qty: round(float, 8) with the qty remaining
+         for execution (original - executed , can be same as original for now)
+        :param pair: the KN formatted (constants.PAIRS['KN'] pair for which
+        the order is been placed
+        :param type: 'buy' or 'sell'
+        """
+        self.error = error
+        self.errormsg = errormsg
+        self.pair = pair
+        self.original_qty = original_qty
+        self.remaining_qty = remaining_qty
+        self.type = type
+
+
+
+##########################################################################
+
+class GetOrdersOpenParams:
     def __init__(self, api_key):
         self.api_key = api_key
 
@@ -99,19 +184,12 @@ class LiquiApiInterface(ExchangeApiInterface):
         """Checks the arguments passed and returns True if they are valid
         and False if they are not"""
 
-        currencies = ['eth', 'knc', 'omg', 'dgd', 'cvc', 'mco', 'gnt',
-                      'adx', 'eos', 'pay', 'bat']
-
-        pairs = ['omg_eth', 'dgd_eth', 'cvc_eth', 'mco_eth', 'gnt_eth',
-                 'adx_eth', 'pay_eth', 'bat_eth', 'knc_eth', 'eos_eth']
-
         types = ['buy', 'sell']
 
         if len(post_args) > 10 or not (
                 all(p in post_args for p in required_post_keys)):
             return False
         for key, value in post_args.items():
-            key = key.lower()
             if not isinstance(key, str):
                 return False
             elif key == 'nonce':
@@ -120,15 +198,15 @@ class LiquiApiInterface(ExchangeApiInterface):
                     return False
             elif key == 'coinname':
                 if not isinstance(value, str) or (
-                        value.lower() not in currencies):
+                        value not in constants.CURRENCIES['LIQUI']):
                     return False
             elif key == 'pair':
                 if not isinstance(value, str) or (
-                        value.lower() not in pairs):
+                        value not in constants.PAIRS['LIQUI']):
                     return False
             elif key == 'type':
                 if not isinstance(value, str) or (
-                        value.lower() not in types):
+                        value not in types):
                     return False
             elif key == 'address':
                 if not isinstance(value, str) or (
@@ -155,25 +233,25 @@ class LiquiApiInterface(ExchangeApiInterface):
         cleaned_post_args = {}
         for key, value in post_args.items():
             if key in parameters:
-                key = key.lower()
                 if key in string_values:
                     if key == 'type' and 'pair' in post_args:
-                        if post_args['type'].lower() == 'sell':
+                        if post_args['type'] == 'sell':
                             cleaned_post_args.update(
-                                {'src_token': post_args['pair'][0:3].lower()})
+                                {'src_token': post_args['pair'][0:3]})
                             cleaned_post_args.update({'dst_token': 'eth'})
-                        elif post_args['type'].lower() == 'buy':
+                        elif post_args['type'] == 'buy':
                             cleaned_post_args.update(
-                                {'dst_token': post_args['pair'][0:3].lower()})
+                                {'dst_token': post_args['pair'][0:3]})
                             cleaned_post_args.update({'src_token': 'eth'})
-                    if key == 'type' and value.lower() == 'sell':
+                    if key == 'type' and value == 'sell':
                         cleaned_post_args.update({'buy': False})
-                    if key == 'type' and value.lower() == 'buy':
+                    if key == 'type' and value == 'buy':
                         cleaned_post_args.update({'buy': True})
                     if key == 'coinname':
-                        cleaned_post_args.update({'token': value.lower()})
+                        cleaned_post_args.update({'token': value.upper()})
                     if key == 'pair' and 'type' not in post_args:
-                        cleaned_post_args.update({'pair': value.lower()})
+                        cleaned_post_args.update(
+                            {'pair': exchange_to_kn(value, 'LIQUI', constants.PAIRS)})
                     if key == 'address':
                         cleaned_post_args.update(
                             {'dst_address': value.lower()})
@@ -276,26 +354,90 @@ class LiquiApiInterface(ExchangeApiInterface):
 
     def parse_method(self, method, args):
         method = method.lower()
-        if method == 'trade':
+        if method == 'Trade':
             'inside trade'
             self.parse_trade_args(args)
-        elif method == 'getinfo':
+        elif method == 'getInfo':
             self.parse_get_balance_args(args)
-        elif method.lower() == 'cancelorder':
+        elif method.lower() == 'CancelOrder':
             self.parse_cancel_args(args)
-        elif method.lower() == 'orderinfo':
+        elif method.lower() == 'OrderInfo':
             self.parse_getorder_single_args(args)
-        elif method.lower() == 'withdrawcoin':
+        elif method.lower() == 'WithdrawCoin':
             self.parse_withdraw_args(args)
-        elif method.lower() == 'activeorders':
+        elif method.lower() == 'ActiveOrders':
             self.parse_getorders_open_args(args)
-        elif method.lower() == 'tradehistory':
+        elif method.lower() == 'TradeHistory':
             self.parse_gethistory_args(args)
         else:
             self.exchange_actions = {'errormsg': {
                 'success': 0, 'error': 'Unsupported method requested'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
+
+
+def kn_to_exchange(pair, exchange, absolute_pairs_path):
+    """Common pair to exchange pair
+    :param pair: any pair in constants.PAIRS['KN'] or other absolute path of
+    a pairs dictionary
+    :param exchange: any key in constants.PAIRS except constants.PAIRS['KN']
+    or other absolute path of a pairs dictionary
+    :param absolute_pairs_path: example: constants.PAIRS  . The
+    full import path of a dictionary with the pair values
+     """
+
+    def finddash(commonpair):
+        """Get the first part of the common pair"""
+        position = commonpair.index('-')
+        return commonpair[:position]
+
+    if pair in absolute_pairs_path['KN']:
+        basecur = finddash(pair.upper())
+        for i in absolute_pairs_path[exchange]:
+            if i.upper().startswith(basecur) or (
+                    i.upper().endswith(basecur)):
+                return i
+
+        else:
+            raise ValueError('Pair is not traded at KN')
+
+
+def exchange_to_kn(pair, exchange, absolute_pairs_path):
+    """Exchange pair to common pair
+    :param pair: any pair in format of exchanges as shown in constants.PAIRS
+     or other absolute path of a pairs dictionary
+    :param exchange: any key except 'KN' in constants.PAIRS or other absolute
+    path of a pairs dictionary
+    :param absolute_pairs_path: example: constants.PAIRS  . The
+    full import path of a dictionary with the pair values
+     """
+
+    def find_bit(pair):
+        """Get the base ccy of the common pair for Bittrex"""
+        position = pair.index('-')
+        return pair[position + 1:]
+
+    def find_liq(pair):
+        """Get the base ccy of the common pair for Liqui"""
+        position = pair.index('_')
+        return pair[:position]
+
+    def find_bi(pair):
+        """Get the base ccy of the common pair for binance or bitfinex"""
+        pair = pair.lower()
+        position = pair.index('eth')
+        return pair[:position]
+    if pair in absolute_pairs_path[exchange]:
+        if exchange == 'BITTREX':
+            basecur = find_bit(pair)
+        elif exchange == 'LIQUI':
+            basecur = find_liq(pair)
+        else:
+            basecur = find_bi(pair)
+        for i in absolute_pairs_path['KN']:
+            if i.startswith(basecur.upper()):
+                return i
+
 
 ##########################################################################
 # TESTING
@@ -320,9 +462,9 @@ def tparse_args(post_args, parameters):
                         cleaned_post_args.update(
                             {'dst_token': post_args['pair'][0:3].lower()})
                         cleaned_post_args.update({'src_token': 'eth'})
-                if key == 'type' and value.lower() == 'sell':
+                if key == 'type' and value == 'sell':
                     cleaned_post_args.update({'buy': False})
-                if key == 'type' and value.lower() == 'buy':
+                if key == 'type' and value == 'buy':
                     cleaned_post_args.update({'buy': True})
                 if key == 'coinname':
                     cleaned_post_args.update({'token': value.lower()})
