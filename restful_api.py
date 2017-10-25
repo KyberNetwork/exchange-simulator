@@ -5,7 +5,6 @@ import json
 
 import exchange_api_interface
 import exchange
-from constants import LIQUI_API_KEY
 
 app = Flask(__name__)
 api = Api(app)
@@ -24,18 +23,12 @@ class LiquiTrade(Resource):
     def post(self, method):
 
         exmethod = exchange_api_interface.LiquiApiInterface()
-        # ex = exchange.Exchange()
+        # exch = exchange.Exchange()
 
         if 'Key' not in request.headers:
             return jsonify({
                 "success": 0,
                 "error": "Missing 'Key' Header"
-            })
-        elif 'Key' in request.headers and (
-                LIQUI_API_KEY != request.headers['Key']):
-            return jsonify({
-                "success": 0,
-                "error": "Invalid api_key in  'Key' Header"
             })
 
         try:
@@ -51,11 +44,13 @@ class LiquiTrade(Resource):
         if 'error' in exmethod.exchange_actions:
             return jsonify(exmethod.exchange_actions['errormsg'])
         else:
-            method = method.lower()
             if method == 'Trade':
                 exchange_params = exchange_api_interface.TradeParams(
                     **exmethod.exchange_actions)
-                # ex.execute_trade(exchange_params)
+                # exchange_reply = (
+                #     exchange_api_interface.LiquiApiInterface.parse_results(
+                #         method,exch.execute_trade(exchange_params)))
+                # return jsonify(exchange_reply)
 
             elif method == 'WithdrawCoin':
                 exchange_params = exchange_api_interface.WithdrawParams(
@@ -65,7 +60,11 @@ class LiquiTrade(Resource):
             elif method == 'getInfo':
                 exchange_params = exchange_api_interface.GetBalanceParams(
                     **exmethod.exchange_actions)
-                # ex.get_user_balance(exchange_params)
+                # exchange_reply = (
+                #     exchange_api_interface.LiquiApiInterface.parse_results(
+                #         method,exch.execute_trade(exchange_params)))
+                # return jsonify(exchange_reply)
+
 
             elif method == 'CancelOrder':
                 exchange_params = exchange_api_interface.CancelTradeParams(
