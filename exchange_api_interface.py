@@ -1,18 +1,23 @@
 #!/usr/bin/python3
 class ExchangeApiInterface:
+
     def parse_trade_args(self, args):
         pass
+
     def parse_get_balance_args(self, args):
         pass
+
     def parse_withdraw_args(self, args):
         pass
+
     def parse_deposit_args(self, args):
         pass
 
 
-################################################################################
+#
 
 class TradeParams:
+
     def __init__(self, api_key, src_token, dst_token, qty, rate, buy):
         self.api_key = api_key
         self.src_token = src_token
@@ -21,106 +26,126 @@ class TradeParams:
         self.rate = rate
         self.buy = buy
 
-##########################################################################
+#
 
-class TradeResults:
-    def __init__(self, error, errormsg, order_id):
+
+class TradeOutput:
+
+    def __init__(self, error, error_msg, order_id):
         """
         :param error: True or False
-        :param errormsg: String containing the error message
+        :param error_msg: String containing the error message
         :order_id: integer for the order ID
         """
         self.error = error
-        self.errormsg = errormsg
+        self.error_msg = error_msg
         self.order_id = order_id
 
-##########################################################################
+#
+
 
 class CancelTradeParams:
+
     def __init__(self, api_key, order_id):
         self.api_key = api_key
         self.order_id = order_id
 
-##########################################################################
+#
 
-class CancelTradeResults:
-    def __init__(self, error, errormsg, order_id):
+
+class CancelTradeOutput:
+
+    def __init__(self, error, error_msg, order_id):
         """
        :param error: True or False
-       :param errormsg: String containing the error message
+       :param error_msg: String containing the error message
        :order_id: integer for the order ID
        """
         self.error = error
-        self.errormsg = errormsg
+        self.error_msg = error_msg
         self.order_id = order_id
 
-###########################################################################
+#
+
 
 class GetBalanceParams:
+
     def __init__(self, api_key):
         self.api_key = api_key
 
-##########################################################################
+#
 
-class GetBalanceResults:
-    def __init__(self, error, errormsg, balance):
+
+class GetBalanceOutput:
+
+    def __init__(self, error, error_msg, balance):
         """
         :param error: True or False
-        :param errormsg: String containing the error message
+        :param error_msg: String containing the error message
         :param balance: Dictionary with { token1: amount1, token2: amount2} where
         token1,token2 is str according to constants.py for  KN exchange and
         amount1, amount2 is round(float, 8)
         """
         self.error = error
-        self.errormsg = errormsg
+        self.error_msg = error_msg
         self.balance = balance
 
-##########################################################################
+#
+
 
 class DepositParams:
+
     def __init__(self, api_key, token, qty):
         self.api_key = api_key
         self.token = token
         self.qty = qty
 
-##########################################################################
+#
+
 
 class WithdrawParams:
-    def __init__(self, api_key, token, qty, dst_address):
+
+    def __init__(self, api_key, token, qty, dst_address, withdraw_on_blockchain):
         self.api_key = api_key
         self.token = token
         self.qty = qty
         self.dst_address = dst_address
+        self.withdraw_on_blockchain = withdraw_on_blockchain
 
 
-class WithdrawResults:
-    def __init__(self, error, errormsg, transaction_id, qty):
+class WithdrawOutput:
+
+    def __init__(self, error, error_msg, transaction_id, qty):
         """
         :param error: True or False
-        :param errormsg: String containing the error message
+        :param error_msg: String containing the error message
         :param transaction_id: integer, a transaction ID for the withdrawal
         :param qty: round(float, 8) with the qty withdraws
         """
         self.error = error
-        self.errormsg = errormsg
+        self.error_msg = error_msg
         self.transaction_id = transaction_id
         self.qty = qty
 
-##########################################################################
+#
+
 
 class GetOrderSingleParams:
+
     def __init__(self, api_key, order_id):
         self.api_key = api_key
         self.order_id = order_id
 
-##########################################################################
+#
 
-class GetOrderSingleResults:
-    def __init__(self, error, errormsg, pair, type, original_qty,
+
+class GetOrderSingleOutput:
+
+    def __init__(self, error, error_msg, pair, type, original_qty,
                  remaining_qty):
         """
         :param error: True or False
-        :param errormsg: String containing the error message
+        :param error_msg: String containing the error message
         :param original_qty: round(float, 8) with the qty requested originally
          for execution
         :param remaining_qty: round(float, 8) with the qty remaining
@@ -130,27 +155,33 @@ class GetOrderSingleResults:
         :param type: 'buy' or 'sell'
         """
         self.error = error
-        self.errormsg = errormsg
+        self.error_msg = error_msg
         self.pair = pair
         self.original_qty = original_qty
         self.remaining_qty = remaining_qty
         self.type = type
 
-##########################################################################
+#
+
 
 class GetOrdersOpenParams:
+
     def __init__(self, api_key):
         self.api_key = api_key
 
-##########################################################################
+#
+
 
 class GetHistoryParams:
+
     def __init__(self, api_key):
         self.api_key = api_key
 
-##########################################################################
+#
+
 
 class LiquiApiInterface(ExchangeApiInterface):
+
     def __init__(self):
         self.name = "Liqui"
         self.args = {}
@@ -158,7 +189,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         self.exchange_replies = {}
         self.method_error = {}
 
-    def check_answers(exchange_results,required_results):
+    def check_answers(exchange_results, required_results):
         """Checks the replies from the exchange for any errors.
          :param exchange_results: is a class object generated by the
          exchange"""
@@ -171,7 +202,7 @@ class LiquiApiInterface(ExchangeApiInterface):
                 return False, "key type"
             if key == 'error' and not isinstance(value, bool):
                 return False, "error type"
-            if key == 'errormsg' and not isinstance(value, str):
+            if key == 'error_msg' and not isinstance(value, str):
                 return False, "error message type"
             if key == 'order_id':
                 if not isinstance(value, int):
@@ -215,12 +246,12 @@ class LiquiApiInterface(ExchangeApiInterface):
          :param exchange_results: is a class object generated by the
          exchange"""
         answers = vars(exchange_results)
-        replies = {"results":{}}
+        replies = {"results": {}}
         for key, value in answers.items():
             if key in required_results:
                 if key == 'error' and value:
                     replies["success"] = 0
-                    replies["error"] = answers['errormsg']
+                    replies["error"] = answers['error_msg']
                 elif key == 'error':
                     replies["success"] = 1
                 if key == 'order_id':
@@ -239,7 +270,6 @@ class LiquiApiInterface(ExchangeApiInterface):
                 if key == 'type':
                     replies["results"]["type"] = value.lower()
         return replies
-
 
     def check_args(post_args, required_post_keys):
         """Checks the arguments passed and returns True if they are valid
@@ -337,7 +367,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
@@ -349,7 +379,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
@@ -361,7 +391,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
@@ -373,7 +403,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
@@ -385,7 +415,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
@@ -397,7 +427,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
@@ -409,31 +439,31 @@ class LiquiApiInterface(ExchangeApiInterface):
         if LiquiApiInterface.check_args(self.args, parameters):
             self.exchange_actions = self.parse_args(self.args, parameters)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Invalid parameters in post request'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
 
     def parse_trade_results(self, exchange_results):
-        required_results = ['order_id','error','errormsg']
+        required_results = ['order_id', 'error', 'error_msg']
         answers = vars(exchange_results)
         check = LiquiApiInterface.check_answers(exchange_results,
                                                 required_results)
         if not check[0]:
-             return {"success": 0, "error":check[1]}
+            return {"success": 0, "error": check[1]}
         else:
-             return LiquiApiInterface.parse_answers(exchange_results,
-                                                    required_results)
+            return LiquiApiInterface.parse_answers(exchange_results,
+                                                   required_results)
 
     def parse_get_balance_results(self, exchange_results):
-        required_results = ['balance', 'error', 'errormsg']
+        required_results = ['balance', 'error', 'error_msg']
         check = LiquiApiInterface.check_answers(exchange_results,
                                                 required_results)
         if not check[0]:
-             return {"success": 0, "error":check[1]}
+            return {"success": 0, "error": check[1]}
         else:
-             return LiquiApiInterface.parse_answers(exchange_results,
-                                                    required_results)
+            return LiquiApiInterface.parse_answers(exchange_results,
+                                                   required_results)
 
     # parse_cancel_results(self, exchange_results)
     # parse_getorder_single_results(self, exchange_results)
@@ -457,11 +487,11 @@ class LiquiApiInterface(ExchangeApiInterface):
         elif method == 'TradeHistory':
             self.parse_gethistory_args(args)
         else:
-            self.exchange_actions = {'errormsg': {
+            self.exchange_actions = {'error_msg': {
                 'success': 0, 'error': 'Unsupported method requested'}}
             self.exchange_actions.update({'error': True})
         return self.exchange_actions
-    
+
     def parse_results(self, method, exchange_results):
         if method == 'Trade':
             self.parse_trade_results(exchange_results)
@@ -480,7 +510,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         # return self.exchange_actions
 
 
-def all_to_exchange(pair, exchange ):
+def all_to_exchange(pair, exchange):
     """common pair to exchange pair
     :param pair: any pair in format of exchanges as shown in constants.py
      EXCHANGENAME_PAIRS

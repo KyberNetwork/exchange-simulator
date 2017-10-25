@@ -8,7 +8,7 @@ import constants
 class TestWeb3(unittest.TestCase):
 
     def test_get_balance_and_withdraw(self):
-        knc = constants.TOKEN_TO_ADDRESS["KNC"]
+        knc = constants.KNC.address
         balance0 = web3_interface.get_balances(
             constants.LIQUI_ADDRESS, [knc])[0]
         # withdraw 2 knc to deposit address
