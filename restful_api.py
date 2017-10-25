@@ -10,22 +10,35 @@ app = Flask(__name__)
 api = Api(app)
 
 
-class Employees(Resource):
-    def get(self):
-        return {'employees': 'zelda'}
-
-    def post(self):
-        return jsonify({'test': True})
-
-
 class LiquiTrade(Resource):
 
     def post(self, method):
+        """A 'requests' dictionary is made that has the Post Request received
+        in the web service and the appropriate parse """
+        exchange_parser = exchange_api_interface.LiquiApiInterface()
+        exchange_caller = exchange.Exchange()
 
-        exmethod = exchange_api_interface.LiquiApiInterface()
-        # exch = exchange.Exchange()
+        post_reqs = {
+            "Trade": {
+                "params_method": exchange_api_interface.TradeParams,
+                "exchange_method": exchange_caller.execute_trade},
+            "WithdrawCoin": {
+                "params_method": exchange_api_interface.WithdrawParams,
+                "exchange_method": exchange_caller.withdraw},
+            "getInfo": {
+                "params_method": exchange_api_interface.GetBalanceParams,
+                "exchange_method": exchange_caller.get_user_balance}
+            # "CancelOrder": {
+            #    "params_method": exchange_api_interface.CancelTradeParams}
+            #    "exchange_method":exchange_caller.==MISSING_METHOD==},
+            # "ActiveOrders": ,
+            # "OrderHistory":,
+            # "OrderInfo":,
+            # "TradeHistory":,
 
-        if 'Key' not in request.headers:
+        }
+
+        if "Key" not in request.headers:
             return jsonify({
                 "success": 0,
                 "error": "Missing 'Key' Header"
@@ -39,58 +52,22 @@ class LiquiTrade(Resource):
                 "error": "Invalid data format in your request"
             })
 
-        request_all['api_key'] = request.headers['key']
-        exmethod.parse_method(method, request_all)
-        if 'error' in exmethod.exchange_actions:
-            return jsonify(exmethod.exchange_actions['errormsg'])
+        request_all["api_key"] = request.headers["key"]
+        exchange_parser.parse_to_exchange(method, request_all)
+        if "error" in exchange_parser.exchange_actions:
+            return jsonify(exchange_parser.exchange_actions)
         else:
-            if method == 'Trade':
-                exchange_params = exchange_api_interface.TradeParams(
-                    **exmethod.exchange_actions)
-                # exchange_reply = (
-                #     exchange_api_interface.LiquiApiInterface.parse_results(
-                #         method,exch.execute_trade(exchange_params)))
-                # return jsonify(exchange_reply)
-
-            elif method == 'WithdrawCoin':
-                exchange_params = exchange_api_interface.WithdrawParams(
-                    **exmethod.exchange_actions)
-                # ex.withdraw(exchange_params)
-
-            elif method == 'getInfo':
-                exchange_params = exchange_api_interface.GetBalanceParams(
-                    **exmethod.exchange_actions)
-                # exchange_reply = (
-                #     exchange_api_interface.LiquiApiInterface.parse_results(
-                #         method,exch.execute_trade(exchange_params)))
-                # return jsonify(exchange_reply)
+            exchange_params = post_reqs[method]["params_method"](
+                **exchange_parser.exchange_actions)
+            exchange_reply = (
+                exchange_parser.parse_from_exchange(
+                    method, post_reqs[method]["exchange_method"](
+                        exchange_params)))
+            return jsonify(exchange_reply)
 
 
-            elif method == 'CancelOrder':
-                exchange_params = exchange_api_interface.CancelTradeParams(
-                    **exmethod.exchange_actions)
-                # ex.cancel_trade(exchange_params)
-
-            elif method == 'ActiveOrders':
-                exchange_params = exchange_api_interface.GetOrdersOpenParams(
-                    **exmethod.exchange_actions)
-                # ex.get_orders_allopen(exchange_params)
-
-            elif method == 'OrderInfo':
-                exchange_params = exchange_api_interface.GetOrderSingleParams(
-                    **exmethod.exchange_actions)
-                # ex.get_order_single(exchange_params)
-
-            elif method == 'TradeHistory':
-                exchange_params = exchange_api_interface.GetHistoryParams(
-                    **exmethod.exchange_actions)
-                # ex.get_trade_history(exchange_params)
-
-            return jsonify(vars(exchange_params))
-
-api.add_resource(Employees, '/employees')  # Route_1
-api.add_resource(LiquiTrade, '/liqui/<method>')
+api.add_resource(LiquiTrade, "/liqui/<method>")
 
 
-if __name__ == '__main__':
-    app.run(port='5002')
+if __name__ == "__main__":
+    app.run(port="5002")

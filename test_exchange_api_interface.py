@@ -1,8 +1,8 @@
-#!/usr/bin/python3
+import unittest
 import constants
 
 
-class ExchangeApiInterface:
+class TestExchangeApiInterface:
     def parse_trade_args(self, args):
         pass
 
@@ -15,10 +15,10 @@ class ExchangeApiInterface:
     def parse_deposit_args(self, args):
         pass
 
+
 ##########################################################################
 
-
-class TradeParams:
+class TestTradeParams:
     def __init__(self, api_key, src_token, dst_token, qty, rate, buy):
         self.api_key = api_key
         self.src_token = src_token
@@ -27,10 +27,10 @@ class TradeParams:
         self.rate = rate
         self.buy = buy
 
+
 ##########################################################################
 
-
-class TradeResults:
+class TestTradeResults:
     def __init__(self, error, error_msg, order_id):
         """
         :param error: True or False
@@ -41,18 +41,18 @@ class TradeResults:
         self.error_msg = error_msg
         self.order_id = order_id
 
+
 ##########################################################################
 
-
-class CancelTradeParams:
+class TestCancelTradeParams:
     def __init__(self, api_key, order_id):
         self.api_key = api_key
         self.order_id = order_id
 
+
 ##########################################################################
 
-
-class CancelTradeResults:
+class TestCancelTradeResults:
     def __init__(self, error, error_msg, order_id):
         """
        :param error: True or False
@@ -63,52 +63,52 @@ class CancelTradeResults:
         self.error_msg = error_msg
         self.order_id = order_id
 
+
 ###########################################################################
 
-
-class GetBalanceParams:
+class TestGetBalanceParams:
     def __init__(self, api_key):
         self.api_key = api_key
 
+
 ##########################################################################
 
-
-class GetBalanceResults:
+class TestGetBalanceResults:
     def __init__(self, error, error_msg, balance):
         """
         :param error: True or False
         :param error_msg: String containing the error message
-        :param balance: Dictionary with { token1: amount1, token2: amount2}
-         where token1,token2 .token attribute of Token object from
-         constants.py  and amount1, amount2 is round(float, 8)
+        :param balance: Dictionary with { token1: amount1, token2: amount2} where
+        token1,token2 is str according to constants.py for KN exchange and
+        amount1, amount2 is round(float, 8)
         """
         self.error = error
         self.error_msg = error_msg
         self.balance = balance
 
+
 ##########################################################################
 
-
-class DepositParams:
+class TestDepositParams:
     def __init__(self, api_key, token, qty):
         self.api_key = api_key
         self.token = token
         self.qty = qty
 
+
 ##########################################################################
 
-
-class WithdrawParams:
+class TestWithdrawParams:
     def __init__(self, api_key, token, qty, dst_address):
         self.api_key = api_key
         self.token = token
         self.qty = qty
         self.dst_address = dst_address
 
+
 ##########################################################################
 
-
-class WithdrawResults:
+class TestWithdrawResults:
     def __init__(self, error, error_msg, transaction_id, qty):
         """
         :param error: True or False
@@ -121,18 +121,18 @@ class WithdrawResults:
         self.transaction_id = transaction_id
         self.qty = qty
 
+
 ##########################################################################
 
-
-class GetOrderSingleParams:
+class TestGetOrderSingleParams:
     def __init__(self, api_key, order_id):
         self.api_key = api_key
         self.order_id = order_id
 
+
 ##########################################################################
 
-
-class GetOrderSingleResults:
+class TestGetOrderSingleResults:
     def __init__(self, error, error_msg, pair, type, original_qty,
                  remaining_qty):
         """
@@ -142,7 +142,8 @@ class GetOrderSingleResults:
          for execution
         :param remaining_qty: round(float, 8) with the qty remaining
          for execution (original - executed , can be same as original for now)
-        :param pair: the "constants.ALL_PAIRS" formatted pair
+        :param pair: the KN formatted (constants.PAIRS["KN"] pair for which
+        the order is been placed
         :param type: "buy" or "sell"
         """
         self.error = error
@@ -152,24 +153,25 @@ class GetOrderSingleResults:
         self.remaining_qty = remaining_qty
         self.type = type
 
+
 ##########################################################################
 
-
-class GetOrdersOpenParams:
+class TestGetOrdersOpenParams:
     def __init__(self, api_key):
         self.api_key = api_key
 
+
 ##########################################################################
 
-
-class GetHistoryParams:
+class TestGetHistoryParams:
     def __init__(self, api_key):
         self.api_key = api_key
 
+
 ##########################################################################
 
 
-class LiquiApiInterface(ExchangeApiInterface):
+class TestLiquiApiInterface(TestExchangeApiInterface):
     def __init__(self):
         self.name = "Liqui"
         self.args = {}
@@ -369,7 +371,7 @@ class LiquiApiInterface(ExchangeApiInterface):
             self.exchange_actions = {
                 "success": 0, "error": "Invalid method requested"}
         else:
-            if LiquiApiInterface.check_args(self.args,
+            if TestLiquiApiInterface.check_args(self.args,
                                             required_params[method]):
                 self.exchange_actions = self.parse_args(
                     self.args, required_params[method])
@@ -391,21 +393,20 @@ class LiquiApiInterface(ExchangeApiInterface):
             # "TradeHistory":,
         }
 
-        check = LiquiApiInterface.check_answers(exchange_results,
+        check = TestLiquiApiInterface.check_answers(exchange_results,
                                                 required_returns[method])
         if not check[0]:
             self.exchange_replies = {"success": 0, "error": check[1]}
         else:
-            self.exchange_replies = LiquiApiInterface.parse_answers(
+            self.exchange_replies = TestLiquiApiInterface.parse_answers(
                 exchange_results, required_returns[method])
         return self.exchange_replies
-
 
 def all_to_exchange(pair, exchange):
     """common pair to exchange pair
     :param pair: any pair in format of exchanges as shown in constants.py
      EXCHANGENAME_PAIRS
-    :param exchange:  any object of class Exchange  in constants.py
+    :param exchange: any object of class Exchange in constants.py
      """
 
     def finddash(commonpair):
@@ -428,7 +429,7 @@ def exchange_to_all(pair, exchange):
     """ Exchange pair to common pair
     :param pair: any pair in format of exchanges as shown in constants.py
      EXCHANGENAME_PAIRS
-    :param exchange:  any object of class Exchange  in constants.py
+    :param exchange: any object of class Exchange in constants.py
      """
 
     def find_bit(pair):
@@ -446,6 +447,7 @@ def exchange_to_all(pair, exchange):
         pair = pair.lower()
         position = pair.index(constants.ETH.token)
         return pair[:position]
+
     if pair in exchange.pairs:
         if exchange == constants.BITTREX.exchange:
             basecur = find_bit(pair)
@@ -456,3 +458,177 @@ def exchange_to_all(pair, exchange):
         for i in constants.ALL_PAIRS:
             if i.startswith(basecur.upper()):
                 return i.lower()
+
+
+######################################################################
+# TO EXCHANGE TESTS
+######################################################################
+
+liqui_int = TestLiquiApiInterface()
+args_to_test1_1 = {
+    "testdata1": "testvalue1",
+    "testdata2": "testvalue2",
+    "testdata3": "testvalue3",
+    "testdata4": "testvalue4",
+    "testdata5": "testvalue5",
+    "api_key": "FDfasdfa134",
+    "rate": 0.1,
+    "amount": 1.2,
+    "type": "sell",
+    "pair": "omg_eth"
+}
+
+args_to_test1_2 = {
+    "testdata1": "testvalue1",
+    "testdata2": "testvalue2",
+    "testdata3": "testvalue3",
+    "testdata4": "testvalue4",
+    "testdata5": "testvalue5",
+    "api_key": "FDfasdfa134",
+    "rate": 1,
+    "amount": 1.2,
+    "type": "sell",
+    "pair": "omg_eth"
+}
+args_to_test1_3 = {
+    "testdata1": "testvalue1",
+    "testdata2": "testvalue2",
+    "testdata3": "testvalue3",
+    "testdata4": "testvalue4",
+    "testdata5": "testvalue5",
+    "api_key": "FDfasdfa134",
+    "rate": 0.1,
+    "amount": 1.2,
+    "type": "sell",
+    "pair": "oMg_eth"
+}
+args_to_test2_1 = {
+    "testdata1": "testvalue1",
+    "testdata2": "testvalue2",
+    "testdata3": "testvalue3",
+    "api_key": "FDfasdfa134",
+    "rate": 0.1111111111111,
+    "amount": 1.2,
+    "type": "buy",
+    "pair": "omg_eth"
+}
+
+args_to_test2_2 = {
+    "testdata1": "testvalue1",
+    "testdata2": "testvalue2",
+    "testdata3": "testvalue3",
+    "api_key": "FDfasdfa134",
+    "rate": 0.1111111111111,
+    "amount": 1.222222222222222,
+    "type": "sell",
+    "pair": "omg_eth"
+}
+list1 = ["api_key", "type", "rate", "amount", "pair"]
+
+result_to_test2_2 = {
+
+    "api_key": "fdfasdfa134",
+    "rate": 0.11111111,
+    "qty": 1.22222222,
+    "buy": False,
+    "src_token": "omg",
+    "dst_token": "eth"
+}
+
+result_to_test2_1 = {
+    "api_key": "fdfasdfa134",
+    "rate": 0.11111111,
+    "qty": 1.2,
+    "buy": True,
+    "src_token": "eth",
+    "dst_token": "omg"
+}
+
+
+class TestToExchange(unittest.TestCase):
+    def test_check_args(self):
+        self.assertEqual(liqui_int.check_args(args_to_test1_1, list1), True)
+        self.assertEqual(liqui_int.check_args(args_to_test1_2, list1), False)
+        self.assertEqual(liqui_int.check_args(args_to_test1_3, list1), False)
+
+    def test_parse_args(self):
+        self.assertEqual(
+            liqui_int.parse_args(
+                args_to_test2_1, list1), result_to_test2_1)
+        self.assertEqual(
+            liqui_int.parse_args(
+                args_to_test2_2, list1), result_to_test2_2)
+
+
+######################################################################
+# FROM EXCHANGE TESTS
+######################################################################
+
+
+list2 = ["error_msg", "error", "balance"]
+list3 = ["error_msg", "error", "order_id"]
+args_from_test1_1 = TestGetBalanceResults(
+    False, "", {"omg": 1.22222, "gnt": 0})
+result_from_test1_1 = (False, "balance value type")
+args_from_test1_2 = TestGetBalanceResults(
+    False, "", {"omg": 1.22222, "gnt": -0.1})
+result_from_test1_2 = (False, "balance value negative")
+args_from_test1_3 = TestGetBalanceResults(
+    False, "", {"omg": 1.22222, "gnt": 1.1})
+result_from_test1_3 = (True, True)
+args_from_test1_4 = TestTradeResults(False, "", 123)
+result_from_test1_4 = (True, True)
+args_from_test1_5 = TestTradeResults(False, "", 123.1)
+result_from_test1_5 = (False, "order_id type")
+#
+result_from_test2_1 = {"success": 0, "error": "balance value type"}
+result_from_test2_2 = {"success": 0, "error": "balance value negative"}
+result_from_test2_3 = {"results": {"funds": {"omg": 1.22222, "gnt": 1.1}},
+                       "success": 1}
+result_from_test2_4 = {"results": {"order_id": 123}, "success": 1}
+result_from_test2_5 = {"error": "order_id type", "success": 0}
+
+
+class TestFromExchange(unittest.TestCase):
+    def test_check_results(self):
+        self.assertEqual(
+            liqui_int.check_answers(
+                args_from_test1_1, list2), result_from_test1_1)
+        self.assertEqual(
+            liqui_int.check_answers(
+                args_from_test1_2, list2), result_from_test1_2)
+        self.assertEqual(
+            liqui_int.check_answers(
+                args_from_test1_3, list2), result_from_test1_3)
+        self.assertEqual(
+            liqui_int.check_answers(
+                args_from_test1_4, list3), result_from_test1_4)
+        self.assertEqual(
+            liqui_int.check_answers(
+                args_from_test1_5, list3), result_from_test1_5)
+
+    def test_parse_results(self):
+        self.assertEqual(
+            liqui_int.parse_from_exchange("getInfo", args_from_test1_1),
+            result_from_test2_1
+        )
+        self.assertEqual(
+            liqui_int.parse_from_exchange("getInfo", args_from_test1_2),
+            result_from_test2_2
+        )
+        self.assertEqual(
+            liqui_int.parse_from_exchange("getInfo", args_from_test1_3),
+            result_from_test2_3
+        )
+        self.assertEqual(
+            liqui_int.parse_from_exchange("Trade", args_from_test1_4),
+            result_from_test2_4
+        )
+        self.assertEqual(
+            liqui_int.parse_from_exchange("Trade", args_from_test1_5),
+            result_from_test2_5
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
