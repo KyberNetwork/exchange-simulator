@@ -5,9 +5,9 @@ import exchange_api_interface
 
 liqui_int = exchange_api_interface.LiquiApiInterface()
 
-######################################################################
+#
 # TO EXCHANGE TESTS
-######################################################################
+#
 
 
 args_to_test1_1 = {
@@ -91,6 +91,7 @@ result_to_test2_1 = {
 
 
 class TestToExchange(unittest.TestCase):
+
     def test_check_args(self):
         self.assertEqual(liqui_int.check_args(args_to_test1_1, list1), True)
         self.assertEqual(liqui_int.check_args(args_to_test1_2, list1), False)
@@ -105,9 +106,9 @@ class TestToExchange(unittest.TestCase):
                 args_to_test2_2, list1), result_to_test2_2)
 
 
-######################################################################
+#
 # FROM EXCHANGE TESTS
-######################################################################
+#
 
 
 list2 = ["error_msg", "error", "balance"]
@@ -135,6 +136,7 @@ result_from_test2_5 = {"error": "order_id type", "success": 0}
 
 
 class TestFromExchange(unittest.TestCase):
+
     def test_check_results(self):
         self.assertEqual(
             liqui_int.check_answers(

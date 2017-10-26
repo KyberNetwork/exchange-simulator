@@ -61,6 +61,9 @@ class TestExchangeWithoutDesposit(unittest.TestCase):
         exchange.reset_db()
 
         # deposit
+        deposit_params = exchange_api_interface.DepositParams("kyber_liqui",
+                                                              "KNC",
+                                                              11)
         liqui_exchange = exchange.get_liqui_exchange()
         liqui_exchange.deposit("kyber_liqui", constants.KNC, 11)
 

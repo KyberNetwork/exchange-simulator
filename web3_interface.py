@@ -14,6 +14,11 @@ from ethereum.utils import mk_contract_address
 # local_url = "http://localhost:8545/jsonrpc"
 local_url = "https://kovan.infura.io"
 
+def merge_two_dicts(x, y):
+    '''Given two dicts, merge them into a new dict as a shallow copy.'''
+    z = x.copy()
+    z.update(y)
+    return z
 
 def json_call(method_name, params):
     url = local_url
