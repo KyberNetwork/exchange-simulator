@@ -16,18 +16,18 @@ class LiquiTrade(Resource):
         """A 'requests' dictionary is made that has the Post Request received
         in the web service and the appropriate parse """
         exchange_parser = exchange_api_interface.LiquiApiInterface()
-        exchange_caller = exchange.Exchange()
+        exchange_caller = exchange.get_liqui_exchange()
 
         post_reqs = {
             "Trade": {
                 "params_method": exchange_api_interface.TradeParams,
-                "exchange_method": exchange_caller.execute_trade},
+                "exchange_method": exchange_caller.execute_trade_api},
             "WithdrawCoin": {
                 "params_method": exchange_api_interface.WithdrawParams,
-                "exchange_method": exchange_caller.withdraw},
+                "exchange_method": exchange_caller.withdraw_api},
             "getInfo": {
                 "params_method": exchange_api_interface.GetBalanceParams,
-                "exchange_method": exchange_caller.get_user_balance}
+                "exchange_method": exchange_caller.get_balances_api}
             # "CancelOrder": {
             #    "params_method": exchange_api_interface.CancelTradeParams}
             #    "exchange_method":exchange_caller.==MISSING_METHOD==},
