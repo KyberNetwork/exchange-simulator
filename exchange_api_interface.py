@@ -3,6 +3,7 @@ import constants
 
 liqui_pairs = ['knc_eth']
 
+
 class ExchangeApiInterface:
     def parse_trade_args(self, args):
         pass
@@ -108,7 +109,13 @@ class DepositParams:
 
 class WithdrawParams:
 
-    def __init__(self, api_key, token, qty, dst_address, withdraw_on_blockchain):
+    def __init__(
+            self,
+            api_key,
+            token,
+            qty,
+            dst_address,
+            withdraw_on_blockchain):
         self.api_key = api_key
         self.token = token
         self.qty = qty
@@ -185,11 +192,7 @@ class GetHistoryParams:
 class LiquiApiInterface(ExchangeApiInterface):
 
     def __init__(self):
-        self.name = "Liqui"
-        self.args = {}
-        self.exchange_actions = {}
-        self.exchange_replies = {}
-        self.method_error = {}
+        pass
 
     def check_answers(exchange_results, required_results):
         """Checks the replies from the exchange for any errors.
@@ -335,23 +338,25 @@ class LiquiApiInterface(ExchangeApiInterface):
                         if post_args["type"] == "sell":
                             cleaned_post_args.update(
                                 {"src_token": constants.KNC})
-                            cleaned_post_args.update({"dst_token": constants.ETH})
+                            cleaned_post_args.update(
+                                {"dst_token": constants.ETH})
                         elif post_args["type"] == "buy":
                             cleaned_post_args.update(
                                 {"dst_token": constants.KNC})
-                            cleaned_post_args.update({"src_token": constants.ETH})
+                            cleaned_post_args.update(
+                                {"src_token": constants.ETH})
                     if key == "type" and value == "sell":
                         cleaned_post_args.update({"buy": False})
                     if key == "type" and value == "buy":
                         cleaned_post_args.update({"buy": True})
                     if key == "coinname":
                         cleaned_post_args.update({"token": value.upper()})
-                    if key == "pair" and "type" not in post_args:
-                        cleaned_post_args.update(
-                            {"pair": exchange_to_all(value, constants.LIQUI)})
+                    # if key == "pair" and "type" not in post_args:
+                    #     cleaned_post_args.update(
+                    #         {"pair": exchange_to_all(value, constants.LIQUI)})
                     if key == "address":
                         cleaned_post_args.update(
-                            {"dst_address":value})
+                            {"dst_address": value})
                     if key == "api_key":
                         cleaned_post_args.update(
                             {"api_key": value.lower()})
@@ -367,7 +372,7 @@ class LiquiApiInterface(ExchangeApiInterface):
 
     parse_args = staticmethod(parse_args)
 
-    def parse_to_exchange(self, method, args):
+    def parse_to_exchange(method, args):
 
         required_params = {
             "Trade": ["pair", "type", "rate", "amount", "api_key"],
@@ -378,20 +383,21 @@ class LiquiApiInterface(ExchangeApiInterface):
             # "TradeHistory": ["api_key"]
         }
         if method not in required_params:
-            self.exchange_actions = {
+            exchange_actions = {
                 "success": 0, "error": "Invalid method requested"}
         else:
-            if LiquiApiInterface.check_args(self.args,
+            if LiquiApiInterface.check_args(args,
                                             required_params[method]):
-                self.exchange_actions = self.parse_args(
-                    self.args, required_params[method])
+                exchange_actions = LiquiApiInterface.parse_args(
+                    args, required_params[method])
             else:
-                self.exchange_actions = {
+                exchange_actions = {
                     "success": 0,
                     "error": "Invalid parameters in post request"}
-        return self.exchange_actions
+        return exchange_actions
+    parse_to_exchange = staticmethod(parse_to_exchange)
 
-    def parse_from_exchange(self, method, exchange_results):
+    def parse_from_exchange(method, exchange_results):
         required_returns = {
             "Trade": ["order_id", "error", "error_msg"],
             "getInfo": ["balance", "error", "error_msg"],
@@ -406,11 +412,12 @@ class LiquiApiInterface(ExchangeApiInterface):
         check = LiquiApiInterface.check_answers(exchange_results,
                                                 required_returns[method])
         if not check[0]:
-            self.exchange_replies = {"success": 0, "error": check[1]}
+            exchange_replies = {"success": 0, "error": check[1]}
         else:
-            self.exchange_replies = LiquiApiInterface.parse_answers(
+            exchange_replies = LiquiApiInterface.parse_answers(
                 exchange_results, required_returns[method])
-        return self.exchange_replies
+        return exchange_replies
+    parse_from_exchange = staticmethod(parse_from_exchange)
 
 
 def all_to_exchange(pair, exchange):

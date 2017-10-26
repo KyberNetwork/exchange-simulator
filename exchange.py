@@ -4,7 +4,7 @@ from threading import Thread, Lock
 import web3_interface
 import constants
 import time
-from exchange_api_interface import TradeOutput, WithdrawOutput
+from exchange_api_interface import TradeOutput, WithdrawOutput, GetBalanceOutput
 
 #
 
@@ -43,7 +43,7 @@ class Exchange:
     def get_balances_api(self, get_balance_params):
         balances = {}
         for token in self.listed_tokens:
-            balance = get_user_balance(get_balance_params.api_key, token)
+            balance = self.get_user_balance(get_balance_params.api_key, token)
             balances[token] = balance
         return GetBalanceOutput(False, "no error", balances)
 
@@ -64,7 +64,7 @@ class Exchange:
                 return TradeOutput(True, "insuficient qty", 0)
 
         elif(user_src_balance < src_qty):
-                return TradeOutput(True, "insuficient qty", 0)
+            return TradeOutput(True, "insuficient qty", 0)
         # get order book
         order_book = self.get_order_book(trade_params.src_token,
                                          trade_params.dst_token)
@@ -156,7 +156,7 @@ rdb = redis.Redis(host='localhost', port=6379, db=0)
 
 liqui = Exchange(
     "Liqui", [constants.KNC, constants.ETH], rdb, constants.OREDER_BOOK_IP,
-                 constants.LIQUI_ADDRESS, constants.BANK_ADDRESS, 5 * 60)
+    constants.LIQUI_ADDRESS, constants.BANK_ADDRESS, 5 * 60)
 
 #
 

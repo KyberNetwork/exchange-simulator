@@ -10,13 +10,15 @@ app = Flask(__name__)
 api = Api(app)
 
 
+exchange_parser = exchange_api_interface.LiquiApiInterface()
+exchange_caller = exchange.get_liqui_exchange()
+
+
 class LiquiTrade(Resource):
 
     def post(self, method):
         """A 'requests' dictionary is made that has the Post Request received
         in the web service and the appropriate parse """
-        exchange_parser = exchange_api_interface.LiquiApiInterface()
-        exchange_caller = exchange.get_liqui_exchange()
 
         post_reqs = {
             "Trade": {
@@ -52,18 +54,23 @@ class LiquiTrade(Resource):
                 "error": "Invalid data format in your request"
             })
 
-        request_all["api_key"] = request.headers["key"]
-        exchange_parser.parse_to_exchange(method, request_all)
-        if "error" in exchange_parser.exchange_actions:
-            return jsonify(exchange_parser.exchange_actions)
+        request_all["api_key"] = request.headers["key"].lower()
+        to_exchange_results = exchange_parser.parse_to_exchange(
+            method, request_all)
+        if "error" in to_exchange_results:
+            return jsonify(to_exchange_results)
         else:
             exchange_params = post_reqs[method]["params_method"](
-                **exchange_parser.exchange_actions)
-            exchange_reply = (
-                exchange_parser.parse_from_exchange(
-                    method, post_reqs[method]["exchange_method"](
-                        exchange_params)))
-            return jsonify(exchange_reply)
+                **to_exchange_results)
+            exchange_caller.before_api(
+                request.headers["key"].lower())
+            exchange_reply = post_reqs[method]["exchange_method"](
+                exchange_params)
+            exchange_caller.after_api(
+                request.headers["key"].lower())
+            exchange_parsed_reply = (exchange_parser.parse_from_exchange(
+                method, exchange_reply))
+            return jsonify(exchange_parsed_reply)
 
 
 api.add_resource(LiquiTrade, "/liqui/<method>")
