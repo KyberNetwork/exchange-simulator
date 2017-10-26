@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import constants
 
+liqui_pairs = ['knc_eth']
 
 class ExchangeApiInterface:
     def parse_trade_args(self, args):
@@ -299,16 +300,14 @@ class LiquiApiInterface(ExchangeApiInterface):
                     return False
             elif key == "pair":
                 if not isinstance(value, str) or (
-                        value not in constants.LIQUI_PAIRS):
+                        value not in liqui_pairs):
                     return False
             elif key == "type":
                 if not isinstance(value, str) or (
                         value not in types):
                     return False
             elif key == "address":
-                if not isinstance(value, str) or (
-                    len(value) != 42) or (
-                        not value.startswith("0x")):
+                if not isinstance(value, int):
                     return False
             elif key == "rate":
                 if not isinstance(value, float) or (
@@ -335,12 +334,12 @@ class LiquiApiInterface(ExchangeApiInterface):
                     if key == "type" and "pair" in post_args:
                         if post_args["type"] == "sell":
                             cleaned_post_args.update(
-                                {"src_token": post_args["pair"][0:3].lower()})
-                            cleaned_post_args.update({"dst_token": "eth"})
+                                {"src_token": constants.KNC})
+                            cleaned_post_args.update({"dst_token": constants.ETH})
                         elif post_args["type"] == "buy":
                             cleaned_post_args.update(
-                                {"dst_token": post_args["pair"][0:3]})
-                            cleaned_post_args.update({"src_token": "eth"})
+                                {"dst_token": constants.KNC})
+                            cleaned_post_args.update({"src_token": constants.ETH})
                     if key == "type" and value == "sell":
                         cleaned_post_args.update({"buy": False})
                     if key == "type" and value == "buy":
@@ -352,7 +351,7 @@ class LiquiApiInterface(ExchangeApiInterface):
                             {"pair": exchange_to_all(value, constants.LIQUI)})
                     if key == "address":
                         cleaned_post_args.update(
-                            {"dst_address": value.lower()})
+                            {"dst_address":value})
                     if key == "api_key":
                         cleaned_post_args.update(
                             {"api_key": value.lower()})
