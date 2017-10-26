@@ -1,9 +1,19 @@
 #!/usr/bin/python3
 
-LIQUI_ADDRESS = "F3019C224501ED2D8881D0896026d144E5e5D353"
-BANK_ADDRESS = 0x7ffdb79da310995b0d5778b87f69a1340b639266
+LIQUI_ADDRESS = 0x80f35d402a77f0a72d2e72e1a72997934f7a288b
+BANK_ADDRESS = 0x707c5863c952012de86c7b7b8df055ac26336824
 
 OREDER_BOOK_IP = "TODO"
 
-TOKEN_TO_ADDRESS = {"KNC": 0xbd46bb7cf321b4acf0a703422f4c2dd69ad0dba0,
-                    "ETH": 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee}
+
+class Token:
+
+    def __init__(self, token, address, decimals):
+        self.token = token
+        self.address = address
+        self.decimals = decimals
+
+KNC = Token('knc', 0x03b50798dcc087953a5bd2e36e6112ad1092ceed, 18)
+ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
+
+LIQUI_TOKENS = [KNC, ETH]

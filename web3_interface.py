@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 from pycoin.serialize import b2h, h2b
 from pycoin import encoding
@@ -14,13 +14,11 @@ from ethereum.utils import mk_contract_address
 # local_url = "http://localhost:8545/jsonrpc"
 local_url = "https://kovan.infura.io"
 
-
 def merge_two_dicts(x, y):
     '''Given two dicts, merge them into a new dict as a shallow copy.'''
     z = x.copy()
     z.update(y)
     return z
-
 
 def json_call(method_name, params):
     url = local_url
@@ -125,21 +123,80 @@ def call_const_function(priv_key, value, contract_hash, contract_abi, function_n
     return_value = json_call("eth_call", [params])
     # print return_value
     return_value = h2b(return_value[2:])  # remove 0x
-    return translator.decode(function_name, return_value)
+    return translator.decode_function_result(function_name, return_value)
 
 #
 
 reserve_abi = \
-    '[{"constant":false,"inputs":[{"name":"sourceToken","type":"address"},{"name":"sourceAmount","type":"uint256"},{"name":"destToken","type":"address"},{"name":"destAddress","type":"address"},{"name":"validate","type":"bool"}],"name":"trade","outputs":[{"name":"","type":"bool"}],"payable":true,"type":"function"},{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"amount","type":"uint256"}],"name":"depositToken","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"source","type":"address"},{"name":"dest","type":"address"}],"name":"getPairInfo","outputs":[{"name":"rate","type":"uint256"},{"name":"expBlock","type":"uint256"},{"name":"balance","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"amount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[{"name":"","type":"bool"}],"payable":true,"type":"function"},{"constant":true,"inputs":[],"name":"kyberNetwork","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"enable","type":"bool"}],"name":"enableTrade","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"tradeEnabled","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"sources","type":"address[]"},{"name":"dests","type":"address[]"},{"name":"conversionRates","type":"uint256[]"},{"name":"expiryBlocks","type":"uint256[]"},{"name":"validate","type":"bool"}],"name":"setRate","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"reserveOwner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"inputs":[{"name":"_kyberNetwork","type":"address"},{"name":"_reserveOwner","type":"address"}],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"name":"origin","type":"address"},{"indexed":false,"name":"error","type":"uint256"},{"indexed":false,"name":"errorInfo","type":"uint256"}],"name":"ErrorReport","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"origin","type":"address"},{"indexed":false,"name":"source","type":"address"},{"indexed":false,"name":"sourceAmount","type":"uint256"},{"indexed":false,"name":"destToken","type":"address"},{"indexed":false,"name":"destAmount","type":"uint256"},{"indexed":false,"name":"destAddress","type":"address"}],"name":"DoTrade","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"source","type":"address"},{"indexed":false,"name":"dest","type":"address"},{"indexed":false,"name":"rate","type":"uint256"},{"indexed":false,"name":"expiryBlock","type":"uint256"}],"name":"SetRate","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"enable","type":"bool"}],"name":"EnableTrade","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"token","type":"address"},{"indexed":false,"name":"amount","type":"uint256"}],"name":"DepositToken","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"token","type":"address"},{"indexed":false,"name":"amount","type":"uint256"},{"indexed":false,"name":"destination","type":"address"}],"name":"Withdraw","type":"event"}]'
+    '[{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"srcAmount","type":"uint256"},{"name":"dest","type":"address"},{"name":"destAmount","type":"uint256"}],"name":"convert","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"tokenAmount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"tokens","type":"address[]"},{"name":"amounts","type":"uint256[]"}],"name":"clearBalances","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"exchange","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_exchange","type":"string"},{"name":"_bank","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
 
-LIQUI_ADDRESS = "F3019C224501ED2D8881D0896026d144E5e5D353"
-BANK_ADDRESS = 0x7ffdb79da310995b0d5778b87f69a1340b639266
+#
+
+#
+
+
+def to_hex_address(integer):
+    return "%040x" % integer
+
+#
 
 
 def withdraw(exchange_address, token, amount, destiniation):
     # this is not a real key.
-    amount = int(amount * 10**18)
     key = h2b(
         "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
-    return call_function(key, 0, exchange_address, reserve_abi, "withdraw",
+    return call_function(
+        key, 0, to_hex_address(exchange_address), reserve_abi, "withdraw",
                          [token, amount, destiniation])
+
+
+#
+
+def get_balances(exchange_address, tokens):
+    # this is not a real key.
+    key = h2b(
+        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
+
+    result = []
+
+    for token in tokens:
+        balance = call_const_function(
+            key, 0, to_hex_address(exchange_address), reserve_abi, "getBalance",
+                                      [token])[0]
+        result = result + [balance]
+
+    return result
+
+#
+
+
+def is_tx_confirmed(tx_hash):
+    if(str(tx_hash).startswith("0x")):
+        params = str(tx_hash)
+    else:
+        params = "0x" + tx_hash
+    result = json_call("eth_getTransactionReceipt", [params])
+    if(result is None):
+        return False
+    return not(result["blockHash"] is None)
+
+
+#
+
+def wait_for_tx_confirmation(tx_hash):
+    round = 0
+    while(not is_tx_confirmed(tx_hash)):
+        round += 1
+        if(round > 100):
+            return False
+
+
+#
+
+def clear_deposits(exchange_address, token_array, amounts):
+    # this is not a real key.
+    key = h2b(
+        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
+    return call_function(
+        key, 0, to_hex_address(exchange_address), reserve_abi, "clearBalances",
+                         [token_array, amounts])
