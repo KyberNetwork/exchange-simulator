@@ -175,7 +175,6 @@ class LiquiApiInterface(ExchangeApiInterface):
         self.args = {}
         self.exchange_actions = {}
         self.exchange_replies = {}
-        self.method_error = {}
 
     def check_answers(exchange_results, required_results):
         """Checks the replies from the exchange for any errors.
@@ -419,7 +418,6 @@ def all_to_exchange(pair, exchange):
             if i.upper().startswith(basecur) or (
                     i.upper().endswith(basecur)):
                 return i
-
         else:
             raise ValueError("Pair is not a common pair")
 
