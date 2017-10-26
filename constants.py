@@ -15,3 +15,5 @@ class Token:
 
 KNC = Token('knc', 0x03b50798dcc087953a5bd2e36e6112ad1092ceed, 18)
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
+
+LIQUI_TOKENS = [KNC, ETH]
