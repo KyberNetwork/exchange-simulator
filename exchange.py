@@ -23,8 +23,12 @@ class Exchange:
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.mutex = Lock()
 
-    def before_api(self):
+    def before_api(self, api_key):
         self.mutex.acquire()
+        self.check_deposits(api_key)
+
+    def after_api(self):
+        self.mutex.release()
 
     def get_user_balance(self, user_api_key, token):
         result = self.db.get(self.name + "," + str(token) + "," + user_api_key)
@@ -85,68 +89,43 @@ class Exchange:
     def deposit(self, api_key, token, qty):
         """
         should be called either for testing or via check_deposits.
-        assumes mutex is already locked
         """
         result = False
-        try:
-            user_balance = self.get_user_balance(api_key,
-                                                 token)
-            user_balance += qty
-            self.set_user_balance(api_key, token, user_balance)
-            result = True
-        finally:
-            self.mutex.release()
-            return result
-    def deposit( self, deposit_params ):
-        self.mutex.acquire()
-        result = False
-        try:
-            user_balance = self.get_user_balance( deposit_params.api_key,
-                                                  deposit_params.token )
-            user_balance += deposit_params.qty
-            self.set_user_balance( deposit_params.api_key,
-                                   deposit_params.token, user_balance )
-            result = True
-        finally:
-            self.mutex.release()
-            return False
+        user_balance = self.get_user_balance(api_key,
+                                             token)
+        user_balance += qty
+        self.set_user_balance(api_key, token, user_balance)
+        return True
 
     def check_deposits(self, api_key):
-        self.mutex.acquire()
         result = False
-        try:
-            # check enough time passed since last deposit check
-            last_check = self.db.get(self.name + "," + "last_deposit_check")
+        # check enough time passed since last deposit check
+        last_check = self.db.get(self.name + "," + "last_deposit_check")
 
-            if(last_check is None):
-                last_check = 0
-            current_time = int(time.time())
-            if(current_time >= last_check + self.deposit_delay_in_secs):
-                balances = web3_interface.get_balances(
+        if(last_check is None):
+            last_check = 0
+        current_time = int(time.time())
+        if(current_time >= last_check + self.deposit_delay_in_secs):
+            balances = web3_interface.get_balances(
+                self.deposit_address,
+                [token.address for token in self.listed_tokens])
+            if(sum(balances) > 0):
+                tx = web3_interface.clear_deposits(
                     self.deposit_address,
-                    [token.address for token in self.listed_tokens])
-                if(sum(balances) > 0):
-                    tx = web3_interface.clear_deposits(
-                        self.deposit_address,
-                        [token.address for token in self.listed_tokens],
-                        balances)
-                for i in range(0, len(balances)):
-                    token = self.listed_tokens[i]
-                    qty = float(balances[i]) / (10**token.decimals)
+                    [token.address for token in self.listed_tokens],
+                    balances)
+            for i in range(0, len(balances)):
+                token = self.listed_tokens[i]
+                qty = float(balances[i]) / (10**token.decimals)
 
-                    if(not self.deposit(api_key, token, qty)):
-                        raise ValueError("check_deposits: deposit failed")
+                if(not self.deposit(api_key, token, qty)):
+                    raise ValueError("check_deposits: deposit failed")
 
-                self.db.set(
-                    self.name + "," + "last_deposit_check", current_time)
+            self.db.set(
+                self.name + "," + "last_deposit_check", current_time)
 
-            result = True
-        except Exception as e:
-            print(e)
-            result = False
-        finally:
-            self.mutex.release()
-            return False
+        result = True
+        return False
 
     def withdraw_api(self, withdraw_params):
 
