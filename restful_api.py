@@ -16,7 +16,7 @@ exchange_caller = exchange.get_liqui_exchange()
 
 class LiquiTrade(Resource):
 
-    def post(self, method):
+    def post(self):
         """A 'requests' dictionary is made that has the Post Request received
         in the web service and the appropriate parse """
 
@@ -47,11 +47,12 @@ class LiquiTrade(Resource):
             })
 
         try:
-            request_all = json.loads(request.data)
-        except json.JSONDecodeError:
+            request_all = request.form.to_dict()
+            method = request_all["method"]
+        except KeyError:
             return jsonify({
                 "success": 0,
-                "error": "Invalid data format in your request"
+                "error": "Method is missing in your request"
             })
 
         request_all["api_key"] = request.headers["key"].lower()
@@ -73,7 +74,7 @@ class LiquiTrade(Resource):
             return jsonify(exchange_parsed_reply)
 
 
-api.add_resource(LiquiTrade, "/liqui/<method>")
+api.add_resource(LiquiTrade, "/")
 
 
 if __name__ == "__main__":

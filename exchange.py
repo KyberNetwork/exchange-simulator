@@ -32,9 +32,10 @@ class Exchange:
         self.mutex.release()
 
     def get_user_balance(self, user_api_key, token):
-        result = self.db.get(self.name + "," + str(token) + "," + user_api_key)
+        key = self.name + "," + str(token) + "," + user_api_key
+        result = self.db.get(key)
         if(result is None):
-            return 0
+            return 0.0
         else:
             return float(result)
 
@@ -105,7 +106,11 @@ class Exchange:
 
         if(last_check is None):
             last_check = 0
+        else:
+            last_check = int(last_check)
+
         current_time = int(time.time())
+
         if(current_time >= last_check + self.deposit_delay_in_secs):
             balances = web3_interface.get_balances(
                 self.deposit_address,
@@ -129,7 +134,6 @@ class Exchange:
         return False
 
     def withdraw_api(self, withdraw_params):
-
         user_balance = self.get_user_balance(withdraw_params.api_key,
                                              withdraw_params.token)
         if(user_balance < withdraw_params.qty):

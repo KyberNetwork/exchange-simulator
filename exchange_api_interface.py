@@ -5,6 +5,7 @@ liqui_pairs = ['knc_eth']
 
 
 class ExchangeApiInterface:
+
     def parse_trade_args(self, args):
         pass
 
@@ -267,7 +268,7 @@ class LiquiApiInterface(ExchangeApiInterface):
                 if key == "balance":
                     funds = {}
                     for k, v in value.items():
-                        funds[k.lower()] = round(v, 8)
+                        funds[str(k).lower()] = round(v, 8)
                     replies["results"]["funds"] = funds
                 if key == "transaction_id":
                     replies["results"]["tId"] = value
@@ -294,6 +295,7 @@ class LiquiApiInterface(ExchangeApiInterface):
             if not isinstance(key, str):
                 return False
             elif key == "nonce":
+                value = int(value)
                 if not isinstance(value, int) or (
                         value > 4294967294) or value <= 0:
                     return False

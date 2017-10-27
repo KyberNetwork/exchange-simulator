@@ -9,7 +9,7 @@ import exchange
 class TestRestfulAPI(unittest.TestCase):
 
     def setUp(self):
-        exchange.reset_db()
+        exchange.reset_db
         restful_api.app.testing = True
         self.app = restful_api.app.test_client()
         self.valid_headers = {
@@ -23,33 +23,31 @@ class TestRestfulAPI(unittest.TestCase):
         """
         expect "error Missing Key Header" appears in response
         """
-        resp = self.app.post('/liqui/method', headers={}, data={})
+        resp = self.app.post('/', headers={}, data={})
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(json.loads(resp.data), {
             "success": 0,
             "error": "Missing 'Key' Header"
         })
 
-    def test_invalid_data_format(self):
+    def test_invalid_method(self):
         """
         expect "Invalid data format ..." appears in response
         """
-        resp = self.app.post('/liqui/method', headers=self.valid_headers)
+        data = {"method": "invalid"}
+        resp = self.app.post('/', headers=self.valid_headers, data=data)
         self.assertEqual(json.loads(resp.data), {
             "success": 0,
-            "error": "Invalid data format in your request"
+            "error": "Invalid method requested"
         })
 
-    def test_invalid_parameters(self):
-        data = {
-            "invalid_key": ""
-        }
-        resp = self.app.post('/liqui/Trade',
+    def test_missing_method(self):
+        resp = self.app.post('/',
                              headers=self.valid_headers,
-                             data=json.dumps(data))
+                             data={})
         self.assertEqual(json.loads(resp.data), {
             "success": 0,
-            "error": "Invalid parameters in post request"
+            "error": "Method is missing in your request"
         })
 
     """
@@ -87,10 +85,10 @@ class TestRestfulAPI(unittest.TestCase):
     @mock.patch("restful_api.exchange_parser.parse_from_exchange",
                 side_effect=mock_balance_response)
     def test_get_info(self, mock_get):
-        data = {}
-        resp = self.app.post('/liqui/getInfo',
+        data = {"method": "getInfo"}
+        resp = self.app.post('/',
                              headers=self.valid_headers,
-                             data=json.dumps(data))
+                             data=data)
         self.assertEqual(json.loads(resp.data), "balance_response")
 
 
