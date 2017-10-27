@@ -27,7 +27,8 @@ class Exchange:
         self.mutex.acquire()
         self.check_deposits(api_key)
 
-    def after_api(self):
+    def after_api(self, api_key):
+        # TODO handle api_key here
         self.mutex.release()
 
     def get_user_balance(self, user_api_key, token):
