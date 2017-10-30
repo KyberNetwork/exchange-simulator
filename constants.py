@@ -5,6 +5,8 @@ BANK_ADDRESS = 0x707c5863c952012de86c7b7b8df055ac26336824
 
 OREDER_BOOK_IP = "TODO"
 
+LOGGER_NAME = "exchange_simulator"
+
 
 class Token:
 
@@ -15,6 +17,7 @@ class Token:
 
     def __str__(self):
         return self.token
+
 
 KNC = Token('knc', 0x03b50798dcc087953a5bd2e36e6112ad1092ceed, 18)
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)

@@ -1,10 +1,13 @@
 #!/usr/bin/python3
+import logging
+import logging.config
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 import json
 
 import exchange_api_interface
 import exchange
+from constants import LOGGER_NAME
 
 app = Flask(__name__)
 api = Api(app)
@@ -12,6 +15,8 @@ api = Api(app)
 
 exchange_parser = exchange_api_interface.LiquiApiInterface()
 exchange_caller = exchange.get_liqui_exchange()
+
+logger = logging.getLogger(LOGGER_NAME)
 
 
 class LiquiTrade(Resource):
@@ -48,6 +53,7 @@ class LiquiTrade(Resource):
 
         try:
             request_all = request.form.to_dict()
+            logger.info("params: %s", request_all)
             method = request_all["method"]
         except KeyError:
             return jsonify({
@@ -59,8 +65,10 @@ class LiquiTrade(Resource):
         to_exchange_results = exchange_parser.parse_to_exchange(
             method, request_all)
         if "error" in to_exchange_results:
+            logger.info(to_exchange_results)
             return jsonify(to_exchange_results)
         else:
+            logger.debug(to_exchange_results)
             exchange_params = post_reqs[method]["params_method"](
                 **to_exchange_results)
             exchange_caller.before_api(
@@ -71,6 +79,7 @@ class LiquiTrade(Resource):
                 request.headers["key"].lower())
             exchange_parsed_reply = (exchange_parser.parse_from_exchange(
                 method, exchange_reply))
+            logger.info(exchange_parsed_reply)
             return jsonify(exchange_parsed_reply)
 
 
@@ -78,4 +87,5 @@ api.add_resource(LiquiTrade, "/")
 
 
 if __name__ == "__main__":
+    logging.config.fileConfig('logging.conf')
     app.run(port="5002")
