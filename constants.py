@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-LIQUI_ADDRESS = 0x80f35d402a77f0a72d2e72e1a72997934f7a288b
-BANK_ADDRESS = 0x707c5863c952012de86c7b7b8df055ac26336824
+LIQUI_ADDRESS = 0xce656971fe4fc43a0211b792d380900761b7862c
+BANK_ADDRESS = 0x1213c432d9ef0dd390ff18a53fd2349049b99a9c
 
 OREDER_BOOK_IP = "TODO"
 
@@ -19,7 +19,7 @@ class Token:
         return self.token
 
 
-KNC = Token('knc', 0x03b50798dcc087953a5bd2e36e6112ad1092ceed, 18)
+KNC = Token('knc', 0x744660550f19d8843d9dd5be8dc3ecf06b611952, 18)
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
 
 LIQUI_TOKENS = [KNC, ETH]
