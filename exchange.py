@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 import logging
+import time
+
+import requests
 import redis
+from operator import itemgetter
 from threading import Thread, Lock
+
 import web3_interface
 import constants
-import time
 from exchange_api_interface import TradeOutput, WithdrawOutput, GetBalanceOutput
 
 #
@@ -155,7 +159,92 @@ class Exchange:
         return WithdrawOutput(False, "", 7, withdraw_params.qty)
 
 
-#
+class OrderBook:
+    BUY = 'BuyPrices'
+    SELL = 'SellPrices'
+
+    def __init__(self, order_book_ip, source_token, dest_token, exchange_name):
+        source_token = source_token.upper()
+        dest_token = dest_token.upper()
+        for pair in constants.SUPPORTED_PAIR:
+            if source_token in pair and dest_token in pair:
+                if pair.startswith(source_token):
+                    self.price_type = OrderBook.BUY
+                    self.source_token = source_token
+                    self.dest_token = dest_token
+                else:
+                    self.price_type = OrderBook.SELL
+                    self.source_token = dest_token
+                    self.dest_token = source_token
+                break
+
+        host = 'http://%s/prices/%s/%s' % (order_book_ip,
+                                           self.source_token,
+                                           self.dest_token)
+        self.load_orderbook(host.lower(), exchange_name.lower())
+
+    def load_orderbook(self, host, exchange_name):
+        def get_data(host, exchange_name):
+            # TODO: wait for new api from victor, current use old one
+            VALID_HTTP_RESPONSE = [200]
+            try:
+                r = requests.get(host)
+            except requests.exceptions.RequestException:
+                return {"Valid": False,
+                        "reason": "Can not make request to host"}
+            if r.status_code in VALID_HTTP_RESPONSE:
+                market_data = r.json()
+                if market_data.get("success", False):
+                    if "exchanges" in market_data:
+                        empty = {"Valid": True,
+                                 "BuyPrices": {},
+                                 "SellPrices": {}}
+                        return market_data["exchanges"].get(exchange_name,
+                                                            empty)
+                return {"Valid": False,
+                        "reason": market_data.get("reason",
+                                                  "Invalid server data format")
+                        }
+            return {"Valid": False, "reason": "Invalid server status code"}
+
+        def parse_orderbook(market_data):
+            data = []
+            if market_data["Valid"]:
+                reversed_sort = (self.price_type == OrderBook.BUY)
+                for command in market_data[self.price_type]:
+                    data.append((command['Rate'], command['Quantity']))
+                data.sort(key=itemgetter(0), reverse=reversed_sort)
+            return data
+
+        market_data = get_data(host, exchange_name)
+        self.order_book = parse_orderbook(market_data)
+
+    def execute_trade(self, required_qty, request_rate):
+
+        def rate_exceed_threshold(rate, threshold):
+            return ((rate - threshold) *
+                    (-1 if self.price_type == OrderBook.BUY else 1)) > 0
+        if required_qty < 0:
+            return 0, 0
+        total_cost = 0
+        total_quantity = 0
+        for command in self.order_book:
+            command_rate, command_volume = command
+            if rate_exceed_threshold(command_rate, request_rate):
+                break
+            needed_volume = required_qty - total_quantity
+            if needed_volume > command_volume:
+                total_cost += command_rate * command_volume
+                total_quantity += command_volume
+            else:
+                total_cost += needed_volume * command_rate
+                total_quantity += needed_volume
+                break
+        if self.price_type == OrderBook.BUY:
+            return total_quantity, total_cost
+        else:
+            return total_cost, total_quantity
+###############################################################################
 
 
 rdb = redis.Redis(host='localhost', port=6379, db=0)
@@ -172,7 +261,7 @@ def reset_db():
     rdb.flushdb()
 
 
-#
+###############################################################################
 
 def get_liqui_exchange():
     return liqui
