@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import time
 
 from pycoin.serialize import b2h, h2b
 from pycoin import encoding
@@ -11,14 +12,16 @@ from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
 
-# local_url = "http://localhost:8545/jsonrpc"
-local_url = "https://kovan.infura.io"
+local_url = "http://localhost:8545/jsonrpc"
+# local_url = "https://kovan.infura.io"
+
 
 def merge_two_dicts(x, y):
     '''Given two dicts, merge them into a new dict as a shallow copy.'''
     z = x.copy()
     z.update(y)
     return z
+
 
 def json_call(method_name, params):
     url = local_url
@@ -29,7 +32,7 @@ def json_call(method_name, params):
                "jsonrpc": "2.0",
                "id": 1,
                }
-    # print (payload)
+    # print(payload)
     response = requests.post(
         url, data=json.dumps(payload), headers=headers).json()
     # print(response)
@@ -87,7 +90,7 @@ def make_transaction(src_priv_key, dst_address, value, data):
     params = ["0x" + tx_hex]
     return_value = json_call("eth_sendRawTransaction", params)
     if return_value == "0x0000000000000000000000000000000000000000000000000000000000000000":
-        print ("Transaction failed")
+        print("Transaction failed")
         return return_value
 
     return return_value
@@ -127,6 +130,7 @@ def call_const_function(priv_key, value, contract_hash, contract_abi, function_n
 
 #
 
+
 reserve_abi = \
     '[{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"srcAmount","type":"uint256"},{"name":"dest","type":"address"},{"name":"destAmount","type":"uint256"}],"name":"convert","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"tokenAmount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"tokens","type":"address[]"},{"name":"amounts","type":"uint256[]"}],"name":"clearBalances","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"exchange","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_exchange","type":"string"},{"name":"_bank","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
 
@@ -147,7 +151,7 @@ def withdraw(exchange_address, token, amount, destiniation):
         "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "withdraw",
-                         [token, amount, destiniation])
+        [token, amount, destiniation])
 
 
 #
@@ -162,7 +166,7 @@ def get_balances(exchange_address, tokens):
     for token in tokens:
         balance = call_const_function(
             key, 0, to_hex_address(exchange_address), reserve_abi, "getBalance",
-                                      [token])[0]
+            [token])[0]
         result = result + [balance]
 
     return result
@@ -187,6 +191,7 @@ def wait_for_tx_confirmation(tx_hash):
     round = 0
     while(not is_tx_confirmed(tx_hash)):
         round += 1
+        time.sleep(1)
         if(round > 100):
             return False
 
@@ -199,4 +204,4 @@ def clear_deposits(exchange_address, token_array, amounts):
         "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "clearBalances",
-                         [token_array, amounts])
+        [token_array, amounts])

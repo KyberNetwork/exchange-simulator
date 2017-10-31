@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import logging
 import redis
 from threading import Thread, Lock
 import web3_interface
@@ -7,6 +8,7 @@ import time
 from exchange_api_interface import TradeOutput, WithdrawOutput, GetBalanceOutput
 
 #
+logger = logging.getLogger(constants.LOGGER_NAME)
 
 
 class Exchange:

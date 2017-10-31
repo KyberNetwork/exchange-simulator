@@ -46,16 +46,19 @@ class LiquiTrade(Resource):
         }
 
         if "Key" not in request.headers:
+            logger.error("Missing key in header")
             return jsonify({
                 "success": 0,
                 "error": "Missing 'Key' Header"
             })
 
+        request_all = request.form.to_dict()
+        logger.info("Original params: %s", request_all)
+
         try:
-            request_all = request.form.to_dict()
-            logger.info("params: %s", request_all)
             method = request_all["method"]
         except KeyError:
+            logger.error("Missing method")
             return jsonify({
                 "success": 0,
                 "error": "Method is missing in your request"
@@ -64,11 +67,10 @@ class LiquiTrade(Resource):
         request_all["api_key"] = request.headers["key"].lower()
         to_exchange_results = exchange_parser.parse_to_exchange(
             method, request_all)
+
         if "error" in to_exchange_results:
-            logger.info(to_exchange_results)
-            return jsonify(to_exchange_results)
+            response = to_exchange_results
         else:
-            logger.debug(to_exchange_results)
             exchange_params = post_reqs[method]["params_method"](
                 **to_exchange_results)
             exchange_caller.before_api(
@@ -79,8 +81,10 @@ class LiquiTrade(Resource):
                 request.headers["key"].lower())
             exchange_parsed_reply = (exchange_parser.parse_from_exchange(
                 method, exchange_reply))
-            logger.info(exchange_parsed_reply)
-            return jsonify(exchange_parsed_reply)
+            response = exchange_parsed_reply
+
+        logger.info("Response: %s", response)
+        return jsonify(response)
 
 
 api.add_resource(LiquiTrade, "/")
@@ -89,3 +93,4 @@ api.add_resource(LiquiTrade, "/")
 if __name__ == "__main__":
     logging.config.fileConfig('logging.conf')
     app.run(port="5002")
+    # app.run(port="5000", host="0.0.0.0")
