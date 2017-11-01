@@ -7,6 +7,8 @@ OREDER_BOOK_IP = "13.229.54.28:8000"
 
 LOGGER_NAME = "exchange_simulator"
 
+EXCHANGE_NAME = "liqui"
+
 
 class Token:
 

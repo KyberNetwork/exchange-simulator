@@ -73,20 +73,18 @@ class Exchange:
 
         elif(user_src_balance < src_qty):
             return TradeOutput(True, "insuficient qty", 0)
+
         # get order book
-        order_book = self.get_order_book(trade_params.src_token,
-                                         trade_params.dst_token)
-
-        # TODO - calc exactly how much to reduce from src and how much to add
-        # to dest
-
-        dst_qty = trade_params.qty * trade_params.rate
-        if(buy):
-            dst_qty = trade_params.qty
+        order_book = OrderBook(constants.OREDER_BOOK_IP,
+                               trade_params.src_token.token,
+                               trade_params.dst_token.token,
+                               constants.EXCHANGE_NAME)
+        src_diff, dst_diff = order_book.execute_trade(trade_params.qty,
+                                                      trade_params.rate)
 
         # for now, just assume limit price is the price
-        user_src_balance -= src_qty
-        user_dst_balance += dst_qty
+        user_src_balance -= src_diff
+        user_dst_balance += dst_diff
         self.set_user_balance(trade_params.api_key,
                               trade_params.src_token, user_src_balance)
         self.set_user_balance(trade_params.api_key,
