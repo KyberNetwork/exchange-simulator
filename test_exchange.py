@@ -60,6 +60,7 @@ class TestExchangeWithoutDesposit(unittest.TestCase):
         self.assertEqual(balance, 10.7)
 
     def test_deposit_and_convert_to_ETH(self):
+        # TODO mock the order book, balance here
         exchange.reset_db()
 
         # deposit

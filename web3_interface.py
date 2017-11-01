@@ -12,8 +12,9 @@ from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
 
-local_url = "http://localhost:8545/jsonrpc"
+# local_url = "http://localhost:8545/jsonrpc"
 # local_url = "https://kovan.infura.io"
+local_url = "https://kovan.kyber.network"
 
 
 def merge_two_dicts(x, y):
@@ -27,11 +28,12 @@ def json_call(method_name, params):
     url = local_url
     headers = {'content-type': 'application/json'}
     # Example echo method
-    payload = {"method": method_name,
-               "params": params,
-               "jsonrpc": "2.0",
-               "id": 1,
-               }
+    payload = {
+        "method": method_name,
+        "params": params,
+        "jsonrpc": "2.0",
+        "id": 1,
+    }
     # print(payload)
     response = requests.post(
         url, data=json.dumps(payload), headers=headers).json()

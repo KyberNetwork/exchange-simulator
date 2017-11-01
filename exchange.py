@@ -28,6 +28,8 @@ class Exchange:
         self.bank_address = ethereum_bank_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.mutex = Lock()
+        self.order_book_cache = {}
+        self.processed_order_ids = set()
 
     def before_api(self, api_key):
         self.mutex.acquire()
@@ -56,40 +58,118 @@ class Exchange:
         return GetBalanceOutput(False, "no error", balances)
 
     def get_order_book(self, src_token, dest_token):
-        return None  # TODO
+        """Find order book in cache using src_token and dest_token as the key
+        If the order book is not found or expired then we fetch order book
+        from data fetcher
+        """
+        CACHE_TIME = 60 * 1
+
+        def expired(ob):
+            return (time.time() - float(ob['Timestamp'])) > CACHE_TIME
+
+        pair = "{}_{}".format(src_token, dest_token)
+        order_book = self.order_book_cache.get(pair, {"Timestamp": 0})
+        if expired(order_book):
+            logger.info("Fetching order book for {}".format(pair))
+            order_book = self.fetch_order_book(src_token, dest_token)
+            self.order_book_cache[pair] = order_book
+        return order_book
+
+    def fetch_order_book(self, src_token, dest_token):
+        def set_order_id(o):
+            """Create Id for an order by hashing a string contain
+            source token, destination token, it's rate and quantity
+            """
+            keys = [src_token, dest_token, o['Rate'], o['Quantity']]
+            o['Id'] = hash('.'.join(map(str, keys)))
+
+        order_book = {
+            'BuyPrices': {},
+            'SellPrices': {},
+            'Timestamp': time.time()
+        }
+        # TODO change this host
+        # host = 'http://{}/prices/{}/{}'.format(constants.OREDER_BOOK_IP,
+        #                                        src_token,
+        #                                        dest_token)
+        # currently, data fetcher only support this
+        host = 'http://{}/prices/knc/eth'.format(self.order_book_ip)
+        try:
+            r = requests.get(host)
+            if r.status_code == requests.codes.ok:
+                data = r.json()
+                order_book = data['exchanges'].get(self.name, order_book)
+                for type in ['BuyPrices', 'SellPrices']:
+                    # sort the order by rate
+                    # descending for BuyPrices, ascending for SellPrices
+                    sorted(order_book[type], key=itemgetter(
+                        'Rate'), reverse=(type == 'SellPrices'))
+                    # set Id for orders so we can keep track process order
+                    [set_order_id(o) for o in order_book[type]]
+            logger.debug("Buy order: {}".format(order_book['BuyPrices'][:3]))
+            logger.debug("Sell order: {}".format(order_book['SellPrices'][:3]))
+        except requests.exceptions.RequestException:
+            logger.error('Cannot make request to get order book')
+        return order_book
 
     def execute_trade_api(self, trade_params):
+        # Check user balance for this order
         user_src_balance = self.get_user_balance(trade_params.api_key,
                                                  trade_params.src_token)
         user_dst_balance = self.get_user_balance(trade_params.api_key,
                                                  trade_params.dst_token)
         buy = trade_params.buy
 
-        src_qty = trade_params.qty
-        if(buy):
-            src_qty = src_qty * trade_params.rate
-            if(user_src_balance < src_qty):
+        if buy:
+            src_qty = trade_params.qty * trade_params.rate
+            if user_src_balance < src_qty:
+                return TradeOutput(True, "insuficient qty", 0)
+        else:
+            src_qty = trade_params.qty
+            if user_src_balance < src_qty:
                 return TradeOutput(True, "insuficient qty", 0)
 
-        elif(user_src_balance < src_qty):
-            return TradeOutput(True, "insuficient qty", 0)
+        order_book = self.get_order_book(trade_params.src_token,
+                                         trade_params.dst_token)
+        if buy:
+            orders = order_book['SellPrices']
+        else:
+            orders = order_book['BuyPrices']
 
-        # get order book
-        order_book = OrderBook(constants.OREDER_BOOK_IP,
-                               trade_params.src_token.token,
-                               trade_params.dst_token.token,
-                               constants.EXCHANGE_NAME)
-        src_diff, dst_diff = order_book.execute_trade(trade_params.qty,
-                                                      trade_params.rate)
+        traded_cost = 0
+        traded_quantity = 0
+        required_quantity = trade_params.qty
+        for order in orders:
+            logger.debug("Process order: {}".format(order))
 
-        # for now, just assume limit price is the price
+            id = order['Id']
+            if id in self.processed_order_ids:
+                continue  # order is already processed, continue to next order
+            rate, quantity = order['Rate'], order['Quantity']
+            bad_rate = (buy and rate > trade_params.rate) or (
+                (not buy) and rate < trade_params.rate)
+            if bad_rate:
+                break  # cant get better rate -> exist
+            needed_quantity = required_quantity - traded_quantity
+            min_quantity = min(quantity, needed_quantity)
+            traded_cost += rate * min_quantity
+            traded_quantity += min_quantity
+            self.processed_order_ids.add(id)
+            if needed_quantity == min_quantity:
+                break  # trade request has been fulfilled
+
+        if buy:
+            src_diff, dst_diff = traded_cost, traded_quantity
+        else:
+            src_diff, dst_diff = traded_quantity, traded_cost
+
+        # Update user balance
         user_src_balance -= src_diff
         user_dst_balance += dst_diff
         self.set_user_balance(trade_params.api_key,
                               trade_params.src_token, user_src_balance)
         self.set_user_balance(trade_params.api_key,
                               trade_params.dst_token, user_dst_balance)
-
         return TradeOutput(False, "", 0)
 
     def deposit(self, api_key, token, qty):
@@ -249,7 +329,7 @@ rdb = redis.Redis(host='localhost', port=6379, db=0)
 
 
 liqui = Exchange(
-    "Liqui", [constants.KNC, constants.ETH], rdb, constants.OREDER_BOOK_IP,
+    "liqui", [constants.KNC, constants.ETH], rdb, constants.OREDER_BOOK_IP,
     constants.LIQUI_ADDRESS, constants.BANK_ADDRESS, 5 * 60)
 
 #
