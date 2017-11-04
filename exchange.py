@@ -69,6 +69,7 @@ class Exchange:
         else:
             if order_book.expired():
                 order_book.reload()
+                self.processed_order_ids = set()  # clear processed order
         return order_book
 
     def execute_trade_api(self, trade_params):
@@ -113,7 +114,6 @@ class Exchange:
                 break  # cant get better rate -> exist
 
             needed_quantity = required_quantity - traded_quantity
-
             min_quantity = min(quantity, needed_quantity)
 
             logger.debug(
@@ -286,7 +286,8 @@ class OrderBook:
             logger.error('Cannot make request to get order book')
 
 
-rdb = redis.Redis(host='localhost', port=6379, db=0)
+# rdb = redis.Redis(host='localhost', port=6379, db=0)
+rdb = redis.Redis(host='redis', port=6379, db=0)
 
 
 liqui = Exchange("liqui", [constants.KNC, constants.ETH], rdb,
