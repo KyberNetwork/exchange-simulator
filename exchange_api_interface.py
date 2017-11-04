@@ -115,23 +115,17 @@ class DepositParams:
 
 class WithdrawParams:
 
-    def __init__(
-            self,
-            api_key,
-            token,
-            qty,
-            dst_address,
-            withdraw_on_blockchain):
+    def __init__(self, api_key, token, qty, dst_address):
         self.api_key = api_key
         self.token = token
         self.qty = qty
         self.dst_address = dst_address
-        self.withdraw_on_blockchain = withdraw_on_blockchain
+        self.withdraw_on_blockchain = constants.WITHDRAW_ON_BLOCKCHAIN
 
 
 class WithdrawOutput:
 
-    def __init__(self, error, error_msg, transaction_id, qty):
+    def __init__(self, error, error_msg, transaction_id, qty, balance):
         """
         :param error: True or False
         :param error_msg: String containing the error message
@@ -141,8 +135,8 @@ class WithdrawOutput:
         self.error = error
         self.error_msg = error_msg
         self.transaction_id = transaction_id
-        self.qty = qty
-
+        self.sent_qty = qty
+        self.balance = balance
 #
 
 
@@ -230,11 +224,11 @@ class LiquiApiInterface(ExchangeApiInterface):
                         return False, "balance value type"
                     if v < 0:
                         return False, "balance value negative"
-            if key == "transaction_id":
-                if not isinstance(value, int):
-                    return False, "transaction id type"
-                if value < 0:
-                    return False, "transaction id value"
+            # if key == "transaction_id":
+                # if not isinstance(value, int):
+                    # return False, "transaction id type"
+                # if value < 0:
+                    # return False, "transaction id value"
             if key == "original_qty":
                 # if not isinstance(value, float):
                     # logger.debug("original quantity {}".format(value))
@@ -242,8 +236,8 @@ class LiquiApiInterface(ExchangeApiInterface):
                 if value < 0:
                     return False, "original_quantity negative"
             if key == "remaining_qty":
-                if not isinstance(value, float):
-                    return False, "remaining_quantity type"
+                # if not isinstance(value, float):
+                    # return False, "remaining_quantity type"
                 if value < 0:
                     return False, "remaining_quantity negative"
                 # if value > answers["original_qty"]:
@@ -286,14 +280,21 @@ class LiquiApiInterface(ExchangeApiInterface):
                     replies["return"]["remains"] = round(value, 8)
                 if key == "type":
                     replies["return"]["type"] = value.lower()
+                if key == "sent_qty":
+                    replies["return"]["amountSent"] = value
         return replies
 
     @staticmethod
     def translate_args(post_args, parameters):
         cleaned_post_args = {}
-        if len(post_args) > 10 or not (
-                all(p in post_args for p in parameters)):
-            raise ValueError("Invalid parameters in post request")
+        if len(post_args) > 10:
+            raise ValueError("Too much parameters")
+        for p in parameters:
+            if p not in post_args:
+                raise ValueError("Invalid parameters in post request")
+        # if len(post_args) > 10 or not (
+                # all(p in post_args for p in parameters)):
+            # raise ValueError("Invalid parameters in post request")
         for key, value in post_args.items():
             if key == "nonce":
                 value = int(value)
@@ -319,12 +320,14 @@ class LiquiApiInterface(ExchangeApiInterface):
             if key == "pair":
                 if value not in liqui_pairs:
                     raise ValueError("Invalid pair: {}".format(value))
-            if key == "coinname":
+            if key == "coinName":
+                value = value.lower()
                 if value not in constants.LIQUI_TOKENS:
                     raise ValueError("Invalid coinname: {}".format(value))
-                cleaned_post_args["token"] = value.upper()
+                else:
+                    cleaned_post_args["token"] = constants.LIQUI_TOKENS[value]
             if key == "address":
-                cleaned_post_args["dst_address"] = int(value)
+                cleaned_post_args["dst_address"] = value
             if key == "api_key":
                 cleaned_post_args["api_key"] = value.lower()
             if key == "rate":
@@ -336,7 +339,7 @@ class LiquiApiInterface(ExchangeApiInterface):
                 value = round(float(value), 8)
                 if value <= 0:
                     raise ValueError("Invalid amount: {}".format(value))
-                cleaned_post_args["qty"] = round(value, 8)
+                cleaned_post_args["qty"] = value
             if key.lower() == "order_id":
                 cleaned_post_args["order_id"] = int(value)
         return cleaned_post_args
@@ -347,7 +350,7 @@ class LiquiApiInterface(ExchangeApiInterface):
         required_params = {
             "Trade": ["pair", "type", "rate", "amount", "api_key"],
             "getInfo": ["api_key"],
-            "WithdrawCoin": ["coinname", "address", "amount", "api_key"]
+            "WithdrawCoin": ["coinName", "address", "amount", "api_key"]
             # "CancelOrder" : ["order_id", "api_key"],
             # "ActiveOrders": ["api_key"],
             # "TradeHistory": ["api_key"]
@@ -379,7 +382,13 @@ class LiquiApiInterface(ExchangeApiInterface):
                 "remaining_qty"
             ],
             "getInfo": ["balance", "error", "error_msg"],
-            "WithdrawCoin": ["transaction_id", "error", "error_msg"]
+            "WithdrawCoin": [
+                "transaction_id",
+                "error",
+                "error_msg",
+                "balance",
+                "sent_qty"
+            ]
             # "CancelOrder": ["order_id", "error", "error_msg"],
             # "OrderInfo": ["order_id", "error", "error_msg",
             #               "original_qty", "remaining_qty", "type"],

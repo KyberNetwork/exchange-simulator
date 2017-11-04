@@ -9,6 +9,10 @@ LOGGER_NAME = "exchange_simulator"
 
 EXCHANGE_NAME = "liqui"
 
+WITHDRAW_ON_BLOCKCHAIN = True
+
+TEMPLATE_TRANSACTION_ID = 0
+
 
 class Token:
 
@@ -24,7 +28,7 @@ class Token:
 KNC = Token('knc', 0x744660550f19d8843d9dd5be8dc3ecf06b611952, 18)
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
 
-LIQUI_TOKENS = [KNC, ETH]
+LIQUI_TOKENS = {"knc": KNC, "eth": ETH}
 
 SUPPORTED_PAIR = ['BAT-ETH', 'CVC-ETH', 'DGD-ETH',  'EOS-ETH', 'ADX-ETH',
                   'FUN-ETH', 'GNT-ETH',  'KNC-ETH', 'LINK-ETH', 'MCO-ETH',

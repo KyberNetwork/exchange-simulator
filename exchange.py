@@ -103,6 +103,7 @@ class Exchange:
         required_quantity = trade_params.qty
         for order in orders:
             id = order['Id']
+            logger.debug("Processing order: {}".format(order))
             if id in self.processed_order_ids:
                 continue  # order is already processed, continue to next order
             rate, quantity = order['Rate'], order['Quantity']
@@ -110,8 +111,14 @@ class Exchange:
                 (not buy) and rate < trade_params.rate)
             if bad_rate:
                 break  # cant get better rate -> exist
+
             needed_quantity = required_quantity - traded_quantity
+
             min_quantity = min(quantity, needed_quantity)
+
+            logger.debug(
+                "Execute this order with quantity {}".format(min_quantity))
+
             traded_cost += rate * min_quantity
             traded_quantity += min_quantity
             self.processed_order_ids.add(id)
@@ -148,8 +155,7 @@ class Exchange:
         should be called either for testing or via check_deposits.
         """
         result = False
-        user_balance = self.get_user_balance(api_key,
-                                             token)
+        user_balance = self.get_user_balance(api_key, token)
         user_balance += qty
         self.set_user_balance(api_key, token, user_balance)
         return True
@@ -192,20 +198,30 @@ class Exchange:
         user_balance = self.get_user_balance(withdraw_params.api_key,
                                              withdraw_params.token)
         if(user_balance < withdraw_params.qty):
+            logger.debug("User balance: {}".format(user_balance))
+            logger.debug("Withdraw amount: {}".format(withdraw_params.qty))
             return WithdrawOutput(True, "insuficient balance", 0,
-                                  withdraw_params.qty)
+                                  withdraw_params.qty, {})
         user_balance -= withdraw_params.qty
         self.set_user_balance(withdraw_params.api_key,
                               withdraw_params.token, user_balance)
         # send tokens to withdraw address
         if (withdraw_params.withdraw_on_blockchain):
-            tx = web3_interface.withdraw(self.deposit_address,
-                                         withdraw_params.token.address,
-                                         int(withdraw_params.qty *
-                                             (10**withdraw_params.token.decimals)),
-                                         withdraw_params.dst_address)
+            tx = web3_interface.withdraw(
+                self.deposit_address,
+                withdraw_params.token.address,
+                int(withdraw_params.qty * (10**withdraw_params.token.decimals)),
+                withdraw_params.dst_address
+            )
+            logger.debug("Transaction: {}".format(tx))
+        else:
+            tx = constants.TEMPLATE_TRANSACTION_ID
 
-        return WithdrawOutput(False, "", 7, withdraw_params.qty)
+        balances = {}
+        for token in self.listed_tokens:
+            balance = self.get_user_balance(withdraw_params.api_key, token)
+            balances[token] = balance
+        return WithdrawOutput(False, "", tx, withdraw_params.qty, balances)
 
 
 class OrderBook:
@@ -229,8 +245,8 @@ class OrderBook:
         return hash('.'.join(map(str, keys))) % OrderBook.MAX_ORDER_ID
 
     def expired(self):
-        CACHE_TIME = 60 * 1
-        return (time.time() - self.timestamp) > CACHE_TIME
+        CACHE_ORDER_BOOK_TIME = 3
+        return (time.time() - self.timestamp) > CACHE_ORDER_BOOK_TIME
 
     def reload(self):
         self.load_order_book()
@@ -273,9 +289,8 @@ class OrderBook:
 rdb = redis.Redis(host='localhost', port=6379, db=0)
 
 
-liqui = Exchange(
-    "liqui", [constants.KNC, constants.ETH], rdb,
-    constants.LIQUI_ADDRESS, constants.BANK_ADDRESS, 5 * 60)
+liqui = Exchange("liqui", [constants.KNC, constants.ETH], rdb,
+                 constants.LIQUI_ADDRESS, constants.BANK_ADDRESS, 5 * 60)
 
 #
 

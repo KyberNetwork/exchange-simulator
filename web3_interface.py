@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import time
+import logging
 
 from pycoin.serialize import b2h, h2b
 from pycoin import encoding
@@ -11,10 +12,13 @@ import rlp
 from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
+import constants
 
 # local_url = "http://localhost:8545/jsonrpc"
 # local_url = "https://kovan.infura.io"
 local_url = "https://kovan.kyber.network"
+
+logger = logging.getLogger(constants.LOGGER_NAME)
 
 
 def merge_two_dicts(x, y):
@@ -34,10 +38,10 @@ def json_call(method_name, params):
         "jsonrpc": "2.0",
         "id": 1,
     }
-    # print(payload)
+    # logger.debug("Payload: {}".format(payload))
     response = requests.post(
         url, data=json.dumps(payload), headers=headers).json()
-    # print(response)
+    # logger.debug("Json call: {}".format(response))
     return response['result']
 
 
@@ -133,8 +137,7 @@ def call_const_function(priv_key, value, contract_hash, contract_abi, function_n
 #
 
 
-reserve_abi = \
-    '[{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"srcAmount","type":"uint256"},{"name":"dest","type":"address"},{"name":"destAmount","type":"uint256"}],"name":"convert","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"tokenAmount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"tokens","type":"address[]"},{"name":"amounts","type":"uint256[]"}],"name":"clearBalances","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"exchange","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_exchange","type":"string"},{"name":"_bank","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
+reserve_abi = '[{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"srcAmount","type":"uint256"},{"name":"dest","type":"address"},{"name":"destAmount","type":"uint256"}],"name":"convert","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"tokenAmount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"tokens","type":"address[]"},{"name":"amounts","type":"uint256[]"}],"name":"clearBalances","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"exchange","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_exchange","type":"string"},{"name":"_bank","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
 
 #
 
@@ -151,9 +154,12 @@ def withdraw(exchange_address, token, amount, destiniation):
     # this is not a real key.
     key = h2b(
         "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
-    return call_function(
-        key, 0, to_hex_address(exchange_address), reserve_abi, "withdraw",
-        [token, amount, destiniation])
+    return call_function(key,
+                         0,
+                         to_hex_address(exchange_address),
+                         reserve_abi,
+                         "withdraw",
+                         [token, amount, destiniation])
 
 
 #
