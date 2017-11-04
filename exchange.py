@@ -29,6 +29,13 @@ class Exchange:
         self.mutex = Lock()
         self.order_books = {}
         self.processed_order_ids = set()
+        self.set_balance_for_default_user()
+
+    def set_balance_for_default_user(self):
+        for token in self.listed_tokens:
+            balance = self.set_user_balance(constants.DEFAULT_API_KEY,
+                                            token,
+                                            10000)
 
     def before_api(self, api_key):
         self.mutex.acquire()

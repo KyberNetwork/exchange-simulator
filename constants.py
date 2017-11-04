@@ -13,6 +13,8 @@ WITHDRAW_ON_BLOCKCHAIN = True
 
 TEMPLATE_TRANSACTION_ID = 0
 
+DEFAULT_API_KEY = "s7kwmscu-u6myvpjh-47evo234-y2uxw61t-raxby17f"
+
 
 class Token:
 
