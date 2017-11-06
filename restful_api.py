@@ -92,5 +92,4 @@ api.add_resource(LiquiTrade, "/")
 
 if __name__ == "__main__":
     logging.config.fileConfig('logging.conf')
-    # app.run(port="5002")
-    app.run(port="5000", host="0.0.0.0")
+    app.run(host='0.0.0.0', port='5000')

@@ -1,10 +1,13 @@
 version: "2.0"
 services:
-  web:
+  api:
     build: .
     volumes:
-      - .:/code
+      - .:/exchange-simulator
     ports:
-     - "5000:5000"
+      - "5000:5000"
+    command: python restful_api.py
+    depends_on:
+      - redis
   redis:
     image: "redis:alpine"
