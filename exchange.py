@@ -277,17 +277,17 @@ class OrderBook:
             if r.status_code == requests.codes.ok:
                 data = r.json()
                 order_book = data['exchanges'][self.exchange_name]
-                for type in ['BuyPrices', 'SellPrices']:
+                for type in ['Bids', 'Asks']:
                     # sort the order by rate
                     # descending for BuyPrices, ascending for SellPrices
                     sorted(order_book[type], key=itemgetter(
-                        'Rate'), reverse=(type == 'SellPrices'))
+                        'Rate'), reverse=(type == 'Asks'))
                     # set Id for orders so we can keep track process order
                     for o in order_book[type]:
                         o["Id"] = self.order_id(o)
 
-                self.buy_prices = order_book['BuyPrices']
-                self.sell_prices = order_book['SellPrices']
+                self.buy_prices = order_book['Bids']
+                self.sell_prices = order_book['Asks']
                 self.timestamp = float(order_book['Timestamp'])
         except requests.exceptions.RequestException:
             logger.error('Cannot make request to get order book')
