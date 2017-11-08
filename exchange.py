@@ -11,18 +11,22 @@ import web3_interface
 import constants
 from exchange_api_interface import TradeOutput, WithdrawOutput, GetBalanceOutput
 
-#
+MAX_ORDER_ID = 2 ** 31
+
+
 logger = logging.getLogger(constants.LOGGER_NAME)
 
 
 class Exchange:
 
     def __init__(self, exchange_name, listed_tokens, db,
+                 order_book_loader,
                  ethereum_deposit_address, ethereum_bank_address,
                  deposit_delay_in_secs):
         self.name = exchange_name
         self.listed_tokens = listed_tokens
         self.db = db
+        self.loader = order_book_loader
         self.deposit_address = ethereum_deposit_address
         self.bank_address = ethereum_bank_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
@@ -63,65 +67,99 @@ class Exchange:
             balances[token] = balance
         return GetBalanceOutput(False, "no error", balances)
 
-    def get_order_book(self, src_token, dest_token):
-        """Find order book in cache using src_token and dest_token as the key
-        If the order book is not found then we will create it
-        If the order book is expired then we reload it
-        """
-        pair = "{}_{}".format(src_token, dest_token)
-        order_book = self.order_books.get(pair, None)
+    def get_order_book(self, src_token, dst_token, timestamp):
+        # """Find order book in cache using src_token and dest_token as the key
+        # If the order book is not found then we will create it
+        # If the order book is expired then we reload it
+        # """
+        # pair = "{}_{}".format(src_token, dest_token)
+        # order_book = self.order_books.get(pair, None)
+        # if not order_book:
+        # order_book = OrderBook(src_token, dest_token, self.name)
+        # self.order_books[pair] = order_book
+        # else:
+        # if order_book.expired():
+        # order_book.reload()
+        # self.processed_order_ids = set()  # clear processed order
+        # return order_book
+        order_book = self.loader.load_order_book(src_token,
+                                                 dst_token,
+                                                 self.name,
+                                                 timestamp)
         if not order_book:
-            order_book = OrderBook(src_token, dest_token, self.name)
-            self.order_books[pair] = order_book
-        else:
-            if order_book.expired():
-                order_book.reload()
-                self.processed_order_ids = set()  # clear processed order
+            order_book = {'Asks': [], 'Bids': []}
+        # logger.debug("Order Book: {}".format(order_book))
         return order_book
+
+    def get_depth(self, pairs, timestamp):
+        depth = {}
+        pairs = pairs.split('-')
+        for pair in pairs:
+            src_token, dst_token = pair.split("_")
+            order_book = self.get_order_book(src_token,
+                                             dst_token,
+                                             timestamp)
+            depth[pair] = {
+                "asks": [
+                    [o['Rate'], o['Quantity']] for o in order_book['Asks']
+                ],
+                "bids": [
+                    [o['Rate'], o['Quantity']] for o in order_book['Bids']
+                ],
+            }
+        return depth
 
     def execute_trade_api(self, trade_params):
         # Check user balance for this order
-        user_src_balance = self.get_user_balance(trade_params.api_key,
-                                                 trade_params.src_token)
-        user_dst_balance = self.get_user_balance(trade_params.api_key,
-                                                 trade_params.dst_token)
+        api_key = trade_params.api_key
+        src_token = trade_params.src_token
+        dst_token = trade_params.dst_token
         buy = trade_params.buy
+        timestamp = trade_params.timestamp
+        qty = trade_params.qty
+        rate = trade_params.rate
+
+        user_src_balance = self.get_user_balance(api_key, src_token)
+        user_dst_balance = self.get_user_balance(api_key, dst_token)
 
         if buy:
-            src_qty = trade_params.qty * trade_params.rate
+            src_qty = qty * rate
             if user_src_balance < src_qty:
                 # TODO change this code, it's ugly
                 return TradeOutput(True, "insuficient qty", 0, 0, 0, {})
             else:
-                order_book = self.get_order_book(trade_params.dst_token,
-                                                 trade_params.src_token)
-                orders = order_book.sell_prices
+                order_book = self.get_order_book(dst_token,
+                                                 src_token,
+                                                 timestamp)
+                orders = order_book['Asks']
         else:
-            src_qty = trade_params.qty
+            src_qty = qty
             if user_src_balance < src_qty:
                 # TODO change this code, it's ugly
                 return TradeOutput(True, "insuficient qty", 0, 0, 0, {})
             else:
-                order_book = self.get_order_book(trade_params.src_token,
-                                                 trade_params.dst_token)
-                orders = order_book.buy_prices
+                order_book = self.get_order_book(src_token,
+                                                 dst_token,
+                                                 timestamp)
+                orders = order_book['Bids']
 
         traded_cost = 0
         traded_quantity = 0
-        required_quantity = trade_params.qty
+        required_quantity = qty
         for order in orders:
-            id = order['Id']
+            id = get_order_id(src_token, dst_token,
+                              order['Rate'], order['Quantity'])
+
             logger.debug("Processing order: {}".format(order))
             if id in self.processed_order_ids:
                 continue  # order is already processed, continue to next order
-            rate, quantity = order['Rate'], order['Quantity']
-            bad_rate = (buy and rate > trade_params.rate) or (
-                (not buy) and rate < trade_params.rate)
+            bad_rate = (buy and order['Rate'] > rate) or (
+                (not buy) and order['Rate'] < rate)
             if bad_rate:
                 break  # cant get better rate -> exist
 
             needed_quantity = required_quantity - traded_quantity
-            min_quantity = min(quantity, needed_quantity)
+            min_quantity = min(order['Quantity'], needed_quantity)
 
             logger.debug(
                 "Execute this order with quantity {}".format(min_quantity))
@@ -140,21 +178,22 @@ class Exchange:
         # Update user balance
         user_src_balance -= src_diff
         user_dst_balance += dst_diff
-        self.set_user_balance(trade_params.api_key,
-                              trade_params.src_token, user_src_balance)
-        self.set_user_balance(trade_params.api_key,
-                              trade_params.dst_token, user_dst_balance)
+        self.set_user_balance(api_key, src_token, user_src_balance)
+        self.set_user_balance(api_key, dst_token, user_dst_balance)
+
         received = traded_quantity
         remains = required_quantity - received
+
         if remains == 0:
             order_id = 0
         else:
-            order = {'Rate': trade_params.rate, 'Quantity': remains}
-            order_id = order_book.add_order(order, buy)
+            order_id = 1
         balances = {}
+
         for token in self.listed_tokens:
-            balance = self.get_user_balance(trade_params.api_key, token)
+            balance = self.get_user_balance(api_key, token)
             balances[token] = balance
+
         return TradeOutput(False, "", order_id, received, remains, balances)
 
     def deposit(self, api_key, token, qty):
@@ -231,83 +270,9 @@ class Exchange:
         return WithdrawOutput(False, "", tx, withdraw_params.qty, balances)
 
 
-class OrderBook:
-    MAX_ORDER_ID = 2 ** 31
-
-    def __init__(self, source_token, dest_token, exchange_name):
-        self.source_token = source_token
-        self.dest_token = dest_token
-        self.exchange_name = exchange_name
-        self.timestamp = time.time()
-        self.buy_prices = []
-        self.sell_prices = []
-
-        self.load_order_book(self.source_token, self.dest_token)
-
-    def order_id(self, o):
-        """Create Id for an order by hashing a string contain
-        source token, destination token, it's rate and quantity
-        """
-        keys = [self.source_token, self.dest_token, o['Rate'], o['Quantity']]
-        return hash('.'.join(map(str, keys))) % OrderBook.MAX_ORDER_ID
-
-    def expired(self):
-        CACHE_ORDER_BOOK_TIME = 3
-        return (time.time() - self.timestamp) > CACHE_ORDER_BOOK_TIME
-
-    def reload(self):
-        self.load_order_book()
-
-    def add_order(self, order, buy):
-        order["Id"] = self.order_id(order)
-        if buy:
-            self.buy_prices.append(order)
-            sorted(self.buy_prices, key=itemgetter('Rate'), reverse=False)
-        else:
-            self.sell_prices.append(order)
-            sorted(self.sell_prices, key=itemgetter('Rate'), reverse=True)
-        return order["Id"]
-
-    def load_order_book(self, src_token, dest_token):
-        try:
-            host = 'http://{}/prices/{}/{}'.format(constants.OREDER_BOOK_IP,
-                                                   self.source_token,
-                                                   self.dest_token)
-            r = requests.get(host)
-            if r.status_code == requests.codes.ok:
-                data = r.json()
-                order_book = data['exchanges'][self.exchange_name]
-                for type in ['BuyPrices', 'SellPrices']:
-                    # sort the order by rate
-                    # descending for BuyPrices, ascending for SellPrices
-                    sorted(order_book[type], key=itemgetter(
-                        'Rate'), reverse=(type == 'SellPrices'))
-                    # set Id for orders so we can keep track process order
-                    for o in order_book[type]:
-                        o["Id"] = self.order_id(o)
-
-                self.buy_prices = order_book['BuyPrices']
-                self.sell_prices = order_book['SellPrices']
-                self.timestamp = float(order_book['Timestamp'])
-        except requests.exceptions.RequestException:
-            logger.error('Cannot make request to get order book')
-
-
-# rdb = redis.Redis(host='localhost', port=6379, db=0)
-rdb = redis.Redis(host='redis', port=6379, db=0)
-
-
-liqui = Exchange("liqui", [constants.KNC, constants.ETH], rdb,
-                 constants.LIQUI_ADDRESS, constants.BANK_ADDRESS, 5 * 60)
-
-#
-
-
-def reset_db():
-    rdb.flushdb()
-
-
-###############################################################################
-
-def get_liqui_exchange():
-    return liqui
+def get_order_id(src_token, dst_token, rate, quantity):
+    """Create Id for an order by hashing a string contain
+    source token, destination token, it's rate and quantity
+    """
+    keys = [src_token, dst_token, rate, quantity]
+    return hash('.'.join(map(str, keys))) % MAX_ORDER_ID

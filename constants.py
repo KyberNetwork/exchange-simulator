@@ -26,6 +26,9 @@ class Token:
     def __str__(self):
         return self.token
 
+    def __repr__(self):
+        return self.token
+
 
 KNC = Token('knc', 0x7a8957d092f2ff1342f21b500f62922238691f83, 18)
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)

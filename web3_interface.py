@@ -38,11 +38,15 @@ def json_call(method_name, params):
         "jsonrpc": "2.0",
         "id": 1,
     }
+    # response = requests.post(
+    #     url, data=json.dumps(payload), headers=headers).json()
+    # return response['result']
+
     # logger.debug("Payload: {}".format(payload))
-    response = requests.post(
-        url, data=json.dumps(payload), headers=headers).json()
-    # logger.debug("Json call: {}".format(response))
-    return response['result']
+    r = requests.post(url, data=json.dumps(payload), headers=headers)
+    data = r.json()
+    # logger.debug("Response: {}".format(data))
+    return data['result']
 
 
 def get_num_transactions(address):

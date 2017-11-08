@@ -1,22 +1,25 @@
 #!/usr/bin/python3
 import logging
 import logging.config
+import time
+
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
+from werkzeug.exceptions import BadRequest
 import json
+import redis
 
 import exchange_api_interface
-import exchange
-from constants import LOGGER_NAME
+from exchange import Exchange
+from order_book_loader import SimulatorLoader
+import constants
+import utils
+
+
+logger = logging.getLogger(constants.LOGGER_NAME)
 
 app = Flask(__name__)
 api = Api(app)
-
-
-exchange_parser = exchange_api_interface.LiquiApiInterface()
-exchange_caller = exchange.get_liqui_exchange()
-
-logger = logging.getLogger(LOGGER_NAME)
 
 
 class LiquiTrade(Resource):
@@ -55,6 +58,11 @@ class LiquiTrade(Resource):
         request_all = request.form.to_dict()
         logger.info("Original params: %s", request_all)
 
+        timestamp = request.args.get('timestamp')
+        if not timestamp:
+            timestamp = int(time.time() * 1000)
+        request_all['timestamp'] = timestamp
+
         try:
             method = request_all["method"]
         except KeyError:
@@ -90,6 +98,40 @@ class LiquiTrade(Resource):
 api.add_resource(LiquiTrade, "/")
 
 
+@app.route("/api/3/depth/<string:pairs>", methods=['GET'])
+def depth(pairs):
+    timestamp = request.args.get('timestamp')
+    if timestamp:
+        timestamp = int(timestamp)
+    else:
+        timestamp = int(time.time() * 1000)
+
+    try:
+        depth = exchange_caller.get_depth(pairs, timestamp)
+        return json.dumps(depth)
+    except ValueError as e:
+        logger.info("Bad Request: {}".format(e))
+        return BadRequest()
+
+
 if __name__ == "__main__":
     logging.config.fileConfig('logging.conf')
+
+    rdb = utils.get_redis_db()
+
+    order_book_loader = SimulatorLoader(rdb)
+    # order_book_loader = CoreLoader()
+
+    exchange_parser = exchange_api_interface.LiquiApiInterface()
+    exchange_caller = Exchange(
+        # "liqui",
+        "binance",  # temporary because we dont have data of knc_eth on liqui
+        [constants.KNC, constants.ETH],
+        rdb,
+        order_book_loader,
+        constants.LIQUI_ADDRESS,
+        constants.BANK_ADDRESS,
+        5 * 60
+    )
+
     app.run(host='0.0.0.0', port='5000')
