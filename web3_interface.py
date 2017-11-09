@@ -144,6 +144,8 @@ def call_const_function(priv_key, value, contract_hash, contract_abi, function_n
 reserve_abi = '[{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"srcAmount","type":"uint256"},{"name":"dest","type":"address"},{"name":"destAmount","type":"uint256"}],"name":"convert","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"tokenAmount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"tokens","type":"address[]"},{"name":"amounts","type":"uint256[]"}],"name":"clearBalances","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"exchange","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_exchange","type":"string"},{"name":"_bank","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
 
 #
+# this is not a real key.
+key = h2b("dae8043a6b75fbf1c88efa28f05434ca8fd6d3270b8cc5086b64a3319512e3f6")
 
 #
 
@@ -155,9 +157,6 @@ def to_hex_address(integer):
 
 
 def withdraw(exchange_address, token, amount, destiniation):
-    # this is not a real key.
-    key = h2b(
-        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
     return call_function(key,
                          0,
                          to_hex_address(exchange_address),
@@ -169,10 +168,6 @@ def withdraw(exchange_address, token, amount, destiniation):
 #
 
 def get_balances(exchange_address, tokens):
-    # this is not a real key.
-    key = h2b(
-        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
-
     result = []
 
     for token in tokens:
@@ -211,9 +206,6 @@ def wait_for_tx_confirmation(tx_hash):
 #
 
 def clear_deposits(exchange_address, token_array, amounts):
-    # this is not a real key.
-    key = h2b(
-        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "clearBalances",
         [token_array, amounts])

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-LIQUI_ADDRESS = 0x5b082bc7928e1fd5b757426fe7225cc7a6a75c55
-BANK_ADDRESS = 0xbf6b2070264b37fd527bf3d393280d7b0401f447
+LIQUI_ADDRESS = 0x2a1c0e5db761b7f176705c86c4d82fb5797b1834
+BANK_ADDRESS = 0xc7159686de47f2ca06fcd1e74d1b9a1a0e584259
 
 OREDER_BOOK_IP = "core:8000"
 
@@ -30,9 +30,9 @@ class Token:
         return self.token
 
 
-KNC = Token('knc', 0xb4ac19f6495df29f32878182be06a2f0572f9763, 18)
+KNC = Token('knc', 0x88c29c3f40b4e15989176f9546b80a1cff4a6b0d, 18)
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
-OMG = Token('omg', 0x6b662ffde8f1d2240eb4eefa211463be0eb258a1, 18)
+OMG = Token('omg', 0x879b5383c9e1269be9dcf73ae9740c26b91e9802, 18)
 LIQUI_TOKENS = {"knc": KNC, "eth": ETH, "omg": OMG}
 
 SUPPORTED_PAIR = ['BAT-ETH', 'CVC-ETH', 'DGD-ETH',  'EOS-ETH', 'ADX-ETH',
