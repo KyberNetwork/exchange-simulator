@@ -8,6 +8,8 @@ from flask_restful import Resource, Api
 from werkzeug.exceptions import BadRequest
 import json
 import redis
+from raven.contrib.flask import Sentry
+
 
 import exchange_api_interface
 from exchange import Exchange
@@ -124,9 +126,8 @@ if __name__ == "__main__":
 
     exchange_parser = exchange_api_interface.LiquiApiInterface()
     exchange_caller = Exchange(
-        # "liqui",
-        "binance",  # temporary because we dont have data of knc_eth on liqui
-        [constants.KNC, constants.ETH],
+        "liqui",
+        [constants.KNC, constants.ETH, constants.OMG],
         rdb,
         order_book_loader,
         constants.LIQUI_ADDRESS,
@@ -134,4 +135,6 @@ if __name__ == "__main__":
         5 * 60
     )
 
+    sentry = Sentry(
+        app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
     app.run(host='0.0.0.0', port='5000')
