@@ -7,8 +7,6 @@ import redis
 
 from utils import normalize_timestamp
 
-ALLOWED_TOKEN = ['knc', 'omg']
-
 
 def load_order_books(filename):
     with open(filename, 'r')as f:
@@ -18,7 +16,7 @@ def load_order_books(filename):
             for pair in e['data']:
                 base, quote = pair.lower().split('-')
                 for exchange in e['data'][pair]:
-                    if exchange == 'liqui' and base in ALLOWED_TOKEN:
+                    if exchange == 'liqui':
                         order_book = e['data'][pair][exchange]
                         yield(base, quote, exchange, order_book)
 
@@ -30,17 +28,16 @@ if __name__ == "__main__":
     rdb = redis.Redis(host='redis', port=6379, db=0)
     rdb.flushdb()
 
-    order_books = load_order_books('data/sample')
-    # order_books = load_order_books(
-    # 'data/full_order_book_data_1510006636_to_510037765')
+    # order_books = load_order_books('data/sample')
+    order_books = load_order_books('data/full')
 
-    all_timestamp = []
+    all_timestamp = set()
 
     for idx, ob in enumerate(order_books):
         base, quote, exchange, order_book = ob
 
         timestamp = order_book['Timestamp']
-        all_timestamp.append(timestamp)
+        all_timestamp.add(timestamp)
         timestamp = normalize_timestamp(timestamp)
 
         # handle the old format with 'BuyPrices' and 'SellPrices'
@@ -60,7 +57,11 @@ if __name__ == "__main__":
             logger.debug('Key: {}'.format(key))
             logger.debug('-' * 100)
 
-    start_time = min(all_timestamp) / 1000
-    end_time = max(all_timestamp) / 1000
+    all_timestamp = list(all_timestamp)
+    all_timestamp.sort()
+    start_time, end_time = all_timestamp[0] / 1000, all_timestamp[-1] / 1000
     logger.info("Starting time: {}".format(datetime.fromtimestamp(start_time)))
     logger.info("Ending time: {}".format(datetime.fromtimestamp(end_time)))
+
+    with open('data/time_stamps.json', 'w') as f:
+        f.write(json.dumps(all_timestamp))

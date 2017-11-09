@@ -100,7 +100,7 @@ class LiquiTrade(Resource):
 api.add_resource(LiquiTrade, "/")
 
 
-@app.route("/api/3/depth/<string:pairs>", methods=['GET'])
+@app.route("/depth/<string:pairs>", methods=['GET'])
 def depth(pairs):
     timestamp = request.args.get('timestamp')
     if timestamp:
@@ -136,5 +136,6 @@ if __name__ == "__main__":
     )
 
     sentry = Sentry(
-        app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
+        app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'
+        '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
     app.run(host='0.0.0.0', port='5000')

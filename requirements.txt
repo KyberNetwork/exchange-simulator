@@ -6,3 +6,4 @@ rlp
 flask
 flask_restful
 redis
+raven[flask]
