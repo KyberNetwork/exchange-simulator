@@ -4,7 +4,7 @@ import logging
 
 import constants
 
-liqui_pairs = ['knc_eth']
+liqui_pairs = ['knc_eth', 'omg_eth']
 logger = logging.getLogger(constants.LOGGER_NAME)
 
 
@@ -27,7 +27,8 @@ class ExchangeApiInterface:
 
 class TradeParams:
 
-    def __init__(self, api_key, src_token, dst_token, qty, rate, buy, timestamp):
+    def __init__(self, api_key, src_token, dst_token, qty, rate,
+                 buy, timestamp):
         self.api_key = api_key
         self.src_token = src_token
         self.dst_token = dst_token
