@@ -7,9 +7,13 @@ Includes deposit and withdrawal of funds, and orders execution.
 ```sh
 $ python restful_api.py
 ```
+Running in simulation mode
+```sh
+$ KYBER_ENV=simulation python restful_api.py
+```
 
 ### Mode
-Setup the simulation mode via KYBER_ENV variable: 
+Setup modes via KYBER_ENV variable: 
 
 * **dev** is local development env **[DEFAULT]**
 * **simulation** is with our market data and fake blockchain

@@ -125,11 +125,20 @@ if __name__ == "__main__":
     rdb = utils.get_redis_db()
 
     if mode == 'simulation':
-        imported = rdb.get('IMPORTED_SIMULATION_DATA')
-        if not imported:
-            sys.exit('You have to import the simulation data first.')
-        else:
-            order_book_loader = SimulatorLoader(rdb)
+        data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
+
+        if not data_imported:
+            logger.info('Import simulation data ...')
+            ob_file = 'data/full_ob'
+            # ob_file = 'data/sample_ob'
+            try:
+                utils.copy_order_books_to_db(ob_file, rdb)
+            except FileNotFoundError:
+                sys.exit('Data is missing.')
+            rdb.set('IMPORTED_SIMULATION_DATA', 1)
+            logger.info('Finish setup process.')
+
+        order_book_loader = SimulatorLoader(rdb)
     else:
         order_book_loader = CoreLoader()
 
