@@ -83,17 +83,24 @@ class LiquiTrade(Resource):
         if "error" in to_exchange_results:
             response = to_exchange_results
         else:
-            exchange_params = post_reqs[method]["params_method"](
-                **to_exchange_results)
-            exchange_caller.before_api(
-                request.headers["key"].lower())
-            exchange_reply = post_reqs[method]["exchange_method"](
-                exchange_params)
-            exchange_caller.after_api(
-                request.headers["key"].lower())
-            exchange_parsed_reply = (exchange_parser.parse_from_exchange(
-                method, exchange_reply))
-            response = exchange_parsed_reply
+            try:
+                exchange_params = post_reqs[method]["params_method"](
+                    **to_exchange_results)
+                exchange_caller.before_api(
+                    request.headers["key"].lower())
+                exchange_reply = post_reqs[method]["exchange_method"](
+                    exchange_params)
+                exchange_caller.after_api(
+                    request.headers["key"].lower())
+                exchange_parsed_reply = (exchange_parser.parse_from_exchange(
+                    method, exchange_reply))
+                response = exchange_parsed_reply
+            except Exception as e:
+                logger.error(e)
+                response = {
+                    'success': 0,
+                    'error': str(e)
+                }
 
         logger.info("Response: %s", response)
         return jsonify(response)

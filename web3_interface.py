@@ -15,8 +15,8 @@ from ethereum.utils import mk_contract_address
 import constants
 
 # local_url = "http://localhost:8545/jsonrpc"
-# local_url = "https://kovan.infura.io"
-local_url = "https://kovan.kyber.network"
+local_url = "https://kovan.infura.io"
+# local_url = "https://kovan.kyber.network"
 
 logger = logging.getLogger(constants.LOGGER_NAME)
 
@@ -38,14 +38,11 @@ def json_call(method_name, params):
         "jsonrpc": "2.0",
         "id": 1,
     }
-    # response = requests.post(
-    #     url, data=json.dumps(payload), headers=headers).json()
-    # return response['result']
 
     # logger.debug("Payload: {}".format(payload))
     r = requests.post(url, data=json.dumps(payload), headers=headers)
+    assert r.status_code == requests.codes.ok, "We've got a problem with Kovan"
     data = r.json()
-    # logger.debug("Response: {}".format(data))
     return data['result']
 
 
