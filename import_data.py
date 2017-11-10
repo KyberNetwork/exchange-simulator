@@ -63,5 +63,7 @@ if __name__ == "__main__":
     logger.info("Starting time: {}".format(datetime.fromtimestamp(start_time)))
     logger.info("Ending time: {}".format(datetime.fromtimestamp(end_time)))
 
+    rdb.set('IMPORTED_SIMULATION_DATA', True)
+
     with open('data/time_stamps.json', 'w') as f:
         f.write(json.dumps(all_timestamp))

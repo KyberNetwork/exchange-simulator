@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+import os
+import sys
 import logging
 import logging.config
 import time
@@ -13,7 +15,7 @@ from raven.contrib.flask import Sentry
 
 import exchange_api_interface
 from exchange import Exchange
-from order_book_loader import SimulatorLoader
+from order_book_loader import SimulatorLoader, CoreLoader
 import constants
 import utils
 
@@ -117,12 +119,19 @@ def depth(pairs):
 
 
 if __name__ == "__main__":
+    mode = os.environ.get('KYBER_ENV', 'dev')
     logging.config.fileConfig('logging.conf')
 
     rdb = utils.get_redis_db()
 
-    order_book_loader = SimulatorLoader(rdb)
-    # order_book_loader = CoreLoader()
+    if mode == 'simulation':
+        imported = rdb.get('IMPORTED_SIMULATION_DATA')
+        if not imported:
+            sys.exit('You have to import the simulation data first.')
+        else:
+            order_book_loader = SimulatorLoader(rdb)
+    else:
+        order_book_loader = CoreLoader()
 
     exchange_parser = exchange_api_interface.LiquiApiInterface()
     exchange_caller = Exchange(
@@ -135,7 +144,8 @@ if __name__ == "__main__":
         5 * 60
     )
 
-    sentry = Sentry(
-        app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'
-        '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
+    if mode != 'dev':
+        sentry = Sentry(app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'
+                        '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
+
     app.run(host='0.0.0.0', port='5000')
