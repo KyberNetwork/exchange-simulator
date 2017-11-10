@@ -136,8 +136,8 @@ if __name__ == "__main__":
 
         if not data_imported:
             logger.info('Import simulation data ...')
-            ob_file = 'data/full_ob'
-            # ob_file = 'data/sample_ob'
+            ob_file = 'data/full_ob.dat'
+            # ob_file = 'data/sample_ob.dat'
             try:
                 utils.copy_order_books_to_db(ob_file, rdb)
             except FileNotFoundError:
