@@ -41,6 +41,7 @@ def index():
 
         params = request.form.to_dict()
         params['api_key'] = api_key
+        params['timestamp'] = timestamp
         try:
             method = params['method']
         except KeyError:
@@ -51,7 +52,7 @@ def index():
         if method == 'getInfo':
             output = liqui_exchange.get_balance_api(**params)
         elif method == 'Trade':
-            output = liqui_exchange.trade()
+            output = liqui_exchange.trade_api(**params)
         elif method == 'WithdrawCoin':
             output = liqui_exchange.withdraw_api(**params)
         else:
@@ -109,6 +110,10 @@ if __name__ == "__main__":
         order_loader = CoreLoader()
 
     balance_handler = BalanceHandler(rdb)
+    # init a deposit
+    for token in constants.LIQUI_TOKENS.keys():
+        balance_handler.deposit(
+            user=constants.DEFAULT_API_KEY, token=token, amount=10000)
     liqui_exchange = Exchange(
         "liqui",
         [constants.KNC, constants.ETH, constants.OMG],

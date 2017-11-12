@@ -102,92 +102,75 @@ class Exchange:
             }
         return depth
 
-    def execute_trade_api(self, trade_params):
-        # Check user balance for this order
-        api_key = trade_params.api_key
-        src_token = trade_params.src_token
-        dst_token = trade_params.dst_token
-        buy = trade_params.buy
-        timestamp = trade_params.timestamp
-        qty = trade_params.qty
-        rate = trade_params.rate
-
-        user_src_balance = self.get_user_balance(api_key, src_token)
-        user_dst_balance = self.get_user_balance(api_key, dst_token)
-
-        if buy:
-            src_qty = qty * rate
-            if user_src_balance < src_qty:
-                # TODO change this code, it's ugly
-                return TradeOutput(True, "insuficient qty", 0, 0, 0, {})
-            else:
-                order_book = self.get_order_book(dst_token,
-                                                 src_token,
-                                                 timestamp)
-                orders = order_book['Asks']
+    def trade_api(self, api_key, type, rate, pair, amount,
+                  timestamp, *args, **kargs):
+        order_book = self.get_order_book(pair, timestamp)
+        balance = self.balance.get(user=api_key)
+        amount, rate = float(amount), float(rate)
+        base, quote = pair.split('_')  # e.g. knc_eth -> base=knc, quote=eth
+        if type == 'buy':
+            # check quote balance
+            assert balance[quote] >= amount * rate, 'Insufficient qty'
+            orders = order_book['Asks']
+        elif type == 'sell':
+            # check base balance
+            assert balance[base] >= amount, 'Insufficient qty'
+            orders = order_book['Bids']
         else:
-            src_qty = qty
-            if user_src_balance < src_qty:
-                # TODO change this code, it's ugly
-                return TradeOutput(True, "insuficient qty", 0, 0, 0, {})
-            else:
-                order_book = self.get_order_book(src_token,
-                                                 dst_token,
-                                                 timestamp)
-                orders = order_book['Bids']
+            raise ValueError('Invalid type of action')
 
-        traded_cost = 0
-        traded_quantity = 0
-        required_quantity = qty
+        base_change = 0
+        quote_change = 0
         for order in orders:
-            id = get_order_id(src_token, dst_token,
-                              order['Rate'], order['Quantity'])
+            logger.debug('Processing order: {}'.format(order))
 
-            logger.debug("Processing order: {}".format(order))
+            id = get_order_id(pair, order['Rate'], order['Quantity'])
             if id in self.processed_order_ids:
                 continue  # order is already processed, continue to next order
-            bad_rate = (buy and order['Rate'] > rate) or (
-                (not buy) and order['Rate'] < rate)
+
+            bad_rate = (type == 'buy' and order['Rate'] > rate) or (
+                type == 'sell' and order['Rate'] < rate)
             if bad_rate:
                 break  # cant get better rate -> exist
 
-            needed_quantity = required_quantity - traded_quantity
-            min_quantity = min(order['Quantity'], needed_quantity)
+            needed_quantity = amount - base_change
+            trade_amount = min(order['Quantity'], needed_quantity)
 
             logger.debug(
-                "Execute this order with quantity {}".format(min_quantity))
+                'Execute this order with quantity {}'.format(trade_amount))
 
-            traded_cost += rate * min_quantity
-            traded_quantity += min_quantity
+            base_change += trade_amount
+            quote_change += rate * trade_amount
+
             self.processed_order_ids.add(id)
-            if needed_quantity == min_quantity:
+            if needed_quantity == trade_amount:
                 break  # trade request has been fulfilled
 
-        if buy:
-            src_diff, dst_diff = traded_cost, traded_quantity
+        logger.debug('Base change, Quote change: {}, {}'.format(
+            base_change, quote_change))
+
+        # udpate balance
+        if type == 'buy':
+            self.balance.deposit(api_key, base, base_change)
+            self.balance.withdraw(api_key, quote, quote_change)
         else:
-            src_diff, dst_diff = traded_quantity, traded_cost
+            self.balance.withdraw(api_key, base, base_change)
+            self.balance.deposit(api_key, quote, quote_change)
 
-        # Update user balance
-        user_src_balance -= src_diff
-        user_dst_balance += dst_diff
-        self.set_user_balance(api_key, src_token, user_src_balance)
-        self.set_user_balance(api_key, dst_token, user_dst_balance)
-
-        received = traded_quantity
-        remains = required_quantity - received
+        received = base_change
+        remains = amount - received
 
         if remains == 0:
             order_id = 0
         else:
-            order_id = 1
-        balances = {}
+            order_id = get_order_id(pair, rate, remains)
 
-        for token in self.listed_tokens:
-            balance = self.get_user_balance(api_key, token)
-            balances[token] = balance
-
-        return TradeOutput(False, "", order_id, received, remains, balances)
+        return {
+            'received': received,
+            'remains': remains,
+            'order_id': order_id,
+            'funds': self.balance.get(user=api_key)
+        }
 
     def deposit(self, api_key, token, qty):
         """
@@ -247,9 +230,9 @@ class Exchange:
         }
 
 
-def get_order_id(src_token, dst_token, rate, quantity):
+def get_order_id(pair, rate, quantity):
     """Create Id for an order by hashing a string contain
-    source token, destination token, it's rate and quantity
+    pair, it's rate and quantity
     """
-    keys = [src_token, dst_token, rate, quantity]
+    keys = [pair, rate, quantity]
     return hash('.'.join(map(str, keys))) % MAX_ORDER_ID

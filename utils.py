@@ -53,10 +53,10 @@ def copy_order_books_to_db(ob_file, rdb):
 
         # handle the old format with 'BuyPrices' and 'SellPrices'
         if 'BuyPrices' in order_book:
-            order_book['Bids'] = order_book['BuyPrices']
+            order_book['Asks'] = order_book['BuyPrices']
             order_book.pop('BuyPrices')
         if 'SellPrices' in order_book:
-            order_book['Asks'] = order_book['SellPrices']
+            order_book['Bids'] = order_book['SellPrices']
             order_book.pop('SellPrices')
 
         key = '_'.join(map(str, [exchange, base, quote, timestamp]))
