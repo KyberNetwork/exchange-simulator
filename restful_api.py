@@ -39,26 +39,28 @@ def index():
         else:
             timestamp = int(time.time() * 1000)
 
+        params = request.form.to_dict()
+        params['api_key'] = api_key
         try:
-            method = request.form['method']
-
-            if method == 'getInfo':
-                output = liqui_exchange.get_balance_api(api_key=api_key)
-            elif method == 'Trade':
-                output = liqui_exchange.trade()
-            elif method == 'WithdrawCoin':
-                output = liqui_exchange.withdraw()
-            else:
-                raise AttributeError('Invalid method requested')
-
-            logger.debug('Output: {}'.format(output))
-
-            return jsonify({
-                'success': 1,
-                'return': output
-            })
+            method = params['method']
         except KeyError:
             raise KeyError('Method is missing in your request')
+
+        logger.info('Params: {}'.format(params))
+
+        if method == 'getInfo':
+            output = liqui_exchange.get_balance_api(**params)
+        elif method == 'Trade':
+            output = liqui_exchange.trade()
+        elif method == 'WithdrawCoin':
+            output = liqui_exchange.withdraw_api(**params)
+        else:
+            raise AttributeError('Invalid method requested')
+
+        return jsonify({
+            'success': 1,
+            'return': output
+        })
     except Exception as e:
         traceback.print_exc()
         return jsonify({

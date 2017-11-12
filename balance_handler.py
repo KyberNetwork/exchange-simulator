@@ -17,5 +17,17 @@ class BalanceHandler:
         return balance
 
     def deposit(self, user, token, amount):
-        '_'.join(['balance', user])
-        self._db.hincrby(key, token, amount)
+        amount = float(amount)
+        assert amount > 0, "invalid amount"
+        key = '_'.join(['balance', user])
+        value = self._db.hincrbyfloat(key, token, amount)
+
+    def withdraw(self, user, token, amount):
+        amount = float(amount)
+        assert amount > 0, "invalid amount"
+        key = '_'.join(['balance', user])
+        value = self._db.hincrbyfloat(key, token, -amount)
+        if value < 0:
+            # rollback
+            self._db.hincrbyfloat(key, token, amount)
+            raise ValueError("insufficient balance")

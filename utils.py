@@ -21,6 +21,10 @@ def get_logger(name=constants.LOGGER_NAME):
     return logging.getLogger(name)
 
 
+def get_token(name):
+    return constants.LIQUI_TOKENS[name]
+
+
 logger = logging.getLogger(constants.LOGGER_NAME)
 
 

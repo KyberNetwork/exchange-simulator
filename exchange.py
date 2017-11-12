@@ -10,6 +10,7 @@ from threading import Thread, Lock
 import web3_interface
 import constants
 from exchange_api_interface import TradeOutput, WithdrawOutput, GetBalanceOutput
+import utils
 
 MAX_ORDER_ID = 2 ** 31
 
@@ -62,9 +63,8 @@ class Exchange:
     def set_user_balance(self, user_api_key, token, balance):
         self.db.set(self.name + "," + str(token) + "," + user_api_key, balance)
 
-    def get_balance_api(self, api_key):
-        balance = self.balance.get(user=api_key)
-        return balance
+    def get_balance_api(self, api_key, *args, **kargs):
+        return self.balance.get(user=api_key)
 
     def get_order_book(self, pair, timestamp):
         # """Find order book in cache using src_token and dest_token as the key
@@ -233,34 +233,18 @@ class Exchange:
         result = True
         return False
 
-    def withdraw_api(self, withdraw_params):
-        user_balance = self.get_user_balance(withdraw_params.api_key,
-                                             withdraw_params.token)
-        if(user_balance < withdraw_params.qty):
-            logger.debug("User balance: {}".format(user_balance))
-            logger.debug("Withdraw amount: {}".format(withdraw_params.qty))
-            return WithdrawOutput(True, "insuficient balance", 0,
-                                  withdraw_params.qty, {})
-        user_balance -= withdraw_params.qty
-        self.set_user_balance(withdraw_params.api_key,
-                              withdraw_params.token, user_balance)
-        # send tokens to withdraw address
-        if (withdraw_params.withdraw_on_blockchain):
-            tx = web3_interface.withdraw(
-                self.deposit_address,
-                withdraw_params.token.address,
-                int(withdraw_params.qty * (10**withdraw_params.token.decimals)),
-                withdraw_params.dst_address
-            )
-            logger.debug("Transaction: {}".format(tx))
-        else:
-            tx = constants.TEMPLATE_TRANSACTION_ID
-
-        balances = {}
-        for token in self.listed_tokens:
-            balance = self.get_user_balance(withdraw_params.api_key, token)
-            balances[token] = balance
-        return WithdrawOutput(False, "", tx, withdraw_params.qty, balances)
+    def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
+        self.balance.withdraw(user=api_key, token=coinName, amount=amount)
+        token = utils.get_token(coinName)
+        tx = web3_interface.withdraw(self.deposit_address,
+                                     token.address,
+                                     int(amount * token.decimals),
+                                     address)
+        return {
+            'tId': tx,
+            'amountSent': amount,
+            'funds': self.balance.get(user=api_key)
+        }
 
 
 def get_order_id(src_token, dst_token, rate, quantity):
