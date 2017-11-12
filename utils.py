@@ -9,12 +9,16 @@ import constants
 
 
 def get_redis_db():
-    return redis.Redis(host='redis', port=6379, db=0)
+    return redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
 
 
 def normalize_timestamp(t):
     # 10000 miliseconds -> 10s
     return int(t / 10000) * 10000
+
+
+def get_logger(name=constants.LOGGER_NAME):
+    return logging.getLogger(name)
 
 
 logger = logging.getLogger(constants.LOGGER_NAME)

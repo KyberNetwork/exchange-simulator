@@ -4,18 +4,18 @@ import requests
 import json
 
 from constants import LOGGER_NAME, OREDER_BOOK_IP
-from utils import normalize_timestamp
+import utils
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = utils.get_logger()
 
 
-class OrderBookLoader:
+class OrderLoader:
     def load_order_book(self, src_token, dst_token, exchange_name, timestamp):
         raise NotImplementedError
         # return {'BuyPrices': [], 'SellPrices': []}
 
 
-class CoreLoader(OrderBookLoader):
+class CoreLoader(OrderLoader):
     def load_order_book(self, src_token, dst_token, exchange_name, timestamp):
         self._load_order_book(src_token, dst_token, exchange_name)
 
@@ -47,14 +47,14 @@ class CoreLoader(OrderBookLoader):
             return None
 
 
-class SimulatorLoader(OrderBookLoader):
+class SimulatorLoader(OrderLoader):
     def __init__(self, rdb):
         self.rdb = rdb
 
     def load_order_book(self, src_token, dst_token, exchange_name, timestamp):
         # might need to change the timestamp in 10 timeframe
         # e.g: timestamp = int(timestamp/10) * 10
-        timestamp = normalize_timestamp(timestamp)
+        timestamp = utils.normalize_timestamp(timestamp)
         key = '_'.join(map(str, [
             exchange_name,
             src_token,

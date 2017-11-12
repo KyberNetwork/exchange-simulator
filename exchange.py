@@ -21,11 +21,13 @@ class Exchange:
 
     def __init__(self, exchange_name, listed_tokens, db,
                  order_book_loader,
+                 balance_handler,
                  ethereum_deposit_address, ethereum_bank_address,
                  deposit_delay_in_secs):
         self.name = exchange_name
         self.listed_tokens = listed_tokens
         self.db = db
+        self.balance = balance_handler
         self.loader = order_book_loader
         self.deposit_address = ethereum_deposit_address
         self.bank_address = ethereum_bank_address
@@ -60,12 +62,9 @@ class Exchange:
     def set_user_balance(self, user_api_key, token, balance):
         self.db.set(self.name + "," + str(token) + "," + user_api_key, balance)
 
-    def get_balances_api(self, get_balance_params):
-        balances = {}
-        for token in self.listed_tokens:
-            balance = self.get_user_balance(get_balance_params.api_key, token)
-            balances[token] = balance
-        return GetBalanceOutput(False, "no error", balances)
+    def get_balance_api(self, api_key):
+        balance = self.balance.get(user=api_key)
+        return balance
 
     def get_order_book(self, src_token, dst_token, timestamp):
         # """Find order book in cache using src_token and dest_token as the key
