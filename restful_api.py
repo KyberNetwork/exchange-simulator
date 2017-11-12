@@ -76,7 +76,7 @@ def depth(pairs):
         timestamp = int(time.time() * 1000)
 
     try:
-        depth = liqui_exchange.get_depth(pairs, timestamp)
+        depth = liqui_exchange.get_depth_api(pairs, timestamp)
         return json.dumps(depth)
     except ValueError as e:
         logger.info("Bad Request: {}".format(e))
@@ -91,7 +91,6 @@ if __name__ == "__main__":
 
     if mode == 'simulation':
         data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
-
         if not data_imported:
             logger.info('Import simulation data ...')
             ob_file = 'data/full_ob.dat'

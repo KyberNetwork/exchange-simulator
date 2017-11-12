@@ -20,7 +20,7 @@ logger = logging.getLogger(constants.LOGGER_NAME)
 class Exchange:
 
     def __init__(self, exchange_name, listed_tokens, db,
-                 order_book_loader,
+                 order_loader,
                  balance_handler,
                  ethereum_deposit_address, ethereum_bank_address,
                  deposit_delay_in_secs):
@@ -28,7 +28,7 @@ class Exchange:
         self.listed_tokens = listed_tokens
         self.db = db
         self.balance = balance_handler
-        self.loader = order_book_loader
+        self.order = order_loader
         self.deposit_address = ethereum_deposit_address
         self.bank_address = ethereum_bank_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
@@ -66,7 +66,7 @@ class Exchange:
         balance = self.balance.get(user=api_key)
         return balance
 
-    def get_order_book(self, src_token, dst_token, timestamp):
+    def get_order_book(self, pair, timestamp):
         # """Find order book in cache using src_token and dest_token as the key
         # If the order book is not found then we will create it
         # If the order book is expired then we reload it
@@ -81,23 +81,17 @@ class Exchange:
         # order_book.reload()
         # self.processed_order_ids = set()  # clear processed order
         # return order_book
-        order_book = self.loader.load_order_book(src_token,
-                                                 dst_token,
-                                                 self.name,
-                                                 timestamp)
+        order_book = self.order.load(pair, self.name, timestamp)
         if not order_book:
             order_book = {'Asks': [], 'Bids': []}
         # logger.debug("Order Book: {}".format(order_book))
         return order_book
 
-    def get_depth(self, pairs, timestamp):
+    def get_depth_api(self, pairs, timestamp):
         depth = {}
         pairs = pairs.split('-')
         for pair in pairs:
-            src_token, dst_token = pair.split("_")
-            order_book = self.get_order_book(src_token,
-                                             dst_token,
-                                             timestamp)
+            order_book = self.get_order_book(pair, timestamp)
             depth[pair] = {
                 "asks": [
                     [o['Rate'], o['Quantity']] for o in order_book['Asks']

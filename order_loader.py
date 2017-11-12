@@ -10,20 +10,20 @@ logger = utils.get_logger()
 
 
 class OrderLoader:
-    def load_order_book(self, src_token, dst_token, exchange_name, timestamp):
+    def load(self, pair, exchange_name, timestamp):
         raise NotImplementedError
-        # return {'BuyPrices': [], 'SellPrices': []}
 
 
 class CoreLoader(OrderLoader):
-    def load_order_book(self, src_token, dst_token, exchange_name, timestamp):
-        self._load_order_book(src_token, dst_token, exchange_name)
+    def load(self, pair, exchange_name, timestamp):
+        self._load(pair, exchange_name)
 
-    def _load_order_book(self, src_token, dst_token, exchange_name):
+    def _load(self, pair, exchange_name):
+        src, dst = pair.split('_')
         try:
             host = 'http://{}/prices/{}/{}'.format(OREDER_BOOK_IP,
-                                                   src_token,
-                                                   dst_token)
+                                                   src,
+                                                   dst)
             r = requests.get(host)
             if r.status_code == requests.codes.ok:
                 data = r.json()
@@ -51,16 +51,11 @@ class SimulatorLoader(OrderLoader):
     def __init__(self, rdb):
         self.rdb = rdb
 
-    def load_order_book(self, src_token, dst_token, exchange_name, timestamp):
+    def load(self, pair, exchange_name, timestamp):
         # might need to change the timestamp in 10 timeframe
         # e.g: timestamp = int(timestamp/10) * 10
         timestamp = utils.normalize_timestamp(timestamp)
-        key = '_'.join(map(str, [
-            exchange_name,
-            src_token,
-            dst_token,
-            timestamp
-        ]))
+        key = '_'.join(map(str, [exchange_name, pair, timestamp]))
         logger.debug('Looking for order book: {}'.format(key))
         result = self.rdb.get(key)
         if not result:
