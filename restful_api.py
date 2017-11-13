@@ -14,7 +14,7 @@ from raven.contrib.flask import Sentry
 
 
 from exchange import Exchange
-from order_loader import SimulatorLoader, CoreLoader
+from order_handler import CoreOrder, SimulationOrder
 from balance_handler import BalanceHandler
 import constants
 import utils
@@ -105,9 +105,9 @@ if __name__ == "__main__":
             rdb.set('IMPORTED_SIMULATION_DATA', 1)
             logger.info('Finish setup process.')
 
-        order_loader = SimulatorLoader(rdb)
+        order_handler = SimulationOrder(rdb)
     else:
-        order_loader = CoreLoader()
+        order_handler = CoreOrder()
 
     balance_handler = BalanceHandler(rdb)
     # init a deposit
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         "liqui",
         [constants.KNC, constants.ETH, constants.OMG],
         rdb,
-        order_loader,
+        order_handler,
         balance_handler,
         constants.LIQUI_ADDRESS,
         constants.BANK_ADDRESS,

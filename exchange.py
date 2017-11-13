@@ -4,12 +4,10 @@ import time
 
 import requests
 import redis
-from operator import itemgetter
 from threading import Thread, Lock
 
 import web3_interface
 import constants
-from exchange_api_interface import TradeOutput, WithdrawOutput, GetBalanceOutput
 import utils
 
 MAX_ORDER_ID = 2 ** 31
@@ -21,7 +19,7 @@ logger = logging.getLogger(constants.LOGGER_NAME)
 class Exchange:
 
     def __init__(self, exchange_name, listed_tokens, db,
-                 order_loader,
+                 order_handler,
                  balance_handler,
                  ethereum_deposit_address, ethereum_bank_address,
                  deposit_delay_in_secs):
@@ -29,20 +27,12 @@ class Exchange:
         self.listed_tokens = listed_tokens
         self.db = db
         self.balance = balance_handler
-        self.order = order_loader
+        self.order = order_handler
         self.deposit_address = ethereum_deposit_address
         self.bank_address = ethereum_bank_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.mutex = Lock()
-        self.order_books = {}
         self.processed_order_ids = set()
-        self.set_balance_for_default_user()
-
-    def set_balance_for_default_user(self):
-        for token in self.listed_tokens:
-            balance = self.set_user_balance(constants.DEFAULT_API_KEY,
-                                            token,
-                                            10000)
 
     def before_api(self, api_key):
         self.mutex.acquire()
@@ -52,38 +42,15 @@ class Exchange:
         # TODO handle api_key here
         self.mutex.release()
 
-    def get_user_balance(self, user_api_key, token):
-        key = self.name + "," + str(token) + "," + user_api_key
-        result = self.db.get(key)
-        if(result is None):
-            return 0.0
-        else:
-            return float(result)
-
-    def set_user_balance(self, user_api_key, token, balance):
-        self.db.set(self.name + "," + str(token) + "," + user_api_key, balance)
-
     def get_balance_api(self, api_key, *args, **kargs):
         return self.balance.get(user=api_key)
 
     def get_order_book(self, pair, timestamp):
-        # """Find order book in cache using src_token and dest_token as the key
-        # If the order book is not found then we will create it
-        # If the order book is expired then we reload it
-        # """
-        # pair = "{}_{}".format(src_token, dest_token)
-        # order_book = self.order_books.get(pair, None)
-        # if not order_book:
-        # order_book = OrderBook(src_token, dest_token, self.name)
-        # self.order_books[pair] = order_book
-        # else:
-        # if order_book.expired():
-        # order_book.reload()
-        # self.processed_order_ids = set()  # clear processed order
-        # return order_book
-        order_book = self.order.load(pair, self.name, timestamp)
-        if not order_book:
+        try:
+            order_book = self.order.load(pair, self.name, timestamp)
+        except Exception:
             order_book = {'Asks': [], 'Bids': []}
+
         # logger.debug("Order Book: {}".format(order_book))
         return order_book
 
@@ -172,20 +139,10 @@ class Exchange:
             'funds': self.balance.get(user=api_key)
         }
 
-    def deposit(self, api_key, token, qty):
-        """
-        should be called either for testing or via check_deposits.
-        """
-        result = False
-        user_balance = self.get_user_balance(api_key, token)
-        user_balance += qty
-        self.set_user_balance(api_key, token, user_balance)
-        return True
-
     def check_deposits(self, api_key):
-        result = False
         # check enough time passed since last deposit check
-        last_check = self.db.get(self.name + "," + "last_deposit_check")
+        check_deposit_key = ','.join([self.name, 'last_deposit_check'])
+        last_check = self.db.get(check_deposit_key)
 
         if(last_check is None):
             last_check = 0
@@ -193,28 +150,26 @@ class Exchange:
             last_check = int(last_check)
 
         current_time = int(time.time())
-
         if(current_time >= last_check + self.deposit_delay_in_secs):
             balances = web3_interface.get_balances(
                 self.deposit_address,
                 [token.address for token in self.listed_tokens])
+
             if(sum(balances) > 0):
                 tx = web3_interface.clear_deposits(
                     self.deposit_address,
                     [token.address for token in self.listed_tokens],
                     balances)
-            for i in range(0, len(balances)):
-                token = self.listed_tokens[i]
-                qty = float(balances[i]) / (10**token.decimals)
 
-                if(not self.deposit(api_key, token, qty)):
+            for idx, balance in enumerate(balances):
+                token = self.listed_tokens[idx]
+                qty = float(balance) / (10**token.decimals)
+                try:
+                    self.balance.deposit(api, token, qty)
+                except Exception:
                     raise ValueError("check_deposits: deposit failed")
 
-            self.db.set(
-                self.name + "," + "last_deposit_check", current_time)
-
-        result = True
-        return False
+            self.db.set(check_deposit_key, current_time)
 
     def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
         self.balance.withdraw(user=api_key, token=coinName, amount=amount)
