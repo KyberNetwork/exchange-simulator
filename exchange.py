@@ -48,7 +48,8 @@ class Exchange:
     def get_order_book(self, pair, timestamp):
         try:
             order_book = self.order.load(pair, self.name, timestamp)
-        except Exception:
+        except Exception as e:
+            logger.error(e)
             order_book = {'Asks': [], 'Bids': []}
 
         # logger.debug("Order Book: {}".format(order_book))

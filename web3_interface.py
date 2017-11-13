@@ -12,13 +12,13 @@ import rlp
 from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
-import constants
+import utils as simulation_utils
 
 # local_url = "http://localhost:8545/jsonrpc"
 local_url = "https://kovan.infura.io"
 # local_url = "https://kovan.kyber.network"
 
-logger = logging.getLogger(constants.LOGGER_NAME)
+logger = simulation_utils.get_logger()
 
 
 def merge_two_dicts(x, y):
@@ -157,13 +157,13 @@ def to_hex_address(integer):
 #
 
 
-def withdraw(exchange_address, token, amount, destiniation):
+def withdraw(exchange_address, token, amount, destination):
     return call_function(key,
                          0,
                          to_hex_address(exchange_address),
                          reserve_abi,
                          "withdraw",
-                         [token, amount, destiniation])
+                         [token, amount, destination])
 
 
 #
