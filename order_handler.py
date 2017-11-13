@@ -10,17 +10,11 @@ logger = utils.get_logger()
 
 
 class OrderHandler:
-    def add(self, pair, exchange_name, rate, quantity):
-        raise NotImplementedError
-
     def load(self, pair, exchange_name, timestamp):
         raise NotImplementedError
 
 
 class CoreOrder(OrderHandler):
-
-    def add(self, pair, exchange_name, rate, quantity):
-        pass
 
     def load(self, pair, exchange_name, timestamp):
         self._load(pair, exchange_name)
@@ -38,9 +32,6 @@ class CoreOrder(OrderHandler):
 class SimulationOrder(OrderHandler):
     def __init__(self, rdb):
         self.rdb = rdb
-
-    def add(self, pair, exchange_name, rate, quantity):
-        pass
 
     def load(self, pair, exchange_name, timestamp):
         # might need to change the timestamp in 10 timeframe

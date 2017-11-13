@@ -33,6 +33,7 @@ class Exchange:
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.mutex = Lock()
         self.processed_order_ids = set()
+        self.remaining_orders = []
 
     def before_api(self, api_key):
         self.mutex.acquire()
@@ -71,20 +72,45 @@ class Exchange:
 
     def trade_api(self, api_key, type, rate, pair, amount,
                   timestamp, *args, **kargs):
+        # lock balance for new order
+        rate, amount = float(rate), float(amount)
+        base, quote = pair.split('_')
+        if type == 'buy':
+            self.balance.withdraw(api_key, quote, rate * amount)
+        elif type == 'sell':
+            self.balance.withdraw(api_key, base, amount)
+        else:
+            raise ValueError('Invalid type of order.')
+        # append new order to the unmatch orders
+        unmatch_orders = self.remaining_orders
+        self.remaining_orders = []
+        unmatch_orders.append({
+            'api_key': api_key,
+            'type': type,
+            'rate': rate,
+            'pair': pair,
+            'amount': amount,
+            'timestamp': timestamp
+        })
+
+        for order in unmatch_orders:
+            order['timestamp'] = timestamp  # to match order with the correct ob
+            result = self._match_order(**order)
+            if result['remains'] > 0:
+                order['amount'] = result['remains']
+                self.remaining_orders.append(order)
+
+        # the last result is corresponding to the new order
+        result['funds'] = self.balance.get(user=api_key)
+        return result
+
+    def _match_order(self, api_key, type, rate, pair, amount, timestamp):
         order_book = self.get_order_book(pair, timestamp)
-        balance = self.balance.get(user=api_key)
-        amount, rate = float(amount), float(rate)
         base, quote = pair.split('_')  # e.g. knc_eth -> base=knc, quote=eth
         if type == 'buy':
-            # check quote balance
-            assert balance[quote] >= amount * rate, 'Insufficient qty'
             orders = order_book['Asks']
         elif type == 'sell':
-            # check base balance
-            assert balance[base] >= amount, 'Insufficient qty'
             orders = order_book['Bids']
-        else:
-            raise ValueError('Invalid type of action')
 
         base_change = 0
         quote_change = 0
@@ -119,9 +145,7 @@ class Exchange:
         # udpate balance
         if type == 'buy':
             self.balance.deposit(api_key, base, base_change)
-            self.balance.withdraw(api_key, quote, quote_change)
         else:
-            self.balance.withdraw(api_key, base, base_change)
             self.balance.deposit(api_key, quote, quote_change)
 
         received = base_change
@@ -135,8 +159,7 @@ class Exchange:
         return {
             'received': received,
             'remains': remains,
-            'order_id': order_id,
-            'funds': self.balance.get(user=api_key)
+            'order_id': order_id
         }
 
     def check_deposits(self, api_key):
