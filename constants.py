@@ -34,7 +34,3 @@ KNC = Token('knc', 0x88c29c3f40b4e15989176f9546b80a1cff4a6b0d, 18)
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
 OMG = Token('omg', 0x879b5383c9e1269be9dcf73ae9740c26b91e9802, 18)
 LIQUI_TOKENS = {"knc": KNC, "eth": ETH, "omg": OMG}
-
-SUPPORTED_PAIR = ['BAT-ETH', 'CVC-ETH', 'DGD-ETH',  'EOS-ETH', 'ADX-ETH',
-                  'FUN-ETH', 'GNT-ETH',  'KNC-ETH', 'LINK-ETH', 'MCO-ETH',
-                  'OMG-ETH', 'PAY-ETH']
