@@ -1,14 +1,14 @@
 class BalanceHandler:
-    SUPPORTED_TOKEN = ['knc', 'eth', 'omg']
 
-    def __init__(self, db):
+    def __init__(self, db, supported_token):
         self._db = db
+        self.supported_token = supported_token
 
     def get(self, user):
         key = self._key(user)
         saved_balance = self._db.hgetall(key)
         if not saved_balance:
-            balance = {token: 0.0 for token in type(self).SUPPORTED_TOKEN}
+            balance = {token: 0.0 for token in self.supported_token}
             self._db.hmset(key, balance)
         else:
             balance = {

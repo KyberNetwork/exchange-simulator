@@ -22,7 +22,12 @@ def get_logger(name=constants.LOGGER_NAME):
 
 
 def get_token(name):
-    return constants.LIQUI_TOKENS[name]
+    return constants.SUPPORTED_TOKENS[name]
+
+
+def init_deposit(balance, user, tokens, amount):
+    for token in tokens:
+        balance.deposit(user, token, amount)
 
 
 logger = logging.getLogger(constants.LOGGER_NAME)

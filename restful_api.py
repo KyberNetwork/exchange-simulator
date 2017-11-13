@@ -93,6 +93,7 @@ if __name__ == "__main__":
     rdb = utils.get_redis_db()
 
     if mode == 'simulation':
+        # import simulation data
         data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
         if not data_imported:
             logger.info('Import simulation data ...')
@@ -102,21 +103,27 @@ if __name__ == "__main__":
                 utils.copy_order_books_to_db(ob_file, rdb)
             except FileNotFoundError:
                 sys.exit('Data is missing.')
-            rdb.set('IMPORTED_SIMULATION_DATA', 1)
+            rdb.set('IMPORTED_SIMULATION_DATA', True)
             logger.info('Finish setup process.')
 
         order_handler = SimulationOrder(rdb)
     else:
         order_handler = CoreOrder()
 
-    balance_handler = BalanceHandler(rdb)
-    # init a deposit
-    for token in constants.LIQUI_TOKENS.keys():
-        balance_handler.deposit(
-            user=constants.DEFAULT_API_KEY, token=token, amount=10000)
+    supported_tokens = constants.SUPPORTED_TOKENS
+    balance_handler = BalanceHandler(rdb, supported_tokens.keys())
+
+    # init deposit
+    initialized_balance = rdb.get('INITIALIZED_BALANCE')
+    if not initialized_balance:
+        utils.init_deposit(balance=balance_handler,
+                           user=constants.DEFAULT_API_KEY,
+                           amount=1000, tokens=supported_tokens)
+        rdb.set('INITIALIZED_BALANCE', True)
+
     liqui_exchange = Exchange(
         "liqui",
-        [constants.KNC, constants.ETH, constants.OMG],
+        supported_tokens.values(),
         rdb,
         order_handler,
         balance_handler,

@@ -18,18 +18,17 @@ logger = logging.getLogger(constants.LOGGER_NAME)
 
 class Exchange:
 
-    def __init__(self, exchange_name, listed_tokens, db,
-                 order_handler,
-                 balance_handler,
-                 ethereum_deposit_address, ethereum_bank_address,
+    def __init__(self, exchange_name, supported_tokens, db,
+                 order_handler, balance_handler,
+                 deposit_address, bank_address,
                  deposit_delay_in_secs):
         self.name = exchange_name
-        self.listed_tokens = listed_tokens
+        self.supported_tokens = supported_tokens
         self.db = db
         self.balance = balance_handler
         self.order = order_handler
-        self.deposit_address = ethereum_deposit_address
-        self.bank_address = ethereum_bank_address
+        self.deposit_address = deposit_address
+        self.bank_address = bank_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.mutex = Lock()
         self.processed_order_ids = set()
@@ -176,16 +175,16 @@ class Exchange:
         if(current_time >= last_check + self.deposit_delay_in_secs):
             balances = web3_interface.get_balances(
                 self.deposit_address,
-                [token.address for token in self.listed_tokens])
+                [token.address for token in self.supported_tokens])
 
             if(sum(balances) > 0):
                 tx = web3_interface.clear_deposits(
                     self.deposit_address,
-                    [token.address for token in self.listed_tokens],
+                    [token.address for token in self.supported_tokens],
                     balances)
 
             for idx, balance in enumerate(balances):
-                token = self.listed_tokens[idx]
+                token = self.supported_tokens[idx]
                 qty = float(balance) / (10**token.decimals)
                 try:
                     self.balance.deposit(api, token, qty)
@@ -197,7 +196,7 @@ class Exchange:
     def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
         self.balance.withdraw(user=api_key, token=coinName, amount=amount)
         token = utils.get_token(coinName)
-        tx = web3_interface.withdraw(self.deposit_address,
+        tx = web3_interface.withdraw(self.bank_address,
                                      token.address,
                                      int(amount * token.decimals),
                                      address)

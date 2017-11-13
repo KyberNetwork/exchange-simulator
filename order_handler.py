@@ -1,9 +1,6 @@
-import logging
-
 import requests
 import json
 
-from constants import OREDER_BOOK_IP
 import utils
 
 logger = utils.get_logger()
@@ -21,7 +18,7 @@ class CoreOrder(OrderHandler):
 
     def _load(self, pair, exchange_name):
         src, dst = pair.split('_')
-        host = 'http://{}/prices/{}/{}'.format(OREDER_BOOK_IP, src, dst)
+        host = 'http://core:8000/prices/{}/{}'.format(src, dst)
         r = requests.get(host)
         assert r.status_code == requests.codes.ok, 'Cannot connect to core'
         data = r.json()

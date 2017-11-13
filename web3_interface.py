@@ -43,7 +43,11 @@ def json_call(method_name, params):
     r = requests.post(url, data=json.dumps(payload), headers=headers)
     assert r.status_code == requests.codes.ok, "We've got a problem with Kovan"
     data = r.json()
-    return data['result']
+    try:
+        result = data['result']
+    except KeyError:
+        raise ValueError('Invalid response from Kovan')
+    return result
 
 
 def get_num_transactions(address):
