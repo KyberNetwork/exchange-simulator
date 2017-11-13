@@ -1,5 +1,14 @@
 #!/usr/bin/python3
+import os
 import json
+
+import yaml
+
+
+MODE = os.environ.get('KYBER_ENV', 'dev')
+with open('env.yaml', 'r') as env_file:
+    env = yaml.load(env_file)
+    DEPOSIT_DELAY = env[MODE]['deposit_delay']
 
 
 class Token:

@@ -89,12 +89,11 @@ def depth(pairs):
 
 
 if __name__ == "__main__":
-    mode = os.environ.get('KYBER_ENV', 'dev')
     logging.config.fileConfig('logging.conf')
-
+    logging.info("Running in {} mode".format(constants.MODE))
     rdb = utils.get_redis_db()
 
-    if mode == 'simulation':
+    if constants.MODE == 'simulation':
         # import simulation data
         data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
         if not data_imported:
@@ -131,10 +130,10 @@ if __name__ == "__main__":
         balance_handler,
         constants.LIQUI_ADDRESS,
         constants.BANK_ADDRESS,
-        5 * 60
+        constants.DEPOSIT_DELAY
     )
 
-    if mode != 'dev':
+    if constants.MODE != 'dev':
         sentry = Sentry(app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'
                         '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
 
