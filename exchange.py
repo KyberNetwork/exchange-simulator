@@ -43,7 +43,9 @@ class Exchange:
         self.mutex.release()
 
     def get_balance_api(self, api_key, *args, **kargs):
-        return self.balance.get(user=api_key)
+        return {
+            'funds': self.balance.get(user=api_key)
+        }
 
     def get_order_book(self, pair, timestamp):
         try:
