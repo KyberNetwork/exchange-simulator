@@ -58,6 +58,8 @@ def index():
         else:
             raise AttributeError('Invalid method requested')
 
+        logger.info('Output: {}'.format(output))
+
         return jsonify({
             'success': 1,
             'return': output
