@@ -1,0 +1,75 @@
+{
+  "tokens": {
+    "OMG": {
+      "address": "0x013bc2c9735f4fa60ed1707b0a3f474a0d7a757f",
+      "name": "OmiseGO",
+      "decimals": 18
+    },
+    "DGD": {
+      "address": "0xde32e39aab07c0b14dd783e11fa60097c19a31e1",
+      "name": "Digix",
+      "decimals": 9
+    },
+    "CVC": {
+      "address": "0x012249b4dc1d3d5f599fc0829e1b2c0beb5d8058",
+      "name": "Civic",
+      "decimals": 8
+    },
+    "FUN": {
+      "address": "0xe5628db2f2419a4c599690da8bd09b27667aba2f",
+      "name": "FunFair",
+      "decimals": 8
+    },
+    "MCO": {
+      "address": "0xe84d0256bc967b71fe28a45b9bd48cb6ce671add",
+      "name": "Monaco",
+      "decimals": 8
+    },
+    "GNT": {
+      "address": "0x6d6a34f2be1e76902a2fde049f317610cdf453eb",
+      "name": "Golem",
+      "decimals": 18
+    },
+    "ADX": {
+      "address": "0x292bb4986f3fcb10d800d155fd7e880940e36718",
+      "name": "Adex",
+      "decimals": 4
+    },
+    "PAY": {
+      "address": "0xdd125e047736566790a024549ba3fd5511a0a889",
+      "name": "TenX",
+      "decimals": 18
+    },
+    "BAT": {
+      "address": "0xa3f121af7bfc0353b149ee7ba83327d988cea282",
+      "name": "BasicAttention",
+      "decimals": 18
+    },
+    "KNC": {
+      "address": "0x5da960b118465749d09abadac3b7d8f5f9c6a91d",
+      "name": "KyberNetwork",
+      "decimals": 18
+    },
+    "EOS": {
+      "address": "0xbdddea8a07dadac96f9a3801f9d5a1f6cb544bd2",
+      "name": "Eos",
+      "decimals": 18
+    },
+    "LINK": {
+      "address": "0x9ecf8f10eff4cd2d1106ac72c5b89ae1d62151f0",
+      "name": "ChainLink",
+      "decimals": 18
+    }
+  },
+  "exchanges": {
+    "Bittrex": "0x41872c969146e789c3415aba1e98322652f736db",
+    "Liqui": "0x9eee2816915bea0b7314aaf192524950eeaf989a",
+    "Poloniex": "0x12af756ca739bdf6cd3715c4a61263e5d40819dd",
+    "Binance": "0x2d735227bbe1480c90e089a3e3451802e1a349b6",
+    "Bitfinex": "0x1a991aade6d7f41c5ee4ef9721efd076d048f626"
+  },
+  "bank": "0xedbe64ed3dac9b8801f57b60b9f0a5204f442e93",
+  "reserve": "0x31683f6e7ca764a516cd706e7a92dad56cd55fdd",
+  "network": "0x876d3928bdf48ef06153a7972a914176d999c740",
+  "wrapper": "0x15f9842b1e134fb8783c60e828aaa12456751f9e"
+}
