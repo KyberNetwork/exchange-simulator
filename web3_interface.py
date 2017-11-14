@@ -13,10 +13,8 @@ from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
 import utils as simulation_utils
+import constants
 
-# local_url = "http://localhost:8545/jsonrpc"
-local_url = "https://kovan.infura.io"
-# local_url = "https://kovan.kyber.network"
 
 logger = simulation_utils.get_logger()
 
@@ -29,7 +27,7 @@ def merge_two_dicts(x, y):
 
 
 def json_call(method_name, params):
-    url = local_url
+    url = constants.BLOCKCHAIN_URL
     headers = {'content-type': 'application/json'}
     # Example echo method
     payload = {

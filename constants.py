@@ -9,6 +9,7 @@ MODE = os.environ.get('KYBER_ENV', 'dev')
 with open('env.yaml', 'r') as env_file:
     env = yaml.load(env_file)
     DEPOSIT_DELAY = env[MODE]['deposit_delay']
+    BLOCKCHAIN_URL = env[MODE]['blockchain_url']
 
 
 class Token:
