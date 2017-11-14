@@ -17,6 +17,10 @@ def normalize_timestamp(t):
     return int(t / 10000) * 10000
 
 
+def config_logging():
+    logging.config.fileConfig('logging.conf')
+
+
 def get_logger(name=constants.LOGGER_NAME):
     return logging.getLogger(name)
 
@@ -28,6 +32,22 @@ def get_token(name):
 def init_deposit(balance, user, tokens, amount):
     for token in tokens:
         balance.deposit(user, token, amount)
+
+
+def setup_data(rdb):
+    if constants.MODE == 'simulation':
+        # import simulation data
+        data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
+        if not data_imported:
+            logger.info('Import simulation data ...')
+            ob_file = 'data/full_ob.dat'
+            # ob_file = 'data/sample_ob.dat'
+            try:
+                copy_order_books_to_db(ob_file, rdb)
+            except FileNotFoundError:
+                sys.exit('Data is missing.')
+            rdb.set('IMPORTED_SIMULATION_DATA', True)
+            logger.info('Finish setup process.')
 
 
 logger = logging.getLogger(constants.LOGGER_NAME)

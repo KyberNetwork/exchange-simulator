@@ -89,28 +89,15 @@ def depth(pairs):
 
 
 if __name__ == "__main__":
-    logging.config.fileConfig('logging.conf')
+    utils.config_logging()
     logging.info("Running in {} mode".format(constants.MODE))
+
     rdb = utils.get_redis_db()
-
     if constants.MODE == 'simulation':
-        # import simulation data
-        data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
-        if not data_imported:
-            logger.info('Import simulation data ...')
-            ob_file = 'data/full_ob.dat'
-            # ob_file = 'data/sample_ob.dat'
-            try:
-                utils.copy_order_books_to_db(ob_file, rdb)
-            except FileNotFoundError:
-                sys.exit('Data is missing.')
-            rdb.set('IMPORTED_SIMULATION_DATA', True)
-            logger.info('Finish setup process.')
-
+        utils.setup_data(rdb)
         order_handler = SimulationOrder(rdb)
     else:
         order_handler = CoreOrder()
-
     supported_tokens = constants.SUPPORTED_TOKENS
     balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
