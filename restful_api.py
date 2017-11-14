@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import os
-import sys
 import logging
 import logging.config
 import time
