@@ -5,13 +5,6 @@ import json
 import yaml
 
 
-MODE = os.environ.get('KYBER_ENV', 'dev')
-with open('env.yaml', 'r') as env_file:
-    env = yaml.load(env_file)
-    DEPOSIT_DELAY = env[MODE]['deposit_delay']
-    BLOCKCHAIN_URL = env[MODE]['blockchain_url']
-
-
 class Token:
 
     def __init__(self, token, address, decimals):
@@ -30,14 +23,20 @@ def get_int(hex_str):
     return int(hex_str, 16)
 
 
-with open('deployment_kovan.json', 'r') as f:
-    cfg = json.loads(f.read())
-    LIQUI_ADDRESS = get_int(cfg['exchanges']['Liqui'])
-    BANK_ADDRESS = get_int(cfg['bank'])
-    SUPPORTED_TOKENS = {}
-    for name, token in cfg['tokens'].items():
-        SUPPORTED_TOKENS[name.lower()] = Token(
-            name.lower(), get_int(token['address']), token['decimals'])
+MODE = os.environ.get('KYBER_ENV', 'dev')
+with open('env.yaml', 'r') as env_file:
+    env = yaml.load(env_file)
+    DEPOSIT_DELAY = env[MODE]['deposit_delay']
+    BLOCKCHAIN_URL = env[MODE]['blockchain_url']
+
+    with open(env[MODE]['addresses'], 'r') as f:
+        cfg = json.loads(f.read())
+        LIQUI_ADDRESS = get_int(cfg['exchanges']['Liqui'])
+        BANK_ADDRESS = get_int(cfg['bank'])
+        SUPPORTED_TOKENS = {}
+        for name, token in cfg['tokens'].items():
+            SUPPORTED_TOKENS[name.lower()] = Token(
+                name.lower(), get_int(token['address']), token['decimals'])
 
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
 SUPPORTED_TOKENS['eth'] = ETH
