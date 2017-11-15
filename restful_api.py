@@ -44,6 +44,8 @@ def index():
 
         logger.info('Params: {}'.format(params))
 
+        liqui_exchange.check_deposits(api_key)
+
         if method == 'getInfo':
             output = liqui_exchange.get_balance_api(**params)
         elif method == 'Trade':
@@ -107,7 +109,7 @@ if __name__ == "__main__":
 
     liqui_exchange = Exchange(
         "liqui",
-        supported_tokens.values(),
+        list(supported_tokens.values()),
         rdb,
         order_handler,
         balance_handler,

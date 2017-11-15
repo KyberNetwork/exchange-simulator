@@ -8,7 +8,7 @@ kovan:
 
 simulation:
   <<: *common
-  deposit_delay: 5
+  deposit_delay: 0
   blockchain_url: http://blockchain:8545
   
 production:
@@ -20,7 +20,7 @@ logging:
 
   formatters:
     simple:
-      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)d:%(funcName)s]'
+      format: '%(asctime)s - %(name)10s - %(levelname)7s - %(message)s - [%(filename)s:%(lineno)d:%(funcName)s]'
 
   handlers:
     console:

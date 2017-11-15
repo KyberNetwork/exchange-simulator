@@ -27,7 +27,7 @@ def merge_two_dicts(x, y):
 
 
 def json_call(method_name, params):
-    url = constants.BLOCKCHAIN_URL
+    url = config.BLOCKCHAIN_URL
     headers = {'content-type': 'application/json'}
     # Example echo method
     payload = {

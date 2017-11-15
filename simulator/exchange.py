@@ -47,7 +47,7 @@ class Exchange:
         try:
             order_book = self.order.load(pair, self.name, timestamp)
         except Exception as e:
-            logger.error(e)
+            logger.info('Order book {}_{} is missing'.format(pair, timestamp))
             order_book = {'Asks': [], 'Bids': []}
 
         # logger.debug("Order Book: {}".format(order_book))
@@ -172,11 +172,17 @@ class Exchange:
 
         current_time = int(time.time())
         if(current_time >= last_check + self.deposit_delay_in_secs):
-            balances = web3_interface.get_balances(
-                self.deposit_address,
-                [token.address for token in self.supported_tokens])
+            try:
+                balances = web3_interface.get_balances(
+                    self.deposit_address,
+                    [token.address for token in self.supported_tokens])
+            except Exception as e:
+                logger.error(e)
+                logger.info('Checking deposit fail.')
+                return
 
             if(sum(balances) > 0):
+                logger.info('Got some deposit.')
                 tx = web3_interface.clear_deposits(
                     self.deposit_address,
                     [token.address for token in self.supported_tokens],
@@ -186,13 +192,15 @@ class Exchange:
                 token = self.supported_tokens[idx]
                 qty = float(balance) / (10**token.decimals)
                 try:
-                    self.balance.deposit(api, token, qty)
-                except Exception:
+                    self.balance.deposit(api_key, token.token, qty)
+                except Exception as e:
+                    logger.error(e)
                     raise ValueError("check_deposits: deposit failed")
 
             self.db.set(check_deposit_key, current_time)
 
     def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
+        coinName = coinName.lower()
         self.balance.withdraw(user=api_key, token=coinName, amount=amount)
         token = utils.get_token(coinName)
         tx = web3_interface.withdraw(self.bank_address,

@@ -14,7 +14,7 @@ class OrderHandler:
 class CoreOrder(OrderHandler):
 
     def load(self, pair, exchange_name, timestamp):
-        self._load(pair, exchange_name)
+        return self._load(pair, exchange_name)
 
     def _load(self, pair, exchange_name):
         src, dst = pair.split('_')
