@@ -33,15 +33,12 @@ with open(env_file, 'r') as f:
 
     with open(env[MODE]['addresses'], 'r') as f:
         cfg = json.loads(f.read())
-        LIQUI_ADDRESS = get_int(cfg['exchanges']['Liqui'])
+        LIQUI_ADDRESS = get_int(cfg['exchanges']['liqui'])
         BANK_ADDRESS = get_int(cfg['bank'])
         SUPPORTED_TOKENS = {}
         for name, token in cfg['tokens'].items():
             SUPPORTED_TOKENS[name.lower()] = Token(
                 name.lower(), get_int(token['address']), token['decimals'])
-
-ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
-SUPPORTED_TOKENS['eth'] = ETH
 
 LOGGER_NAME = "simulator"
 

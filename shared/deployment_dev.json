@@ -1,5 +1,10 @@
 {
   "tokens": {
+    "ETH": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "name": "Ether",
+      "decimals": 18
+    },
     "OMG": {
       "address": "0x013bc2c9735f4fa60ed1707b0a3f474a0d7a757f",
       "name": "OmiseGO",
@@ -62,11 +67,11 @@
     }
   },
   "exchanges": {
-    "Bittrex": "0x41872c969146e789c3415aba1e98322652f736db",
-    "Liqui": "0x9eee2816915bea0b7314aaf192524950eeaf989a",
-    "Poloniex": "0x12af756ca739bdf6cd3715c4a61263e5d40819dd",
-    "Binance": "0x2d735227bbe1480c90e089a3e3451802e1a349b6",
-    "Bitfinex": "0x1a991aade6d7f41c5ee4ef9721efd076d048f626"
+    "bittrex": "0x41872c969146e789c3415aba1e98322652f736db",
+    "liqui": "0x9eee2816915bea0b7314aaf192524950eeaf989a",
+    "poloniex": "0x12af756ca739bdf6cd3715c4a61263e5d40819dd",
+    "binance": "0x2d735227bbe1480c90e089a3e3451802e1a349b6",
+    "bitfinex": "0x1a991aade6d7f41c5ee4ef9721efd076d048f626"
   },
   "bank": "0xedbe64ed3dac9b8801f57b60b9f0a5204f442e93",
   "reserve": "0x31683f6e7ca764a516cd706e7a92dad56cd55fdd",
