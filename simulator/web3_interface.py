@@ -12,7 +12,8 @@ import rlp
 from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
-from . import constants, utils as simulation_utils
+from . import config
+from . import utils as simulation_utils
 
 
 logger = simulation_utils.get_logger()

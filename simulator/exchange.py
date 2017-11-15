@@ -4,7 +4,7 @@ import time
 import redis
 from threading import Thread, Lock
 
-from . import web3_interface, utils, constants
+from . import web3_interface, utils
 
 MAX_ORDER_ID = 2 ** 31
 

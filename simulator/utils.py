@@ -1,13 +1,14 @@
 import sys
 import os
 import logging
-from logging import config
 from datetime import datetime
 
 import json
 import redis
 
-from . import constants
+from . import config
+
+logger = logging.getLogger(config.LOGGER_NAME)
 
 
 def get_redis_db():
@@ -19,18 +20,12 @@ def normalize_timestamp(t):
     return int(t / 10000) * 10000
 
 
-def config_logging():
-    this_dir, this_filename = os.path.split(__file__)
-    log_cfg = os.path.join(this_dir, 'logging.conf')
-    logging.config.fileConfig(log_cfg)
-
-
-def get_logger(name=constants.LOGGER_NAME):
+def get_logger(name=config.LOGGER_NAME):
     return logging.getLogger(name)
 
 
 def get_token(name):
-    return constants.SUPPORTED_TOKENS[name]
+    return config.SUPPORTED_TOKENS[name]
 
 
 def init_deposit(balance, user, tokens, amount):
@@ -39,7 +34,7 @@ def init_deposit(balance, user, tokens, amount):
 
 
 def setup_data(rdb):
-    if constants.MODE == 'simulation':
+    if config.MODE == 'simulation':
         # import simulation data
         data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
         if not data_imported:
@@ -52,9 +47,6 @@ def setup_data(rdb):
                 sys.exit('Data is missing.')
             rdb.set('IMPORTED_SIMULATION_DATA', True)
             logger.info('Finish setup process.')
-
-
-logger = logging.getLogger(constants.LOGGER_NAME)
 
 
 def copy_order_books_to_db(ob_file, rdb):

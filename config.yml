@@ -1,0 +1,48 @@
+dev: &common
+  deposit_delay: 300
+  blockchain_url: https://kovan.infura.io
+  addresses: shared/deployment_dev.json
+
+kovan:
+  <<: *common
+
+simulation:
+  <<: *common
+  deposit_delay: 5
+  blockchain_url: http://blockchain:8545
+  
+production:
+  <<: *common
+
+logging:
+  version: 1
+  disable_existing_loggers: False
+
+  formatters:
+    simple:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)d:%(funcName)s]'
+
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      formatter: simple
+      stream: ext://sys.stdout
+    file_handler:
+      class: logging.handlers.RotatingFileHandler
+      level: DEBUG
+      formatter: simple
+      filename: simulator.log
+      maxBytes: 10485760 # 10MB
+      backupCount: 2
+      encoding: utf8
+
+  loggers:
+    simulator:
+      level: DEBUG
+      handlers: [console, file_handler]
+      propagate: no
+
+  root:
+    level: DEBUG
+    handlers: [console, file_handler]

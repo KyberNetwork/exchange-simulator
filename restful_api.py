@@ -9,7 +9,7 @@ import redis
 from raven.contrib.flask import Sentry
 
 
-from simulator import constants, utils
+from simulator import config, utils
 from simulator.exchange import Exchange
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
@@ -84,23 +84,24 @@ def depth(pairs):
 
 
 if __name__ == "__main__":
-    utils.config_logging()
-    logger.info("Running in {} mode".format(constants.MODE))
+    logger.info("Running in {} mode".format(config.MODE))
+
+    logger.debug("debug simulator")
 
     rdb = utils.get_redis_db()
-    if constants.MODE == 'simulation':
+    if config.MODE == 'simulation':
         utils.setup_data(rdb)
         order_handler = SimulationOrder(rdb)
     else:
         order_handler = CoreOrder()
-    supported_tokens = constants.SUPPORTED_TOKENS
+    supported_tokens = config.SUPPORTED_TOKENS
     balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
     # init deposit
     initialized_balance = rdb.get('INITIALIZED_BALANCE')
     if not initialized_balance:
         utils.init_deposit(balance=balance_handler,
-                           user=constants.DEFAULT_API_KEY,
+                           user=config.DEFAULT_API_KEY,
                            amount=1000, tokens=supported_tokens)
         rdb.set('INITIALIZED_BALANCE', True)
 
@@ -110,12 +111,12 @@ if __name__ == "__main__":
         rdb,
         order_handler,
         balance_handler,
-        constants.LIQUI_ADDRESS,
-        constants.BANK_ADDRESS,
-        constants.DEPOSIT_DELAY
+        config.LIQUI_ADDRESS,
+        config.BANK_ADDRESS,
+        config.DEPOSIT_DELAY
     )
 
-    if constants.MODE != 'dev':
+    if config.MODE != 'dev':
         sentry = Sentry(app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'
                         '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
 
