@@ -1,9 +1,8 @@
-pycoin
-ethereum
-requests
-jsonrpc
-rlp
-flask
-flask_restful
-redis
-raven[flask]
+pycoin==0.80
+ethereum==2.1.0
+requests==2.18.4
+jsonrpc==1.2
+rlp==0.6.0
+Flask==0.12.2
+redis==2.10.6
+raven==6.3.0
