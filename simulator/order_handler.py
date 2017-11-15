@@ -1,7 +1,7 @@
 import requests
 import json
 
-import utils
+from . import utils
 
 logger = utils.get_logger()
 

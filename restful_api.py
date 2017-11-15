@@ -1,7 +1,4 @@
 #!/usr/bin/python3
-import os
-import logging
-import logging.config
 import time
 import traceback
 
@@ -12,11 +9,10 @@ import redis
 from raven.contrib.flask import Sentry
 
 
-from exchange import Exchange
-from order_handler import CoreOrder, SimulationOrder
-from balance_handler import BalanceHandler
-import constants
-import utils
+from simulator import constants, utils
+from simulator.exchange import Exchange
+from simulator.order_handler import CoreOrder, SimulationOrder
+from simulator.balance_handler import BalanceHandler
 
 
 logger = utils.get_logger()
@@ -89,7 +85,7 @@ def depth(pairs):
 
 if __name__ == "__main__":
     utils.config_logging()
-    logging.info("Running in {} mode".format(constants.MODE))
+    logger.info("Running in {} mode".format(constants.MODE))
 
     rdb = utils.get_redis_db()
     if constants.MODE == 'simulation':

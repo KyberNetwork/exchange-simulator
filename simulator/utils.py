@@ -1,4 +1,5 @@
 import sys
+import os
 import logging
 from logging import config
 from datetime import datetime
@@ -6,7 +7,7 @@ from datetime import datetime
 import json
 import redis
 
-import constants
+from . import constants
 
 
 def get_redis_db():
@@ -19,7 +20,9 @@ def normalize_timestamp(t):
 
 
 def config_logging():
-    logging.config.fileConfig('logging.conf')
+    this_dir, this_filename = os.path.split(__file__)
+    log_cfg = os.path.join(this_dir, 'logging.conf')
+    logging.config.fileConfig(log_cfg)
 
 
 def get_logger(name=constants.LOGGER_NAME):

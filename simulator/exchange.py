@@ -1,19 +1,15 @@
 #!/usr/bin/python3
-import logging
 import time
 
-import requests
 import redis
 from threading import Thread, Lock
 
-import web3_interface
-import constants
-import utils
+from . import web3_interface, utils, constants
 
 MAX_ORDER_ID = 2 ** 31
 
 
-logger = logging.getLogger(constants.LOGGER_NAME)
+logger = utils.get_logger()
 
 
 class Exchange:

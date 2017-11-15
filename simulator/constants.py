@@ -24,8 +24,10 @@ def get_int(hex_str):
 
 
 MODE = os.environ.get('KYBER_ENV', 'dev')
-with open('env.yaml', 'r') as env_file:
-    env = yaml.load(env_file)
+this_dir, this_filename = os.path.split(__file__)
+env_file = os.path.join(this_dir, 'env.yaml')
+with open(env_file, 'r') as f:
+    env = yaml.load(f)
     DEPOSIT_DELAY = env[MODE]['deposit_delay']
     BLOCKCHAIN_URL = env[MODE]['blockchain_url']
 
@@ -41,7 +43,7 @@ with open('env.yaml', 'r') as env_file:
 ETH = Token('eth', 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee, 18)
 SUPPORTED_TOKENS['eth'] = ETH
 
-LOGGER_NAME = "exchange_simulator"
+LOGGER_NAME = "simulator"
 
 EXCHANGE_NAME = "liqui"
 
