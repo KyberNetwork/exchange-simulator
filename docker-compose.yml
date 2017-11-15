@@ -1,9 +1,11 @@
 version: "2.0"
 services:
-  api:
+  simulator:
     build: .
+    env_file:
+      - common.env
     volumes:
-      - .:/exchange-simulator
+      - .:/exchange-simulator      
     ports:
       - "5000:5000"
     command: python restful_api.py
