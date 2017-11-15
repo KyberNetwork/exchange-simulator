@@ -5,4 +5,4 @@ jsonrpc==1.2
 rlp==0.6.0
 Flask==0.12.2
 redis==2.10.6
-raven==6.3.0
+raven[flask]==6.3.0
