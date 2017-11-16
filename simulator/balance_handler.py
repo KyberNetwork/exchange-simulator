@@ -1,3 +1,8 @@
+from . import utils
+
+logger = utils.get_logger()
+
+
 class BalanceHandler:
 
     def __init__(self, db, supported_token):

@@ -1,6 +1,7 @@
 import sys
 import os
 import logging
+import time
 from datetime import datetime
 
 import json
@@ -31,6 +32,10 @@ def get_token(name):
 def init_deposit(balance, user, tokens, amount):
     for token in tokens:
         balance.deposit(user, token, amount)
+
+
+def get_current_timestamp():
+    return normalize_timestamp(time.time())
 
 
 def setup_data(rdb):
