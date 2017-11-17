@@ -40,6 +40,8 @@ try:
             with open(cfg[MODE]['addresses'], 'r') as f:
                 address = json.loads(f.read())
                 LIQUI_ADDRESS = get_int(address['exchanges']['liqui'])
+                BITTREX_ADDRESS = get_int(address['exchanges']['bittrex'])
+                BINANCE_ADDRESS = get_int(address['exchanges']['binance'])
                 BANK_ADDRESS = get_int(address['bank'])
                 SUPPORTED_TOKENS = {}
                 for name, token in address['tokens'].items():

@@ -111,7 +111,7 @@ if __name__ == '__main__':
         rdb,
         order_handler,
         balance_handler,
-        config.LIQUI_ADDRESS,
+        config.BITTREX_ADDRESS,
         config.BANK_ADDRESS,
         config.DEPOSIT_DELAY
     )

@@ -29,9 +29,9 @@ class Bittrex(Exchange):
         quantity = float(quantity)
         self.balance.withdraw(user=apikey, token=currency, amount=quantity)
         token = utils.get_token(currency)
-        tx = web3_interface.withdraw(self.bank_address,
+        tx = web3_interface.withdraw(self.deposit_address,
                                      token.address,
-                                     int(quantity * token.decimals),
+                                     int(quantity * 10**token.decimals),
                                      address)
         return {
             'uuid': tx
