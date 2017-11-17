@@ -1,10 +1,11 @@
 from .exchange import Exchange
-from . import web3_interface, utils
+from .. import web3_interface, utils
 
 logger = utils.get_logger()
 
 
 class Binance(Exchange):
+
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -45,14 +46,14 @@ class Binance(Exchange):
             "balances": balances
         }
 
-    def trades(self, api_key, symbol, quantity, price, side,
-               timestamp, *args, **kargs):
+    def trade_api(self, api_key, symbol, quantity, price, side,
+                  timestamp, *args, **kargs):
         base = symbol[:3]
         quote = symbol[-3:]
         pair = '_'.join([base, quote]).lower()
 
-        result = super().trade_api(api_key, side, price,
-                                   pair, quantity, timestamp)
+        result = super().trades(api_key, side, price,
+                                pair, quantity, timestamp)
         return {
             'symbol': symbol,
             'orderId': result['order_id'],
@@ -61,14 +62,7 @@ class Binance(Exchange):
         }
 
     def withdraw_api(self, api_key, asset, amount, address, *args, **kargs):
-        asset = asset.lower()
-        amount = float(amount)
-        self.balance.withdraw(user=api_key, token=asset, amount=amount)
-        token = utils.get_token(asset)
-        tx = web3_interface.withdraw(self.deposit_address,
-                                     token.address,
-                                     int(quantity * 10**token.decimals),
-                                     address)
+        self.withdraw(api_key, asset, address, amount)
         return {
             'msg': 'success',
             'success': True

@@ -10,7 +10,7 @@ from raven.contrib.flask import Sentry
 
 
 from simulator import config, utils
-from simulator.exchange import Exchange
+from simulator.exchange import Liqui
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
 
@@ -44,14 +44,14 @@ def index():
 
         logger.info('Params: {}'.format(params))
 
-        liqui_exchange.check_deposits(api_key)
+        liqui.check_deposits(api_key)
 
         if method == 'getInfo':
-            output = liqui_exchange.get_balance_api(**params)
+            output = liqui.get_balance_api(**params)
         elif method == 'Trade':
-            output = liqui_exchange.trade_api(**params)
+            output = liqui.trade_api(**params)
         elif method == 'WithdrawCoin':
-            output = liqui_exchange.withdraw_api(**params)
+            output = liqui.withdraw_api(**params)
         else:
             raise AttributeError('Invalid method requested')
 
@@ -78,7 +78,7 @@ def depth(pairs):
         timestamp = int(time.time() * 1000)
 
     try:
-        depth = liqui_exchange.get_depth_api(pairs, timestamp)
+        depth = liqui.get_depth_api(pairs, timestamp)
         return json.dumps(depth)
     except ValueError as e:
         logger.info("Bad Request: {}".format(e))
@@ -107,14 +107,13 @@ if __name__ == "__main__":
                            amount=100000, tokens=supported_tokens)
         rdb.set('INITIALIZED_BALANCE', True)
 
-    liqui_exchange = Exchange(
+    liqui = Liqui(
         "liqui",
         list(supported_tokens.values()),
         rdb,
         order_handler,
         balance_handler,
         config.LIQUI_ADDRESS,
-        config.BANK_ADDRESS,
         config.DEPOSIT_DELAY
     )
 

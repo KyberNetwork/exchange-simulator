@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange_binance import Binance
+from simulator.exchange.binance import Binance
 
 api = Flask(__name__)
 
@@ -74,7 +74,7 @@ def account(params):
 @api.route('/order', methods=['POST'])
 @action(public=False)
 def order(params):
-    return binance.trades(**params)
+    return binance.trade_api(**params)
 
 
 @api.route('/withdraw.html', methods=['POST'])
@@ -84,7 +84,7 @@ def withdraw(params):
 
 
 def main():
-    api.run(debug=True)
+    api.run(port=5001, debug=True)
 
 
 if __name__ == '__main__':
@@ -104,7 +104,6 @@ if __name__ == '__main__':
         order_handler,
         balance_handler,
         config.BINANCE_ADDRESS,
-        config.BANK_ADDRESS,
         config.DEPOSIT_DELAY
     )
     main()

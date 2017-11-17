@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange_bittrex import Bittrex
+from simulator.exchange.bittrex import Bittrex
 
 api = Flask(__name__)
 
@@ -59,36 +59,36 @@ def action(expected_params):
     return decorator
 
 
+@api.route('/getorderbook')
+@action(expected_params=['type', 'market'])
+def get_order_book(params):
+    return bittrex.get_order_book_api(**params)
+
+
 @api.route('/account/getbalances')
 @action(expected_params=['apikey', 'nonce'])
 def get_balances(params):
-    return bittrex.get_balances(**params)
-
-
-@api.route('/account/withdraw')
-@action(expected_params=['apikey', 'nonce'])
-def withdraw(params):
-    return bittrex.withdraw(**params)
+    return bittrex.get_balance_api(**params)
 
 
 @api.route('/market/buylimit')
 @action(expected_params=['apikey', 'nonce'])
 def buy_limit(params):
     params['type'] = 'buy'
-    return bittrex.trades(**params)
+    return bittrex.trade_api(**params)
 
 
 @api.route('/market/selllimit')
 @action(expected_params=['apikey', 'nonce'])
 def sell_limit(params):
     params['type'] = 'sell'
-    return bittrex.trades(**params)
+    return bittrex.trade_api(**params)
 
 
-@api.route('/getorderbook')
-@action(expected_params=['type', 'market'])
-def get_order_book(params):
-    return bittrex.get_order_book_api(**params)
+@api.route('/account/withdraw')
+@action(expected_params=['apikey', 'nonce'])
+def withdraw(params):
+    return bittrex.withdraw_api(**params)
 
 
 def main():
@@ -112,7 +112,6 @@ if __name__ == '__main__':
         order_handler,
         balance_handler,
         config.BITTREX_ADDRESS,
-        config.BANK_ADDRESS,
         config.DEPOSIT_DELAY
     )
     main()

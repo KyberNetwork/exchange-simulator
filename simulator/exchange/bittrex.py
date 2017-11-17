@@ -1,10 +1,11 @@
 from .exchange import Exchange
-from . import web3_interface, utils
+from .. import web3_interface, utils
 
 logger = utils.get_logger()
 
 
 class Bittrex(Exchange):
+
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -24,20 +25,7 @@ class Bittrex(Exchange):
             }
         return result
 
-    def withdraw(self, apikey, currency, quantity, address, *args, **kargs):
-        currency = currency.lower()
-        quantity = float(quantity)
-        self.balance.withdraw(user=apikey, token=currency, amount=quantity)
-        token = utils.get_token(currency)
-        tx = web3_interface.withdraw(self.deposit_address,
-                                     token.address,
-                                     int(quantity * 10**token.decimals),
-                                     address)
-        return {
-            'uuid': tx
-        }
-
-    def get_balances(self, apikey, *args, **kargs):
+    def get_balance_api(self, apikey, *args, **kargs):
         balance = self.balance.get(user=apikey)
         result = []
         for token in self.supported_tokens:
@@ -52,12 +40,14 @@ class Bittrex(Exchange):
             })
         return result
 
-    def trades(self, apikey, market, quantity, rate,
-               type, timestamp, *args, **kargs):
+    def trade_api(self, apikey, market, quantity, rate,
+                  type, timestamp, *args, **kargs):
         quote, base = market.split('-')
         pair = '_'.join([base, quote]).lower()
-        result = super().trade_api(apikey, type, rate,
-                                   pair, quantity, timestamp)
-        return {
-            'uuid': result['order_id']
-        }
+        result = super().trades(apikey, type, rate,
+                                pair, quantity, timestamp)
+        return {'uuid': result['order_id']}
+
+    def withdraw_api(self, apikey, currency, quantity, address, *args, **kargs):
+        tx = self.withdraw(apikey, currency, quantity, address)
+        return {'uuid': tx}

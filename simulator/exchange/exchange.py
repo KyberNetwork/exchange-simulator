@@ -1,12 +1,7 @@
 #!/usr/bin/python3
 import time
 
-import redis
-from threading import Thread, Lock
-
-from . import web3_interface, utils
-
-MAX_ORDER_ID = 2 ** 31
+from .. import web3_interface, utils
 
 
 logger = utils.get_logger()
@@ -16,32 +11,19 @@ class Exchange:
 
     def __init__(self, exchange_name, supported_tokens, db,
                  order_handler, balance_handler,
-                 deposit_address, bank_address,
-                 deposit_delay_in_secs):
+                 deposit_address, deposit_delay_in_secs):
         self.name = exchange_name
         self.supported_tokens = supported_tokens
         self.db = db
         self.balance = balance_handler
         self.order = order_handler
         self.deposit_address = deposit_address
-        self.bank_address = bank_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
-        self.mutex = Lock()
         self.processed_order_ids = set()
         self.remaining_orders = []
 
-    def before_api(self, api_key):
-        self.mutex.acquire()
-        self.check_deposits(api_key)
-
-    def after_api(self, api_key):
-        # TODO handle api_key here
-        self.mutex.release()
-
-    def get_balance_api(self, api_key, *args, **kargs):
-        return {
-            'funds': self.balance.get(user=api_key)
-        }
+    def get_balance(self, api_key):
+        return self.balance.get(user=api_key)
 
     def get_order_book(self, pair, timestamp):
         try:
@@ -53,23 +35,7 @@ class Exchange:
         # logger.debug("Order Book: {}".format(order_book))
         return order_book
 
-    def get_depth_api(self, pairs, timestamp):
-        depth = {}
-        pairs = pairs.split('-')
-        for pair in pairs:
-            order_book = self.get_order_book(pair, timestamp)
-            depth[pair] = {
-                "asks": [
-                    [o['Rate'], o['Quantity']] for o in order_book['Asks']
-                ],
-                "bids": [
-                    [o['Rate'], o['Quantity']] for o in order_book['Bids']
-                ],
-            }
-        return depth
-
-    def trade_api(self, api_key, type, rate, pair, amount,
-                  timestamp, *args, **kargs):
+    def trade(self, api_key, type, rate, pair, amount, timestamp):
         # lock balance for new order
         rate, amount = float(rate), float(amount)
         base, quote = pair.split('_')
@@ -199,7 +165,7 @@ class Exchange:
 
             self.db.set(check_deposit_key, current_time)
 
-    def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
+    def withdraw(self, api_key, coinName, address, amount):
         coinName = coinName.lower()
         amount = float(amount)
         self.balance.withdraw(user=api_key, token=coinName, amount=amount)
@@ -208,11 +174,10 @@ class Exchange:
                                      token.address,
                                      int(amount * 10**token.decimals),
                                      address)
-        return {
-            'tId': tx,
-            'amountSent': amount,
-            'funds': self.balance.get(user=api_key)
-        }
+        return tx
+
+
+MAX_ORDER_ID = 2 ** 31
 
 
 def get_order_id(pair, rate, quantity):
