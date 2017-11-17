@@ -104,7 +104,7 @@ if __name__ == "__main__":
     if not initialized_balance:
         utils.init_deposit(balance=balance_handler,
                            user=config.DEFAULT_API_KEY,
-                           amount=1000, tokens=supported_tokens)
+                           amount=100000, tokens=supported_tokens)
         rdb.set('INITIALIZED_BALANCE', True)
 
     liqui_exchange = Exchange(

@@ -1,7 +1,7 @@
 dev: &common
   deposit_delay: 300
   blockchain_url: https://kovan.infura.io
-  addresses: shared/deployment_dev.json
+  addresses: shared/deployment_kovan.json
 
 kovan:
   <<: *common
@@ -10,6 +10,7 @@ simulation:
   <<: *common
   deposit_delay: 0
   blockchain_url: http://blockchain:8545
+  addresses: shared/deployment_dev.json
   
 production:
   <<: *common
