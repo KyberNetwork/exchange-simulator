@@ -204,9 +204,9 @@ class Exchange:
         amount = float(amount)
         self.balance.withdraw(user=api_key, token=coinName, amount=amount)
         token = utils.get_token(coinName)
-        tx = web3_interface.withdraw(self.bank_address,
+        tx = web3_interface.withdraw(self.deposit_address,
                                      token.address,
-                                     int(amount * token.decimals),
+                                     int(amount * 10**token.decimals),
                                      address)
         return {
             'tId': tx,
