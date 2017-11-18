@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange.bittrex import Bittrex
+from simulator.exchange import Bittrex
 
 api = Flask(__name__)
 
@@ -92,7 +92,7 @@ def withdraw(params):
 
 
 def main():
-    api.run(debug=True)
+    api.run(port=5001, debug=True)
 
 
 if __name__ == '__main__':

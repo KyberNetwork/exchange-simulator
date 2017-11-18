@@ -12,7 +12,7 @@ class Bittrex(Exchange):
     def get_order_book_api(self, market, type, timestamp):
         quote, base = market.split('-')
         pair = '_'.join([base, quote]).lower()
-        order_book = super().get_order_book(pair, timestamp)
+        order_book = self.get_order_book(pair, timestamp)
 
         if type == 'sell':
             result = order_book['Asks']
@@ -44,8 +44,8 @@ class Bittrex(Exchange):
                   type, timestamp, *args, **kargs):
         quote, base = market.split('-')
         pair = '_'.join([base, quote]).lower()
-        result = super().trades(apikey, type, rate,
-                                pair, quantity, timestamp)
+        result = self.trade(apikey, type, rate,
+                            pair, quantity, timestamp)
         return {'uuid': result['order_id']}
 
     def withdraw_api(self, apikey, currency, quantity, address, *args, **kargs):

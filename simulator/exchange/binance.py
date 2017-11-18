@@ -13,9 +13,7 @@ class Binance(Exchange):
         base = symbol[:3]
         quote = symbol[-3:]
         pair = '_'.join([base, quote]).lower()
-        logger.info('Pair: {}'.format(pair))
-
-        order_book = super().get_order_book(pair, timestamp)
+        order_book = self.get_order_book(pair, timestamp)
         asks = [
             [str(o['Rate']), str(o['Quantity']), []] for o in order_book['Asks']
         ]
@@ -52,8 +50,7 @@ class Binance(Exchange):
         quote = symbol[-3:]
         pair = '_'.join([base, quote]).lower()
 
-        result = super().trades(api_key, side, price,
-                                pair, quantity, timestamp)
+        result = self.trade(api_key, side, price, pair, quantity, timestamp)
         return {
             'symbol': symbol,
             'orderId': result['order_id'],

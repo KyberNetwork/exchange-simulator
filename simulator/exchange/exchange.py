@@ -65,7 +65,6 @@ class Exchange:
                 self.remaining_orders.append(order)
 
         # the last result is corresponding to the new order
-        result['funds'] = self.balance.get(user=api_key)
         return result
 
     def _match_order(self, api_key, type, rate, pair, amount, timestamp):

@@ -1,15 +1,10 @@
-from functools import wraps
-
-from flask import Flask, request, jsonify
+from flask import Flask
 
 from simulator import config, utils
-from simulator.order_handler import CoreOrder, SimulationOrder
-from simulator.balance_handler import BalanceHandler
-from simulator.exchange import Binance
+from simulator.exchange import Bitfinex
 
 api = Flask(__name__)
 
-logger = utils.get_logger()
 
 MISSING_ERROR = {
     'symbol': {
@@ -30,7 +25,7 @@ def validate_params(expected_params):
             return MISSING_ERROR['symbol']
 
 
-def action(expected_params=[], public=False):
+def action(expected_params=[]):
     def decorator(func):
         @wraps(func)
         def wrapper():
@@ -39,12 +34,11 @@ def action(expected_params=[], public=False):
                 return str(error)
 
             params = request.args.to_dict()
-            if not public:
-                api_key = request.headers.get('X-MBX-APIKEY')
-                if not api_key:
-                    return str(MISSING_ERROR['api_key'])
-                else:
-                    params['api_key'] = api_key.lower()
+
+            api_key = request.headers.get('X-BFX-APIKEY')
+            if not api_key:
+                return str(MISSING_ERROR['api_key'])
+            params['api_key'] = api_key.lower()
 
             timestamp = request.args.get('timestamp')
             if 'timestamp' not in params:
@@ -59,32 +53,34 @@ def action(expected_params=[], public=False):
     return decorator
 
 
-@api.route('/depth', methods=['GET'])
-@action(expected_params=['symbol'], public=True)
-def order_book(params):
-    return binance.get_order_book_api(**params)
+@api.route('/book/<symbol>')
+def order_book(symbol):
+    timestamp = request.args.get('timestamp')
+    if 'timestamp' not in params:
+        params['timestamp'] = utils.get_current_timestamp()
+    return bitfinex.order_book_api(symbol, timestamp)
 
 
-@api.route('/account', methods=['GET'])
-@action(public=False)
-def account(params):
-    return binance.get_account_api(**params)
+@api.route('/balances')
+@action()
+def balances(params):
+    return bitfinex.balances_api(**params)
 
 
-@api.route('/order', methods=['POST'])
-@action(public=False)
-def order(params):
-    return binance.trade_api(**params)
+@api.route('/order/new')
+@action()
+def new_order(params):
+    return bitfinex.trade_api(**params)
 
 
-@api.route('/withdraw.html', methods=['POST'])
-@action(public=False)
+@api.route('/withdraw')
+@action()
 def withdraw(params):
-    return binance.withdraw_api(**params)
+    return bitfinex.withdraw_api(**params)
 
 
 def main():
-    api.run(port=5002, debug=True)
+    api.run(port=5003, debug=True)
 
 
 if __name__ == '__main__':
@@ -97,13 +93,13 @@ if __name__ == '__main__':
     supported_tokens = config.SUPPORTED_TOKENS
     balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
-    binance = Binance(
-        "binance",
+    bitfinex = Bitfinex(
+        "bitfinex",
         list(supported_tokens.values()),
         rdb,
         order_handler,
         balance_handler,
-        config.BINANCE_ADDRESS,
+        config.BITTREX_ADDRESS,
         config.DEPOSIT_DELAY
     )
     main()
