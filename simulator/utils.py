@@ -55,6 +55,7 @@ def setup_data(rdb):
 
 
 def copy_order_books_to_db(ob_file, rdb):
+    EXCHANGES = ['liqui', 'binance']
 
     def load_order_books(ob_file):
         with open(ob_file, 'r')as f:
@@ -63,7 +64,7 @@ def copy_order_books_to_db(ob_file, rdb):
                 for pair in e['data']:
                     base, quote = pair.lower().split('-')
                     for exchange in e['data'][pair]:
-                        if exchange == 'liqui':
+                        if exchange in EXCHANGES:
                             ob = e['data'][pair][exchange]
                             yield(base, quote, exchange, ob)
 

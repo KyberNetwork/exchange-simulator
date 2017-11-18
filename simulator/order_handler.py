@@ -23,6 +23,10 @@ class CoreOrder(OrderHandler):
         assert r.status_code == requests.codes.ok, 'Cannot connect to core'
         data = r.json()
         order_book = data['exchanges'][exchange_name]
+        if not order_book['Bids']:
+            order_book['Bids'] = []
+        if not order_book['Asks']:
+            order_book['Asks'] = []
         return order_book
 
 
@@ -33,6 +37,7 @@ class SimulationOrder(OrderHandler):
     def load(self, pair, exchange_name, timestamp):
         # might need to change the timestamp in 10 timeframe
         # e.g: timestamp = int(timestamp/10) * 10
+        timestamp = int(timestamp)
         timestamp = utils.normalize_timestamp(timestamp)
         key = '_'.join(map(str, [exchange_name, pair, timestamp]))
         logger.debug('Looking for order book: {}'.format(key))

@@ -59,32 +59,32 @@ def action(expected_params=[], public=False):
     return decorator
 
 
-@api.route('/depth', methods=['GET'])
+@api.route('/api/v1/depth', methods=['GET'])
 @action(expected_params=['symbol'], public=True)
 def order_book(params):
     return binance.get_order_book_api(**params)
 
 
-@api.route('/account', methods=['GET'])
+@api.route('/api/v3/account', methods=['GET'])
 @action(public=False)
 def account(params):
     return binance.get_account_api(**params)
 
 
-@api.route('/order', methods=['POST'])
+@api.route('/api/v3/order', methods=['POST'])
 @action(public=False)
 def order(params):
     return binance.trade_api(**params)
 
 
-@api.route('/withdraw.html', methods=['POST'])
+@api.route('/api/v3/withdraw.html', methods=['POST'])
 @action(public=False)
 def withdraw(params):
     return binance.withdraw_api(**params)
 
 
 def main():
-    api.run(port=5002, debug=True)
+    api.run(host='0.0.0.0', port=5002, debug=True)
 
 
 if __name__ == '__main__':

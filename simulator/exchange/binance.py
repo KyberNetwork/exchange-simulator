@@ -10,8 +10,7 @@ class Binance(Exchange):
         super().__init__(*args)
 
     def get_order_book_api(self, symbol, timestamp, *args, **kargs):
-        base = symbol[:3]
-        quote = symbol[-3:]
+        base, quote = symbol[:-3], symbol[-3:]
         pair = '_'.join([base, quote]).lower()
         order_book = self.get_order_book(pair, timestamp)
         asks = [
