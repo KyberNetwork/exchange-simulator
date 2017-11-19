@@ -38,4 +38,4 @@ class BalanceHandler:
             raise ValueError("insufficient balance")
 
     def _key(self, user):
-        return '_'.join(['balance', user])
+        return '_'.join(['balance', user]).lower()

@@ -60,4 +60,5 @@ except FileNotFoundError:
 
 LOGGER_NAME = "simulator"
 EXCHANGE_NAME = "liqui"
-DEFAULT_API_KEY = "s7kwmscu-u6myvpjh-47evo234-y2uxw61t-raxby17f"
+DEFAULT_LIQUI_API_KEY = "s7kwmscu-u6myvpjh-47evo234-y2uxw61t-raxby17f"
+DEFAULT_BINANCE_API_KEY = 'c9sjgjigscafovfbspnizwfciapwmpysin6eks8udoykyuzdeo5afbeubs7ar5fd'
