@@ -45,6 +45,7 @@ def action(expected_params=[], public=False):
                     return str(MISSING_ERROR['api_key'])
                 else:
                     params['api_key'] = api_key.lower()
+                binance.check_deposits(api_key)
 
             timestamp = request.args.get('timestamp')
             if 'timestamp' not in params:
@@ -94,35 +95,35 @@ def withdraw(params):
     return binance.withdraw_api(**params)
 
 
-def main():
-    api.run(host='0.0.0.0', port=5100, debug=True)
+logger.info("Running in {} mode".format(config.MODE))
 
+rdb = utils.get_redis_db()
+if config.MODE == 'simulation':
+    # utils.setup_data(rdb)
+    order_handler = SimulationOrder(rdb)
+else:
+    order_handler = CoreOrder()
+
+supported_tokens = config.SUPPORTED_TOKENS
+balance_handler = BalanceHandler(rdb, supported_tokens.keys())
+
+# init deposit
+initialized_balance = rdb.get('INITIALIZED_BINANCE_BALANCE')
+if not initialized_balance:
+    utils.init_deposit(balance=balance_handler,
+                       user=config.DEFAULT_BINANCE_API_KEY,
+                       amount=100000, tokens=supported_tokens)
+    rdb.set('INITIALIZED_BINANCE_BALANCE', True)
+
+binance = Binance(
+    "binance",
+    list(supported_tokens.values()),
+    rdb,
+    order_handler,
+    balance_handler,
+    config.BINANCE_ADDRESS,
+    config.DEPOSIT_DELAY
+)
 
 if __name__ == '__main__':
-    rdb = utils.get_redis_db()
-    if config.MODE == 'simulation':
-        utils.setup_data(rdb)
-        order_handler = SimulationOrder(rdb)
-    else:
-        order_handler = CoreOrder()
-    supported_tokens = config.SUPPORTED_TOKENS
-    balance_handler = BalanceHandler(rdb, supported_tokens.keys())
-
-    # init deposit
-    initialized_balance = rdb.get('INITIALIZED_BINANCE_BALANCE')
-    if not initialized_balance:
-        utils.init_deposit(balance=balance_handler,
-                           user=config.DEFAULT_BINANCE_API_KEY,
-                           amount=100000, tokens=supported_tokens)
-        rdb.set('INITIALIZED_BINANCE_BALANCE', True)
-
-    binance = Binance(
-        "binance",
-        list(supported_tokens.values()),
-        rdb,
-        order_handler,
-        balance_handler,
-        config.BINANCE_ADDRESS,
-        config.DEPOSIT_DELAY
-    )
-    main()
+    api.run(host='0.0.0.0', port=5100, debug=True)

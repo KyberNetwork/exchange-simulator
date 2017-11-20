@@ -87,40 +87,40 @@ def depth(pairs):
         return BadRequest()
 
 
+logger.info("Running in {} mode".format(config.MODE))
+
+rdb = utils.get_redis_db()
+if config.MODE == 'simulation':
+    utils.setup_data(rdb)
+    order_handler = SimulationOrder(rdb)
+else:
+    order_handler = CoreOrder()
+supported_tokens = config.SUPPORTED_TOKENS
+balance_handler = BalanceHandler(rdb, supported_tokens.keys())
+
+# init deposit
+initialized_balance = rdb.get('INITIALIZED_LIQUI_BALANCE')
+if not initialized_balance:
+    utils.init_deposit(balance=balance_handler,
+                       user=config.DEFAULT_LIQUI_API_KEY,
+                       amount=100000, tokens=supported_tokens)
+    rdb.set('INITIALIZED_LIQUI_BALANCE', True)
+
+liqui = Liqui(
+    "liqui",
+    list(supported_tokens.values()),
+    rdb,
+    order_handler,
+    balance_handler,
+    config.LIQUI_ADDRESS,
+    config.DEPOSIT_DELAY
+)
+
+if config.MODE != 'dev':
+    sentry = Sentry(app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'
+                    '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
+
+
 if __name__ == "__main__":
     logger.info("Running in {} mode".format(config.MODE))
-
-    logger.debug("debug simulator")
-
-    rdb = utils.get_redis_db()
-    if config.MODE == 'simulation':
-        utils.setup_data(rdb)
-        order_handler = SimulationOrder(rdb)
-    else:
-        order_handler = CoreOrder()
-    supported_tokens = config.SUPPORTED_TOKENS
-    balance_handler = BalanceHandler(rdb, supported_tokens.keys())
-
-    # init deposit
-    initialized_balance = rdb.get('INITIALIZED_LIQUI_BALANCE')
-    if not initialized_balance:
-        utils.init_deposit(balance=balance_handler,
-                           user=config.DEFAULT_LIQUI_API_KEY,
-                           amount=100000, tokens=supported_tokens)
-        rdb.set('INITIALIZED_LIQUI_BALANCE', True)
-
-    liqui = Liqui(
-        "liqui",
-        list(supported_tokens.values()),
-        rdb,
-        order_handler,
-        balance_handler,
-        config.LIQUI_ADDRESS,
-        config.DEPOSIT_DELAY
-    )
-
-    if config.MODE != 'dev':
-        sentry = Sentry(app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'
-                        '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
-
     app.run(host='0.0.0.0', port=5000, debug=True)
