@@ -51,7 +51,11 @@ def action(expected_params=[], public=False):
                 params['timestamp'] = utils.get_current_timestamp()
 
             logger.info('Params: {}'.format(params))
-            result = func(params)
+            try:
+                result = func(params)
+            except Exception as e:
+                return jsonify({'code': -1, 'msg': str(e)})
+
             logger.info('Output: {}'.format(result))
 
             return jsonify(result)
@@ -77,14 +81,14 @@ def order(params):
     return binance.trade_api(**params)
 
 
-@api.route('/api/v3/withdraw.html', methods=['POST'])
+@api.route('/wapi/v3/withdraw.html', methods=['POST'])
 @action(public=False)
 def withdraw(params):
     return binance.withdraw_api(**params)
 
 
 def main():
-    api.run(host='0.0.0.0', port=5002, debug=True)
+    api.run(host='0.0.0.0', port=5100, debug=True)
 
 
 if __name__ == '__main__':

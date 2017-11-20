@@ -45,9 +45,10 @@ class Binance(Exchange):
 
     def trade_api(self, api_key, symbol, quantity, price, side,
                   timestamp, *args, **kargs):
-        base = symbol[:3]
+        base = symbol[:-3]
         quote = symbol[-3:]
         pair = '_'.join([base, quote]).lower()
+        side = side.lower()
 
         result = self.trade(api_key, side, price, pair, quantity, timestamp)
         return {
@@ -58,8 +59,9 @@ class Binance(Exchange):
         }
 
     def withdraw_api(self, api_key, asset, amount, address, *args, **kargs):
-        self.withdraw(api_key, asset, address, amount)
+        tx = self.withdraw(api_key, asset, address, amount)
         return {
             'msg': 'success',
-            'success': True
+            'success': True,
+            'id': str(tx)
         }
