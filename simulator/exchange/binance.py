@@ -63,5 +63,5 @@ class Binance(Exchange):
         return {
             'msg': 'success',
             'success': True,
-            'id': str(tx)
+            'id': str(tx)[2:]  # remove 0x in transaction id
         }
