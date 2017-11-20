@@ -52,6 +52,8 @@ def index():
             output = liqui.trade_api(**params)
         elif method == 'WithdrawCoin':
             output = liqui.withdraw_api(**params)
+        elif method == 'OrderInfo':
+            output = liqui.get_order_api(**params)
         else:
             raise AttributeError('Invalid method requested')
 

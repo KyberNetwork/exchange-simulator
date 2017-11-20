@@ -2,6 +2,7 @@
 import time
 
 from .. import web3_interface, utils
+from ..order import Order
 
 
 logger = utils.get_logger()
@@ -16,18 +17,17 @@ class Exchange:
         self.supported_tokens = supported_tokens
         self.db = db
         self.balance = balance_handler
-        self.order = order_handler
+        self.orders = order_handler
         self.deposit_address = deposit_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.processed_order_ids = set()
-        self.remaining_orders = []
 
     def get_balance(self, api_key):
         return self.balance.get(user=api_key)
 
     def get_order_book(self, pair, timestamp):
         try:
-            order_book = self.order.load(pair, self.name, timestamp)
+            order_book = self.orders.load(pair, self.name, timestamp)
         except Exception as e:
             logger.info('Order book {}_{} is missing'.format(pair, timestamp))
             order_book = {'Asks': [], 'Bids': []}
@@ -36,36 +36,47 @@ class Exchange:
         return order_book
 
     def trade(self, api_key, type, rate, pair, amount, timestamp):
-        # lock balance for new order
         rate, amount = float(rate), float(amount)
         base, quote = pair.split('_')
+        type = type.lower()
+
+        # 1. lock balance
         if type == 'buy':
             self.balance.withdraw(api_key, quote, rate * amount)
         elif type == 'sell':
             self.balance.withdraw(api_key, base, amount)
         else:
             raise ValueError('Invalid type of order.')
-        # append new order to the unmatch orders
-        unmatch_orders = self.remaining_orders
-        self.remaining_orders = []
-        unmatch_orders.append({
-            'api_key': api_key,
-            'type': type,
-            'rate': rate,
-            'pair': pair,
-            'amount': amount,
-            'timestamp': timestamp
-        })
 
-        for order in unmatch_orders:
-            order['timestamp'] = timestamp  # to match order with the correct ob
-            result = self._match_order(**order)
-            if result['remains'] > 0:
-                order['amount'] = result['remains']
-                self.remaining_orders.append(order)
+        # 2. open new order
+        new_order = Order(pair, type, rate, amount)
 
-        # the last result is corresponding to the new order
-        return result
+        # 3. match new order
+        base_change, quote_change = self._match_order(api_key,
+                                                      type,
+                                                      rate,
+                                                      pair,
+                                                      amount,
+                                                      timestamp)
+
+        # 4. update balance and order
+        # update order & balance
+        # we are not holding balance for remaining order
+        new_order.executed_amount = base_change
+        new_order.remaining_amount = amount - base_change
+        self.orders.add(new_order)
+        if type == 'buy':
+            self.balance.deposit(api_key, base, base_change)
+            self.balance.deposit(api_key, quote, rate * amount - quote_change)
+        else:
+            self.balance.deposit(api_key, base, amount - base_change)
+            self.balance.deposit(api_key, quote, quote_change)
+
+        return {
+            'received': new_order.executed_amount,
+            'remaining': new_order.remaining_amount,
+            'order_id': new_order.id
+        }
 
     def _match_order(self, api_key, type, rate, pair, amount, timestamp):
         order_book = self.get_order_book(pair, timestamp)
@@ -105,25 +116,10 @@ class Exchange:
         logger.debug('Base change, Quote change: {}, {}'.format(
             base_change, quote_change))
 
-        # udpate balance
-        if type == 'buy':
-            self.balance.deposit(api_key, base, base_change)
-        else:
-            self.balance.deposit(api_key, quote, quote_change)
+        return base_change, quote_change
 
-        received = base_change
-        remains = amount - received
-
-        if remains == 0:
-            order_id = 0
-        else:
-            order_id = get_order_id(pair, rate, remains)
-
-        return {
-            'received': received,
-            'remains': remains,
-            'order_id': order_id
-        }
+    def get_order(self, order_id):
+        return self.orders.get(order_id)
 
     def check_deposits(self, api_key):
         # check enough time passed since last deposit check

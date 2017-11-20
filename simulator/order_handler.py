@@ -7,11 +7,22 @@ logger = utils.get_logger()
 
 
 class OrderHandler:
+    def __init__(self):
+        self.orders = {}
+
+    def add(self, order):
+        self.orders[str(order.id)] = order
+
+    def get(self, order_id):
+        return self.orders[str(order_id)]
+
     def load(self, pair, exchange_name, timestamp):
         raise NotImplementedError
 
 
 class CoreOrder(OrderHandler):
+    def __init__(self):
+        super().__init__()
 
     def load(self, pair, exchange_name, timestamp):
         return self._load(pair, exchange_name)
@@ -32,6 +43,7 @@ class CoreOrder(OrderHandler):
 
 class SimulationOrder(OrderHandler):
     def __init__(self, rdb):
+        super().__init__()
         self.rdb = rdb
 
     def load(self, pair, exchange_name, timestamp):

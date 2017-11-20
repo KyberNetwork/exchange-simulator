@@ -32,6 +32,18 @@ class Liqui(Exchange):
         result = self.trade(api_key, type, rate, pair, amount, timestamp)
         return result
 
+    def get_order_api(self, order_id, *args, **kargs):
+        order = self.get_order(order_id)
+        return {
+            'pair': order.pair,
+            'type': order.type,
+            'start_amount': order.original_amount,
+            'amount': order.remaining_amount,
+            'rate': order.rate,
+            'timestamp_created': utils.get_current_timestamp(),
+            'status': order.status()
+        }
+
     def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
         tx = self.withdraw(api_key, coinName, address, amount)
         return {

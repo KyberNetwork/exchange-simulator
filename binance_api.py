@@ -54,6 +54,7 @@ def action(expected_params=[], public=False):
             try:
                 result = func(params)
             except Exception as e:
+                logger.info('Error Output: {}'.str(e))
                 return jsonify({'code': -1, 'msg': str(e)})
 
             logger.info('Output: {}'.format(result))
@@ -77,8 +78,14 @@ def account(params):
 
 @api.route('/api/v3/order', methods=['POST'])
 @action(public=False)
-def order(params):
+def create_order(params):
     return binance.trade_api(**params)
+
+
+@api.route('/api/v3/order', methods=['GET'])
+@action(public=False)
+def get_order(params):
+    return binance.get_order_api(**params)
 
 
 @api.route('/wapi/v3/withdraw.html', methods=['POST'])

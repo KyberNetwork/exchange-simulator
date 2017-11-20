@@ -48,7 +48,6 @@ class Binance(Exchange):
         base = symbol[:-3]
         quote = symbol[-3:]
         pair = '_'.join([base, quote]).lower()
-        side = side.lower()
 
         result = self.trade(api_key, side, price, pair, quantity, timestamp)
         return {
@@ -57,6 +56,26 @@ class Binance(Exchange):
             'clientOrderId': 'myOrder1',  # Will be newClientOrderId
             'transactTime': utils.get_current_timestamp()
         }
+
+    def get_order_api(self, orderId, *args, **kargs):
+        try:
+            order = self.get_order(orderId)
+            return {
+                'symbol': order.pair.upper(),
+                'orderId': order.id,
+                'clientOrderId': 'myOrder1',
+                'price': str(order.rate),
+                'origQty': str(order.original_amount),
+                'executedQty': str(order.executed_amount),
+                'timeInForce': 'GTC',
+                'type': 'LIMIT',
+                'side': order.type,
+                'stopPrice': '0.0',
+                'icebergQty': '0.0',
+                'time': utils.get_current_timestamp()
+            }
+        except Exception:
+            raise ValueError('Order not found')
 
     def withdraw_api(self, api_key, asset, amount, address, *args, **kargs):
         tx = self.withdraw(api_key, asset, address, amount)
