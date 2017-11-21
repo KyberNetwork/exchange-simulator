@@ -34,8 +34,8 @@ def index():
         if not method:
             raise KeyError('Method is missing in your request')
 
-        if 'timestamp' not in params:
-            params['timestamp'] = utils.get_current_timestamp()
+        params['timestamp'] = request.args.get('timestamp',
+                                               utils.get_current_timestamp())
 
         logger.info('Params: {}'.format(params))
         liqui.check_deposits(api_key)
