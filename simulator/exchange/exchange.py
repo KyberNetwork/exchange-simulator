@@ -94,9 +94,9 @@ class Exchange:
         for order in orders:
             logger.debug('Processing order: {}'.format(order))
 
-            id = get_order_id(pair, order['Rate'], order['Quantity'])
-            if id in self.processed_order_ids:
-                continue  # order is already processed, continue to next order
+            # id = get_order_id(pair, order['Rate'], order['Quantity'])
+            # if id in self.processed_order_ids:
+            # continue  # order is already processed, continue to next order
 
             bad_rate = (type == 'buy' and order['Rate'] > rate) or (
                 type == 'sell' and order['Rate'] < rate)
