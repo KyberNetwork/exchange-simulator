@@ -38,6 +38,9 @@ class Exchange:
     def trade(self, api_key, type, rate, pair, amount, timestamp):
         rate, amount = float(rate), float(amount)
         base, quote = pair.split('_')
+        if base not in self.supported_tokens:
+            raise ValueError('This token is not supported {}.'.format(base))
+        assert quote == 'eth', 'We are only support token vs eth.'
         type = type.lower()
 
         # 1. lock balance
