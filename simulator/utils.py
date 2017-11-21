@@ -38,20 +38,18 @@ def get_current_timestamp():
     return normalize_timestamp(int(time.time() * 1000))
 
 
-def setup_data(rdb):
-    if config.MODE == 'simulation':
-        # import simulation data
-        data_imported = rdb.get('IMPORTED_SIMULATION_DATA')
-        if not data_imported:
-            logger.info('Import simulation data ...')
-            ob_file = 'data/full_ob.dat'
-            # ob_file = 'data/sample_ob.dat'
-            try:
-                copy_order_books_to_db(ob_file, rdb)
-            except FileNotFoundError:
-                sys.exit('Data is missing.')
-            rdb.set('IMPORTED_SIMULATION_DATA', True)
-            logger.info('Finish setup process.')
+def setup_data(rdb, ob_file):
+    # import simulation data
+    FLAG = 'IMPORTED_SIMULATION_DATA'
+    imported = rdb.get(FLAG)
+    if not imported:
+        logger.info('Importing simulation data ...')
+        try:
+            copy_order_books_to_db(ob_file, rdb)
+        except FileNotFoundError:
+            sys.exit('Data is missing.')
+        rdb.set(FLAG, True)
+        logger.info('Done.')
 
 
 def copy_order_books_to_db(ob_file, rdb):

@@ -99,7 +99,6 @@ logger.info("Running in {} mode".format(config.MODE))
 
 rdb = utils.get_redis_db()
 if config.MODE == 'simulation':
-    # utils.setup_data(rdb)
     order_handler = SimulationOrder(rdb)
 else:
     order_handler = CoreOrder()
