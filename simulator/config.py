@@ -38,16 +38,16 @@ try:
 
         try:
             with open(cfg[MODE]['addresses'], 'r') as f:
-                address = json.loads(f.read())
+                addr = json.loads(f.read())
 
-                LIQUI_ADDRESS = get_int(address['exchanges']['liqui'])
-                BITTREX_ADDRESS = get_int(address['exchanges']['bittrex'])
-                BINANCE_ADDRESS = get_int(address['exchanges']['binance'])
-                BITFINEX_ADDRESS = get_int(address['exchanges']['bitfinex'])
+                LIQUI_ADDRESS = get_int(addr['exchanges']['liqui']['ETH'])
+                BITTREX_ADDRESS = get_int(addr['exchanges']['bittrex']['ETH'])
+                BINANCE_ADDRESS = get_int(addr['exchanges']['binance']['ETH'])
+                BITFINEX_ADDRESS = get_int(addr['exchanges']['bitfinex']['ETH'])
 
-                BANK_ADDRESS = get_int(address['bank'])
+                BANK_ADDRESS = get_int(addr['bank'])
                 SUPPORTED_TOKENS = {}
-                for name, token in address['tokens'].items():
+                for name, token in addr['tokens'].items():
                     name = name.lower()
                     SUPPORTED_TOKENS[name] = Token(name,
                                                    get_int(token['address']),
