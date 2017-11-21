@@ -30,7 +30,12 @@ class Liqui(Exchange):
     def trade_api(self, api_key, type, rate, pair, amount,
                   timestamp, *args, **kargs):
         result = self.trade(api_key, type, rate, pair, amount, timestamp)
-        return result
+        return {
+            'received': result['received'],
+            'remains': result['remaining'],
+            'order_id': result['order_id'],
+            'funds': self.get_balance(api_key)
+        }
 
     def get_order_api(self, order_id, *args, **kargs):
         order = self.get_order(order_id)
