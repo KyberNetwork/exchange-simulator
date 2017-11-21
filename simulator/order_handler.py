@@ -14,7 +14,10 @@ class OrderHandler:
         self.orders[str(order.id)] = order
 
     def get(self, order_id):
-        return self.orders[str(order_id)]
+        order_id = str(order_id)
+        if order_id not in self.orders:
+            raise ValueError('Order not found.')
+        return self.orders[order_id]
 
     def load(self, pair, exchange_name, timestamp):
         raise NotImplementedError
