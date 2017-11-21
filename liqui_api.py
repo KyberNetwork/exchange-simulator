@@ -23,29 +23,22 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def index():
     try:
-        if 'Key' not in request.headers:
+        api_key = request.headers.get('Key', None)
+        if not api_key:
             raise AttributeError("Missing 'Key' Header")
-        else:
-            api_key = request.headers['Key'].lower()
-
-        timestamp = request.args.get('timestamp')
-        if timestamp:
-            timestamp = int(timestamp)
-        else:
-            timestamp = int(time.time() * 1000)
 
         params = request.form.to_dict()
-        params['api_key'] = api_key
-        params['timestamp'] = timestamp
-        try:
-            method = params['method']
-        except KeyError:
+        params['api_key'] = api_key.lower()
+
+        method = params.get('method', None)
+        if not method:
             raise KeyError('Method is missing in your request')
 
+        if 'timestamp' not in params:
+            params['timestamp'] = utils.get_current_timestamp()
+
         logger.info('Params: {}'.format(params))
-
         liqui.check_deposits(api_key)
-
         if method == 'getInfo':
             output = liqui.get_balance_api(**params)
         elif method == 'Trade':
@@ -56,15 +49,13 @@ def index():
             output = liqui.get_order_api(**params)
         else:
             raise AttributeError('Invalid method requested')
-
         logger.info('Output: {}'.format(output))
-
         return jsonify({
             'success': 1,
             'return': output
         })
     except Exception as e:
-        traceback.print_exc()
+        # traceback.print_exc()
         return jsonify({
             'success': 0,
             'error': str(e)
@@ -73,11 +64,9 @@ def index():
 
 @app.route("/depth/<string:pairs>", methods=['GET'])
 def depth(pairs):
-    timestamp = request.args.get('timestamp')
-    if timestamp:
-        timestamp = int(timestamp)
-    else:
-        timestamp = int(time.time() * 1000)
+    timestamp = request.args.get('timestamp', None)
+    if not timestamp:
+        timestamp = utils.get_current_timestamp()
 
     try:
         depth = liqui.get_depth_api(pairs, timestamp)
@@ -86,8 +75,6 @@ def depth(pairs):
         logger.info("Bad Request: {}".format(e))
         return BadRequest()
 
-
-logger.info("Running in {} mode".format(config.MODE))
 
 rdb = utils.get_redis_db()
 if config.MODE == 'simulation':
