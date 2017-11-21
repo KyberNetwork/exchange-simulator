@@ -45,7 +45,7 @@ class Liqui(Exchange):
             'start_amount': order.original_amount,
             'amount': order.remaining_amount,
             'rate': order.rate,
-            'timestamp_created': utils.get_current_timestamp(),
+            'timestamp_created': 0,
             'status': order.status()
         }
 

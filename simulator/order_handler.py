@@ -50,8 +50,6 @@ class SimulationOrder(OrderHandler):
         self.rdb = rdb
 
     def load(self, pair, exchange_name, timestamp):
-        # might need to change the timestamp in 10 timeframe
-        # e.g: timestamp = int(timestamp/10) * 10
         timestamp = int(timestamp)
         timestamp = utils.normalize_timestamp(timestamp)
         key = '_'.join(map(str, [exchange_name, pair, timestamp]))

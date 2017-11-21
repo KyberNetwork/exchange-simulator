@@ -64,9 +64,7 @@ def index():
 
 @app.route("/depth/<string:pairs>", methods=['GET'])
 def depth(pairs):
-    timestamp = request.args.get('timestamp', None)
-    if not timestamp:
-        timestamp = utils.get_current_timestamp()
+    timestamp = request.args.get('timestamp', utils.get_current_timestamp())
 
     try:
         depth = liqui.get_depth_api(pairs, timestamp)

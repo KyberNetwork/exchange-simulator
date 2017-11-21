@@ -47,7 +47,6 @@ def action(expected_params=[], public=False):
                     params['api_key'] = api_key.lower()
                 binance.check_deposits(api_key)
 
-            timestamp = request.args.get('timestamp')
             if 'timestamp' not in params:
                 params['timestamp'] = utils.get_current_timestamp()
 

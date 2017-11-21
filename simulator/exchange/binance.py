@@ -54,7 +54,7 @@ class Binance(Exchange):
             'symbol': symbol,
             'orderId': result['order_id'],
             'clientOrderId': 'myOrder1',  # Will be newClientOrderId
-            'transactTime': utils.get_current_timestamp()
+            'transactTime': 0
         }
 
     def get_order_api(self, orderId, *args, **kargs):
@@ -71,7 +71,7 @@ class Binance(Exchange):
             'side': order.type,
             'stopPrice': '0.0',
             'icebergQty': '0.0',
-            'time': utils.get_current_timestamp()
+            'time': 0
         }
 
     def withdraw_api(self, api_key, asset, amount, address, *args, **kargs):

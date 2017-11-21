@@ -35,7 +35,7 @@ def init_deposit(balance, user, tokens, amount):
 
 
 def get_current_timestamp():
-    return normalize_timestamp(int(time.time() * 1000))
+    return int(time.time() * 1000)
 
 
 def setup_data(rdb, ob_file):

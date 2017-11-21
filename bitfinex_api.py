@@ -40,7 +40,6 @@ def action(expected_params=[]):
                 return str(MISSING_ERROR['api_key'])
             params['api_key'] = api_key.lower()
 
-            timestamp = request.args.get('timestamp')
             if 'timestamp' not in params:
                 params['timestamp'] = utils.get_current_timestamp()
 
@@ -55,9 +54,7 @@ def action(expected_params=[]):
 
 @api.route('/book/<symbol>')
 def order_book(symbol):
-    timestamp = request.args.get('timestamp')
-    if 'timestamp' not in params:
-        params['timestamp'] = utils.get_current_timestamp()
+    timestamp = request.args.get('timestamp', utils.get_current_timestamp())
     return bitfinex.order_book_api(symbol, timestamp)
 
 
