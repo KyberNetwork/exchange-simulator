@@ -126,13 +126,13 @@ class Exchange:
         check_deposit_key = ','.join([self.name, 'last_deposit_check'])
         last_check = self.db.get(check_deposit_key)
 
-        if(last_check is None):
+        if not last_check:
             last_check = 0
         else:
             last_check = int(last_check)
 
-        current_time = int(time.time())
-        if(current_time >= last_check + self.deposit_delay_in_secs):
+        current_time = utils.get_current_timestamp()
+        if(current_time >= last_check + self.deposit_delay_in_secs * 1000):
             try:
                 balances = web3_interface.get_balances(
                     self.deposit_address,

@@ -4,6 +4,7 @@ import logging
 import time
 from datetime import datetime
 
+import requests
 import json
 import redis
 
@@ -35,7 +36,19 @@ def init_deposit(balance, user, tokens, amount):
 
 
 def get_current_timestamp():
-    return int(time.time() * 1000)
+    timestamp = int(time.time() * 1000)
+    if config.MODE == 'simulation':
+        try:
+            headers = {'content-type': 'application/json'}
+            url = 'http://scheduler:7000/get'
+            r = requests.get(url, headers=headers)
+            data = r.json()
+            timestamp = data.get['timestamp']
+        except Exception as e:
+            logger.error(
+                "Can't get timestamp from scheduler: {}".format(str(e)))
+            timestamp = int(time.time() * 1000)
+    return timestamp
 
 
 def setup_data(rdb, ob_file):

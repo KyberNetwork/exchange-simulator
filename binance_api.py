@@ -39,6 +39,7 @@ def action(expected_params=[], public=False):
                 return str(error)
 
             params = request.args.to_dict()
+            logger.debug('Original params: {}'.format(params))
             if not public:
                 api_key = request.headers.get('X-MBX-APIKEY')
                 if not api_key:
