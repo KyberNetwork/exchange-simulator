@@ -46,7 +46,10 @@ def action(expected_params=[], public=False):
                     return str(MISSING_ERROR['api_key'])
                 else:
                     params['api_key'] = api_key.lower()
-                binance.check_deposits(api_key)
+                try:
+                    binance.check_deposits(api_key)
+                except Exception:
+                    logger.error('Check deposit fail.')
 
             if 'timestamp' not in params:
                 params['timestamp'] = utils.get_current_timestamp()

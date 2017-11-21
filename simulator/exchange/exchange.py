@@ -144,10 +144,14 @@ class Exchange:
 
             if(sum(balances) > 0):
                 logger.info('Got some deposit.')
-                tx = web3_interface.clear_deposits(
-                    self.deposit_address,
-                    [token.address for token in self.supported_tokens],
-                    balances)
+                try:
+                    tx = web3_interface.clear_deposits(
+                        self.deposit_address,
+                        [token.address for token in self.supported_tokens],
+                        balances)
+                except Exception as e:
+                    logger.error('Clear deposit fail.')
+                    return
 
             for idx, balance in enumerate(balances):
                 token = self.supported_tokens[idx]
