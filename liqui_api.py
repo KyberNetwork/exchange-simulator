@@ -68,10 +68,12 @@ def depth(pairs):
 
     try:
         depth = liqui.get_depth_api(pairs, timestamp)
-        return json.dumps(depth)
-    except ValueError as e:
-        logger.info("Bad Request: {}".format(e))
-        return BadRequest()
+        return jsonify(depth)
+    except Exception as e:
+        return jsonify({
+            'success': 0,
+            'error': str(e)
+        })
 
 
 rdb = utils.get_redis_db()

@@ -25,7 +25,15 @@ class Exchange:
     def get_balance(self, api_key):
         return self.balance.get(user=api_key)
 
+    def check_pair(self, pair):
+        base, quote = pair.split('_')
+        base_is_supported = any(base == t.token for t in self.supported_tokens)
+        quote_is_ether = quote == 'eth'
+        if (not base_is_supported) or (not quote_is_ether):
+            raise ValueError('Invalid pair {}.'.format(pair))
+
     def get_order_book(self, pair, timestamp):
+        self.check_pair(pair)
         try:
             order_book = self.orders.load(pair, self.name, timestamp)
         except Exception as e:
@@ -37,10 +45,8 @@ class Exchange:
 
     def trade(self, api_key, type, rate, pair, amount, timestamp):
         rate, amount = float(rate), float(amount)
+        self.check_pair(pair)
         base, quote = pair.split('_')
-        # if base not in self.supported_tokens:
-        # raise ValueError('This token is not supported {}.'.format(base))
-        # assert quote == 'eth', 'We are only support token vs eth.'
         type = type.lower()
 
         # 1. lock balance
