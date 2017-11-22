@@ -35,8 +35,8 @@ def action(expected_params):
                 validate_params(expected_params)
 
                 params = request.args.to_dict()
-                if 'timestamp' not in params:
-                    params['timestamp'] = utils.get_current_timestamp()
+                params['timestamp'] = utils.get_timestamp(
+                    request.args.to_dict())
 
                 logger.info('Params: {}'.format(params))
                 result = func(params)

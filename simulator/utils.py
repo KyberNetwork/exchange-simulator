@@ -35,19 +35,18 @@ def init_deposit(balance, user, tokens, amount):
         balance.deposit(user, token, amount)
 
 
-def get_current_timestamp():
-    timestamp = int(time.time() * 1000)
+def get_timestamp(data={}):
     if config.MODE == 'simulation':
         try:
-            headers = {'content-type': 'application/json'}
-            url = 'http://scheduler:7000/get'
-            r = requests.get(url, headers=headers)
+            r = requests.get('http://scheduler:7000/get')
             data = r.json()
-            timestamp = data.get['timestamp']
+            timestamp = data['timestamp']
         except Exception as e:
             logger.error(
                 "Can't get timestamp from scheduler: {}".format(str(e)))
             timestamp = int(time.time() * 1000)
+    else:
+        timestamp = data.get('timestamp', int(time.time()) * 1000)
     return timestamp
 
 

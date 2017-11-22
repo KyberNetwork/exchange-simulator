@@ -51,8 +51,7 @@ def action(expected_params=[], public=False):
                 except Exception:
                     logger.error('Check deposit fail.')
 
-            if 'timestamp' not in params:
-                params['timestamp'] = utils.get_current_timestamp()
+            params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
             logger.info('Params: {}'.format(params))
             try:

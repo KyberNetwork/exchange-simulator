@@ -34,8 +34,7 @@ def index():
         if not method:
             raise KeyError('Method is missing in your request')
 
-        params['timestamp'] = request.args.get('timestamp',
-                                               utils.get_current_timestamp())
+        params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
         logger.info('Params: {}'.format(params))
         liqui.check_deposits(api_key)
@@ -64,7 +63,7 @@ def index():
 
 @app.route("/depth/<string:pairs>", methods=['GET'])
 def depth(pairs):
-    timestamp = request.args.get('timestamp', utils.get_current_timestamp())
+    timestamp = utils.get_timestamp(request.args.to_dict())
 
     try:
         depth = liqui.get_depth_api(pairs, timestamp)

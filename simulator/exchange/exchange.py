@@ -140,7 +140,7 @@ class Exchange:
         else:
             last_check = int(last_check)
 
-        current_time = utils.get_current_timestamp()
+        current_time = utils.get_timestamp()
         if(current_time >= last_check + self.deposit_delay_in_secs * 1000):
             try:
                 balances = web3_interface.get_balances(
