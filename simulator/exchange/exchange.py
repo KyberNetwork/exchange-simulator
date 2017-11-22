@@ -147,8 +147,7 @@ class Exchange:
                     self.deposit_address,
                     [token.address for token in self.supported_tokens])
             except Exception as e:
-                logger.error(e)
-                logger.info('Checking deposit fail.')
+                logger.error('Checking deposit fail: {}.'.format(e))
                 return
 
             if(sum(balances) > 0):
@@ -159,7 +158,7 @@ class Exchange:
                         [token.address for token in self.supported_tokens],
                         balances)
                 except Exception as e:
-                    logger.error('Clear deposit fail.')
+                    logger.error('Clear deposit fail: {}.'.format(e))
                     return
 
             for idx, balance in enumerate(balances):
@@ -168,8 +167,8 @@ class Exchange:
                 try:
                     self.balance.deposit(api_key, token.token, qty)
                 except Exception as e:
-                    logger.error(e)
-                    raise ValueError("check_deposits: deposit failed")
+                    logger.error('Deposit to balance fail: {}'.format(e))
+                    return
 
             self.db.set(check_deposit_key, current_time)
 

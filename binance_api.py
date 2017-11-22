@@ -57,7 +57,7 @@ def action(expected_params=[], public=False):
             try:
                 result = func(params)
             except Exception as e:
-                logger.info('Error Output: {}'.str(e))
+                logger.info('Error Output: {}'.format(str(e)))
                 return jsonify({'code': -1, 'msg': str(e)})
 
             logger.info('Output: {}'.format(result))

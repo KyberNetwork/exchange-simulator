@@ -42,8 +42,7 @@ def get_timestamp(data={}):
             data = r.json()
             timestamp = data['timestamp']
         except Exception as e:
-            logger.error(
-                "Can't get timestamp from scheduler: {}".format(str(e)))
+            logger.error("Can't get timestamp from scheduler: {}".format(e))
             timestamp = int(time.time() * 1000)
     else:
         timestamp = data.get('timestamp', int(time.time()) * 1000)
