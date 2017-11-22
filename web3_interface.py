@@ -9,16 +9,18 @@ import jsonrpc
 import rlp
 from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
+import time
 
+local_url = "http://localhost:5000/"
+# local_url = "https://kovan.infura.io"
 
-# local_url = "http://localhost:8545/jsonrpc"
-local_url = "https://kovan.infura.io"
 
 def merge_two_dicts(x, y):
     '''Given two dicts, merge them into a new dict as a shallow copy.'''
     z = x.copy()
     z.update(y)
     return z
+
 
 def json_call(method_name, params):
     url = local_url
@@ -57,7 +59,12 @@ def eval_startgas(src, dst, value, data, gas_price):
     return json_call("eth_estimateGas", [params])
 
 
+global_nonce = -1
+
+
 def make_transaction(src_priv_key, dst_address, value, data):
+    global global_nonce
+
     src_address = b2h(utils.privtoaddr(src_priv_key))
     nonce = get_num_transactions(src_address)
     gas_price = get_gas_price_in_wei()
@@ -70,6 +77,14 @@ def make_transaction(src_priv_key, dst_address, value, data):
     start_gas = "0xF4240"
 
     nonce = int(nonce, 16)
+    if(global_nonce < 0):
+        global_nonce = nonce
+
+    nonce = global_nonce
+    global_nonce += 1
+
+    print(nonce)
+
     gas_price = int(gas_price, 16)
     # int(gas_price, 16)/20
     start_gas = int(start_gas, 16) + 100000
@@ -187,6 +202,8 @@ def wait_for_tx_confirmation(tx_hash):
     round = 0
     while(not is_tx_confirmed(tx_hash)):
         round += 1
+        time.sleep(1)
+        print("wait")
         if(round > 100):
             return False
 
@@ -200,3 +217,35 @@ def clear_deposits(exchange_address, token_array, amounts):
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "clearBalances",
                          [token_array, amounts])
+
+
+def post():
+    json_call("enableDelay", [])
+
+
+def test():
+    key = h2b(
+        "dae8043a6b75fbf1c88efa28f05434ca8fd6d3270b8cc5086b64a3319512e3f6")
+    tx_hash1 = make_transaction(key, 0x123, 10**18, h2b("1234"))
+
+    post()
+
+    key = h2b(
+        "dae8043a6b75fbf1c88efa28f05434ca8fd6d3270b8cc5086b64a3319512e3f6")
+    tx_hash15 = make_transaction(key, 0x123, 10**18, h2b("1234"))
+
+    time.sleep(10)
+
+    key = h2b(
+        "dae8043a6b75fbf1c88efa28f05434ca8fd6d3270b8cc5086b64a3319512e3f6")
+    tx_hash2 = make_transaction(key, 0x124, 10**18, h2b("1234"))
+
+    print (tx_hash1)
+    wait_for_tx_confirmation(tx_hash1)
+
+    print (tx_hash15)
+    wait_for_tx_confirmation(tx_hash1)
+
+    print (tx_hash2)
+    wait_for_tx_confirmation(tx_hash2)
+test()
