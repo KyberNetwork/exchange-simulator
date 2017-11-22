@@ -116,9 +116,9 @@ class Exchange:
                 'Execute this order with quantity {}'.format(trade_amount))
 
             base_change += trade_amount
-            quote_change += rate * trade_amount
+            quote_change += order['Rate'] * trade_amount
 
-            self.processed_order_ids.add(id)
+            # self.processed_order_ids.add(id)
             if needed_quantity == trade_amount:
                 break  # trade request has been fulfilled
 
