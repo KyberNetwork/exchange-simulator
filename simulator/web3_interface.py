@@ -39,13 +39,13 @@ def json_call(method_name, params):
 
     # logger.debug("Payload: {}".format(payload))
     r = requests.post(url, data=json.dumps(payload), headers=headers)
-    assert r.status_code == requests.codes.ok, "We've got a problem with Kovan"
+    assert r.status_code == requests.codes.ok, 'Blockchain connection issue.'
     data = r.json()
     try:
-        result = data['result']
+        return data['result']
     except KeyError:
-        raise ValueError('Invalid response from Kovan')
-    return result
+        logger.error('Blockchain response: {}'.format(data))
+        raise ValueError(data)
 
 
 def get_num_transactions(address):
