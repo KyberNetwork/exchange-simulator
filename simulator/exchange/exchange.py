@@ -77,7 +77,7 @@ class Exchange:
         if new_order.executed_amount > 0:
             if type == 'buy':
                 self.balance.deposit(api_key, base, base_change, 'available')
-                self.balance.withdraw(api_key, base, quote_change, 'lock')
+                self.balance.withdraw(api_key, quote, quote_change, 'lock')
             else:
                 self.balance.deposit(api_key, quote, quote_change, 'available')
                 self.balance.withdraw(api_key, base, base_change, 'lock')
@@ -142,7 +142,8 @@ class Exchange:
         base, quote = order.pair.split('_')
         # unlock balance
         if order.type == 'buy':
-            self.balance.unlock(api_key, quote, order.remaining_amount * rate)
+            self.balance.unlock(
+                api_key, quote, order.remaining_amount * order.rate)
         else:
             self.balance.unlock(api_key, base, order.remaining_amount)
         self.orders.remove(order_id)

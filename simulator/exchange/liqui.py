@@ -66,7 +66,7 @@ class Liqui(Exchange):
     def cancel_order_api(self, api_key, order_id, *args, **kargs):
         self.cancel_order(api_key, order_id)
         return {
-            'order_id': order_id,
+            'order_id': int(order_id),
             'funds': self.get_balance(api_key, 'available')
         }
 

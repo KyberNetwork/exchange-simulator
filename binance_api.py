@@ -1,4 +1,5 @@
 from functools import wraps
+import traceback
 
 from flask import Flask, request, jsonify
 
@@ -57,6 +58,7 @@ def action(expected_params=[], public=False):
             try:
                 result = func(params)
             except Exception as e:
+                # traceback.print_exc()
                 logger.info('Error Output: {}'.format(str(e)))
                 return jsonify({'code': -1, 'msg': str(e)})
 

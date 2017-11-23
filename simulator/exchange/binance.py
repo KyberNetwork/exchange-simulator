@@ -23,7 +23,6 @@ class Binance(Exchange):
     def get_account_api(self, api_key, *args, **kargs):
         available = self.balance.get(user=api_key, type='available')
         lock = self.balance.get(user=api_key, type='lock')
-
         balances = []
         for token in self.supported_tokens:
             balances.append({

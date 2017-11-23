@@ -59,6 +59,7 @@ def index():
         })
     except Exception as e:
         # traceback.print_exc()
+        logger.debug('Error Output: {}'.format(e))
         return jsonify({
             'success': 0,
             'error': str(e)

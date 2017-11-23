@@ -30,7 +30,7 @@ class BalanceHandler:
         assert amount >= 0, "invalid amount"
         key = self._key(user, balance_type)
         value = self._db.hincrbyfloat(key, token, -amount)
-        if value < 1e-18:  # rollback
+        if value < -1e-18:  # rollback
             self._db.hincrbyfloat(key, token, amount)
             raise ValueError("insufficient balance")
 
