@@ -30,6 +30,8 @@ class Liqui(Exchange):
     def trade_api(self, api_key, type, rate, pair, amount,
                   timestamp, *args, **kargs):
         result = self.trade(api_key, type, rate, pair, amount, timestamp)
+        if result['remaining'] == 0:
+            result['order_id'] = 0
         return {
             'received': result['received'],
             'remains': result['remaining'],
@@ -41,14 +43,15 @@ class Liqui(Exchange):
         orders = self.get_active_orders(pair)
         result = {}
         for o in orders:
-            result[o.id] = {
-                'pair': o.pair,
-                'type': o.type,
-                'amount': o.remaining_amount,
-                'rate': o.rate,
-                'timestamp_created': 0,
-                'status': 0,
-            }
+            if o.active:
+                result[o.id] = {
+                    'pair': o.pair,
+                    'type': o.type,
+                    'amount': o.remaining_amount,
+                    'rate': o.rate,
+                    'timestamp_created': 0,
+                    'status': 0,
+                }
         return result
 
     def get_order_api(self, order_id, *args, **kargs):

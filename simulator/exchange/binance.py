@@ -59,8 +59,22 @@ class Binance(Exchange):
         result = []
         for o in orders:
             output = self.__order_to_dict(o)
-            output['status'] = 'NEW'
+            if o.active:
+                output['status'] = 'NEW'
+            else:
+                output['status'] = 'FILLED'
             result.append(output)
+        return result
+
+    def get_open_orders_api(self, api_key, symbol, *args, **kargs):
+        pair = self.__symbol_to_pair(symbol)
+        orders = self.get_active_orders(pair)
+        result = []
+        for o in orders:
+            if o.active:
+                output = self.__order_to_dict(o)
+                output['status'] = 'NEW'
+                result.append(output)
         return result
 
     def get_order_api(self, orderId, *args, **kargs):

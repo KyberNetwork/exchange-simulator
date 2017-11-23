@@ -18,3 +18,6 @@ class Order:
             return 0
         elif self.remaining_amount == 0:
             return 1
+
+    def active(self):
+        return self.remaining_amount > 0

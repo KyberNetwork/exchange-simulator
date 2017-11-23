@@ -71,8 +71,7 @@ class Exchange:
         # 4.1. update order
         new_order.executed_amount = base_change
         new_order.remaining_amount = amount - base_change
-        if new_order.remaining_amount > 0:
-            self.orders.add(new_order)
+        self.orders.add(new_order)
         # 4.2. update balance
         if new_order.executed_amount > 0:
             if type == 'buy':

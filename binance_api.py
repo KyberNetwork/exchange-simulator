@@ -99,6 +99,12 @@ def get_all_orders(params):
     return binance.get_all_orders_api(**params)
 
 
+@api.route('/api/v3/openOrders', methods=['GET'])
+@action(public=False)
+def get_open_orders(params):
+    return binance.get_open_orders_api(**params)
+
+
 @api.route('/api/v3/order', methods=['DELETE'])
 @action(public=False)
 def cancel_order(params):
