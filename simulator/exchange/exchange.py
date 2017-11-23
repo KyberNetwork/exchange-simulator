@@ -22,8 +22,8 @@ class Exchange:
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.processed_order_ids = set()
 
-    def get_balance(self, api_key):
-        return self.balance.get(user=api_key)
+    def get_balance(self, user, type):
+        return self.balance.get(user=user, type=type)
 
     def check_pair(self, pair):
         base, quote = pair.split('_')
@@ -51,9 +51,9 @@ class Exchange:
 
         # 1. lock balance
         if type == 'buy':
-            self.balance.withdraw(api_key, quote, rate * amount)
+            self.balance.lock(api_key, quote, rate * amount)
         elif type == 'sell':
-            self.balance.withdraw(api_key, base, amount)
+            self.balance.lock(api_key, base, amount)
         else:
             raise ValueError('Invalid type of order.')
 
@@ -68,18 +68,19 @@ class Exchange:
                                                       amount,
                                                       timestamp)
 
-        # 4. update balance and order
-        # update order & balance
-        # we are not holding balance for remaining order
+        # 4.1. update order
         new_order.executed_amount = base_change
         new_order.remaining_amount = amount - base_change
-        self.orders.add(new_order)
-        if type == 'buy':
-            self.balance.deposit(api_key, base, base_change)
-            self.balance.deposit(api_key, quote, rate * amount - quote_change)
-        else:
-            self.balance.deposit(api_key, base, amount - base_change)
-            self.balance.deposit(api_key, quote, quote_change)
+        if new_order.remaining_amount > 0:
+            self.orders.add(new_order)
+        # 4.2. update balance
+        if new_order.executed_amount > 0:
+            if type == 'buy':
+                self.balance.deposit(api_key, base, base_change, 'available')
+                self.balance.withdraw(api_key, base, quote_change, 'lock')
+            else:
+                self.balance.deposit(api_key, quote, quote_change, 'available')
+                self.balance.withdraw(api_key, base, base_change, 'lock')
 
         return {
             'received': new_order.executed_amount,
@@ -95,8 +96,7 @@ class Exchange:
         elif type == 'sell':
             orders = order_book['Bids']
 
-        base_change = 0
-        quote_change = 0
+        base_change, quote_change = 0.0, 0.0
         for order in orders:
             logger.debug('Processing order: {}'.format(order))
 
@@ -137,8 +137,15 @@ class Exchange:
             self.check_pair(pair)
         return self.orders.get_all(pair)
 
-    def cancel_order(self, order_id):
-        return self.orders.remove(order_id)
+    def cancel_order(self, api_key, order_id):
+        order = self.orders.get(order_id)
+        base, quote = order.pair.split('_')
+        # unlock balance
+        if order.type == 'buy':
+            self.balance.unlock(api_key, quote, order.remaining_amount * rate)
+        else:
+            self.balance.unlock(api_key, base, order.remaining_amount)
+        self.orders.remove(order_id)
 
     def check_deposits(self, api_key):
         # check enough time passed since last deposit check
@@ -174,18 +181,16 @@ class Exchange:
             for idx, balance in enumerate(balances):
                 token = self.supported_tokens[idx]
                 qty = float(balance) / (10**token.decimals)
-                try:
-                    self.balance.deposit(api_key, token.token, qty)
-                except Exception as e:
-                    logger.error('Deposit to balance fail: {}'.format(e))
-                    return
+                if qty > 0:
+                    self.balance.deposit(api_key, token.token, qty, 'available')
 
             self.db.set(check_deposit_key, current_time)
 
     def withdraw(self, api_key, coinName, address, amount):
         coinName = coinName.lower()
         amount = float(amount)
-        self.balance.withdraw(user=api_key, token=coinName, amount=amount)
+        self.balance.withdraw(user=api_key, token=coinName,
+                              amount=amount, balance_type='available')
         token = utils.get_token(coinName)
         tx = web3_interface.withdraw(self.deposit_address,
                                      token.address,

@@ -21,14 +21,15 @@ class Binance(Exchange):
         return {'lastUpdateId': timestamp, 'asks': asks, 'bids': bids}
 
     def get_account_api(self, api_key, *args, **kargs):
-        balance = self.balance.get(user=api_key)
+        available = self.balance.get(user=api_key, type='available')
+        lock = self.balance.get(user=api_key, type='lock')
 
         balances = []
         for token in self.supported_tokens:
             balances.append({
                 'asset': token.token.upper(),
-                'free': str(balance[token.token]),
-                'locked': "0.0"
+                'free': str(available[token.token]),
+                'locked': str(lock[token.token])
             })
 
         return {
@@ -68,7 +69,7 @@ class Binance(Exchange):
         return self.__order_to_dict(order)
 
     def cancel_order_api(self, api_key, symbol, orderId, *args, **kargs):
-        self.cancel_order(orderId)
+        self.cancel_order(api_key, orderId)
         return {
             'symbol': symbol,
             'orderId': int(orderId),

@@ -32,7 +32,7 @@ def get_token(name):
 
 def init_deposit(balance, user, tokens, amount):
     for token in tokens:
-        balance.deposit(user, token, amount)
+        balance.deposit(user, token, amount, 'available')
 
 
 def get_timestamp(data={}):
