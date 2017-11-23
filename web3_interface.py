@@ -156,10 +156,13 @@ def to_hex_address(integer):
 #
 
 
-def withdraw(exchange_address, token, amount, destiniation):
-    # this is not a real key.
-    key = h2b(
-        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
+def get_test_private_key(index):
+    return utils.sha3("exchange" + str(index))
+
+#
+
+
+def withdraw(key, exchange_address, token, amount, destiniation):
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "withdraw",
                          [token, amount, destiniation])
@@ -210,10 +213,7 @@ def wait_for_tx_confirmation(tx_hash):
 
 #
 
-def clear_deposits(exchange_address, token_array, amounts):
-    # this is not a real key.
-    key = h2b(
-        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
+def clear_deposits(key, exchange_address, token_array, amounts):
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "clearBalances",
                          [token_array, amounts])
@@ -248,4 +248,6 @@ def test():
 
     print (tx_hash2)
     wait_for_tx_confirmation(tx_hash2)
+
+
 test()
