@@ -88,13 +88,6 @@ else:
 supported_tokens = config.SUPPORTED_TOKENS
 balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
-# init deposit
-initialized_balance = rdb.get('INITIALIZED_LIQUI_BALANCE')
-if not initialized_balance:
-    utils.init_deposit(balance=balance_handler,
-                       user=config.DEFAULT_LIQUI_API_KEY,
-                       amount=100000, tokens=supported_tokens)
-    rdb.set('INITIALIZED_LIQUI_BALANCE', True)
 
 liqui = Liqui(
     "liqui",
