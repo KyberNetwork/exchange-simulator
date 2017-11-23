@@ -19,6 +19,19 @@ class OrderHandler:
             raise ValueError('Order not found.')
         return self.orders[order_id]
 
+    def get_all(self, pair=None):
+        all_orders = self.orders.values()
+        if not pair:
+            return all_orders
+        else:
+            return list(filter(lambda o: o.pair == pair, all_orders))
+
+    def remove(self, order_id):
+        try:
+            del self.orders[order_id]
+        except KeyError:
+            raise ValueError('Order not found.')
+
     def load(self, pair, exchange_name, timestamp):
         raise NotImplementedError
 

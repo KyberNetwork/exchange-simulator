@@ -53,14 +53,14 @@ def action(expected_params=[], public=False):
 
             params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
-            logger.info('Params: {}'.format(params))
+            logger.debug('Params: {}'.format(params))
             try:
                 result = func(params)
             except Exception as e:
                 logger.info('Error Output: {}'.format(str(e)))
                 return jsonify({'code': -1, 'msg': str(e)})
 
-            logger.info('Output: {}'.format(result))
+            logger.debug('Output: {}'.format(result))
 
             return jsonify(result)
         return wrapper
@@ -89,6 +89,18 @@ def create_order(params):
 @action(public=False)
 def get_order(params):
     return binance.get_order_api(**params)
+
+
+@api.route('/api/v3/allOrders', methods=['GET'])
+@action(public=False)
+def get_all_orders(params):
+    return binance.get_all_orders_api(**params)
+
+
+@api.route('/api/v3/order', methods=['DELETE'])
+@action(public=False)
+def cancel_order(params):
+    return binance.cancel_order_api(**params)
 
 
 @api.route('/wapi/v3/withdraw.html', methods=['POST'])

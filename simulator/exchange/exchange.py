@@ -130,6 +130,16 @@ class Exchange:
     def get_order(self, order_id):
         return self.orders.get(order_id)
 
+    def get_active_orders(self, pair):
+        if not pair:
+            pair = None
+        else:
+            self.check_pair(pair)
+        return self.orders.get_all(pair)
+
+    def cancel_order(self, order_id):
+        return self.orders.remove(order_id)
+
     def check_deposits(self, api_key):
         # check enough time passed since last deposit check
         check_deposit_key = ','.join([self.name, 'last_deposit_check'])

@@ -37,6 +37,20 @@ class Liqui(Exchange):
             'funds': self.get_balance(api_key)
         }
 
+    def get_active_orders_api(self, api_key, pair, *args, **kargs):
+        orders = self.get_active_orders(pair)
+        result = {}
+        for o in orders:
+            result[o.id] = {
+                'pair': o.pair,
+                'type': o.type,
+                'amount': o.remaining_amount,
+                'rate': o.rate,
+                'timestamp_created': 0,
+                'status': 0,
+            }
+        return result
+
     def get_order_api(self, order_id, *args, **kargs):
         order = self.get_order(order_id)
         return {
@@ -47,6 +61,13 @@ class Liqui(Exchange):
             'rate': order.rate,
             'timestamp_created': 0,
             'status': order.status()
+        }
+
+    def cancel_order_api(self, api_key, order_id, *args, **kargs):
+        self.cancel_order(order_id)
+        return {
+            'order_id': order_id,
+            'funds': self.get_balance(api_key)
         }
 
     def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):

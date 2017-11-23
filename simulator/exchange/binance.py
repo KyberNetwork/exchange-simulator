@@ -10,8 +10,7 @@ class Binance(Exchange):
         super().__init__(*args)
 
     def get_order_book_api(self, symbol, timestamp, *args, **kargs):
-        base, quote = symbol[:-3], symbol[-3:]
-        pair = '_'.join([base, quote]).lower()
+        pair = self.__symbol_to_pair(symbol)
         order_book = self.get_order_book(pair, timestamp)
         asks = [
             [str(o['Rate']), str(o['Quantity']), []] for o in order_book['Asks']
@@ -45,10 +44,7 @@ class Binance(Exchange):
 
     def trade_api(self, api_key, symbol, quantity, price, side,
                   timestamp, *args, **kargs):
-        base = symbol[:-3]
-        quote = symbol[-3:]
-        pair = '_'.join([base, quote]).lower()
-
+        pair = self.__symbol_to_pair(symbol)
         result = self.trade(api_key, side, price, pair, quantity, timestamp)
         return {
             'symbol': symbol,
@@ -57,10 +53,40 @@ class Binance(Exchange):
             'transactTime': 0
         }
 
+    def get_all_orders_api(self, api_key, symbol, *args, **kargs):
+        pair = self.__symbol_to_pair(symbol)
+        orders = self.get_active_orders(pair)
+        result = []
+        for o in orders:
+            output = self.__order_to_dict(o)
+            output['status'] = 'NEW'
+            result.append(output)
+        return result
+
     def get_order_api(self, orderId, *args, **kargs):
         order = self.get_order(orderId)
+        return self.__order_to_dict(order)
+
+    def cancel_order_api(self, api_key, symbol, orderId, *args, **kargs):
+        self.cancel_order(orderId)
         return {
-            'symbol': order.pair.upper(),
+            'symbol': symbol,
+            'orderId': int(orderId),
+            'origClientOrderId': 'origClientOrderId',
+            'clientOrderId': 'clientOrderId'
+        }
+
+    def withdraw_api(self, api_key, asset, amount, address, *args, **kargs):
+        tx = self.withdraw(api_key, asset, address, amount)
+        return {
+            'msg': 'success',
+            'success': True,
+            'id': str(tx)[2:]  # remove 0x in transaction id
+        }
+
+    def __order_to_dict(self, order):
+        return {
+            'symbol': self.__pair_to_symbol(order.pair),
             'orderId': order.id,
             'clientOrderId': 'myOrder1',
             'price': str(order.rate),
@@ -74,10 +100,9 @@ class Binance(Exchange):
             'time': 0
         }
 
-    def withdraw_api(self, api_key, asset, amount, address, *args, **kargs):
-        tx = self.withdraw(api_key, asset, address, amount)
-        return {
-            'msg': 'success',
-            'success': True,
-            'id': str(tx)[2:]  # remove 0x in transaction id
-        }
+    def __symbol_to_pair(self, symbol):
+        base, quote = symbol[:-3], symbol[-3:]
+        return '_'.join([base, quote]).lower()
+
+    def __pair_to_symbol(self, pair):
+        return ''.join(map(lambda x: x.upper(), pair.split('_')))

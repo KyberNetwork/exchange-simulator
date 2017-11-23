@@ -36,7 +36,7 @@ def index():
 
         params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
-        logger.info('Params: {}'.format(params))
+        logger.debug('Params: {}'.format(params))
         liqui.check_deposits(api_key)
         if method == 'getInfo':
             output = liqui.get_balance_api(**params)
@@ -46,9 +46,13 @@ def index():
             output = liqui.withdraw_api(**params)
         elif method == 'OrderInfo':
             output = liqui.get_order_api(**params)
+        elif method == 'ActiveOrders':
+            output = liqui.get_active_orders_api(**params)
+        elif method == 'CancelOrder':
+            output = liqui.cancel_order_api(**params)
         else:
             raise AttributeError('Invalid method requested')
-        logger.info('Output: {}'.format(output))
+        logger.debug('Output: {}'.format(output))
         return jsonify({
             'success': 1,
             'return': output
