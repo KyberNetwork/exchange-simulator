@@ -21,18 +21,21 @@ class BalanceHandler:
 
     def deposit(self, user, token, amount, balance_type):
         amount = float(amount)
-        assert amount >= 0, "invalid amount"
+        assert amount >= 0, 'invalid amount: {}'.format([amount, token])
         key = self._key(user, balance_type)
-        value = self._db.hincrbyfloat(key, token, amount)
+        self._db.hincrbyfloat(key, token, amount)
 
     def withdraw(self, user, token, amount, balance_type):
         amount = float(amount)
-        assert amount >= 0, "invalid amount"
-        key = self._key(user, balance_type)
-        value = self._db.hincrbyfloat(key, token, -amount)
-        if value < -1e-18:  # rollback
-            self._db.hincrbyfloat(key, token, amount)
-            raise ValueError("insufficient balance")
+        assert amount >= 0, 'invalid amount: {}'.format([amount, token])
+        key = self._key(user, balance_type)        
+        new_value = self._db.hincrbyfloat(key, token, -amount)
+        if (new_value < 0) and (abs(new_value) > 1e-8):
+            self._db.hincrbyfloat(key, token, amount)            
+            raise ValueError('not enough {} {} in {} balance'.format(
+                amount, token, balance_type))
+        if (abs(new_value) < 1e-8):
+            self._db.hset(key, token, 0)
 
     def lock(self, user, token, amount):
         self.withdraw(user, token, amount, 'available')

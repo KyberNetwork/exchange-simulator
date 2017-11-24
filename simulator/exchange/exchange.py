@@ -161,24 +161,14 @@ class Exchange:
         current_time = utils.get_timestamp()
         if(current_time >= last_check + self.deposit_delay_in_secs * 1000):
             token_addresses = [t.address for t in self.supported_tokens]
-
-            try:
-                balances = web3_interface.get_balances(self.deposit_address,
-                                                       token_addresses)
-            except Exception as e:
-                logger.error('Checking deposit fail: {}.'.format(e))
-                return
-
+            balances = web3_interface.get_balances(
+                self.deposit_address, token_addresses)
             if(sum(balances) > 0):
-                logger.info('Got some deposit.')
-                try:
-                    tx = web3_interface.clear_deposits(self.private_key,
-                                                       self.deposit_address,
-                                                       token_addresses,
-                                                       balances)
-                except Exception as e:
-                    logger.error('Clear deposit fail: {}.'.format(e))
-                    return
+                logger.debug('Got deposit.')                
+                tx = web3_interface.clear_deposits(self.private_key,
+                                                   self.deposit_address,
+                                                   token_addresses,
+                                                   balances)
 
             for idx, balance in enumerate(balances):
                 token = self.supported_tokens[idx]

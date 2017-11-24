@@ -37,7 +37,12 @@ def index():
         params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
         logger.debug('Params: {}'.format(params))
-        liqui.check_deposits(api_key)
+
+        try:
+            liqui.check_deposits(api_key)
+        except Exception as e:
+            logger.error('Check deposit failed {}'.format(e))
+
         if method == 'getInfo':
             output = liqui.get_balance_api(**params)
         elif method == 'Trade':

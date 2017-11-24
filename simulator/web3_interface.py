@@ -44,8 +44,7 @@ def json_call(method_name, params):
     data = r.json()
     try:
         return data['result']
-    except KeyError:
-        logger.error('Blockchain response: {}'.format(data))
+    except KeyError:        
         raise ValueError(data)
 
 
