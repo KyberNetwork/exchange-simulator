@@ -7,3 +7,4 @@ Flask==0.12.2
 redis==2.10.6
 raven[flask]==6.3.0
 uWSGI==2.0.15
+jsonrpcserver==3.5.2
