@@ -43,7 +43,7 @@ class Liqui(Exchange):
         orders = self.get_active_orders(pair)
         result = {}
         for o in orders:
-            if o.active:
+            if o.active():
                 result[o.id] = {
                     'pair': o.pair,
                     'type': o.type,

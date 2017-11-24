@@ -14,10 +14,10 @@ class Order:
         self.id = random.randint(0, MAX_ORDER_ID)
 
     def status(self):
-        if self.remaining_amount > 0:
+        if self.remaining_amount > 1e-18:
             return 0
         elif self.remaining_amount == 0:
             return 1
 
     def active(self):
-        return self.remaining_amount > 0
+        return self.remaining_amount > 1e-18

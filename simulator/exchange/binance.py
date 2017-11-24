@@ -59,7 +59,7 @@ class Binance(Exchange):
         result = []
         for o in orders:
             output = self.__order_to_dict(o)
-            if o.active:
+            if o.active():
                 output['status'] = 'NEW'
             else:
                 output['status'] = 'FILLED'
@@ -71,7 +71,7 @@ class Binance(Exchange):
         orders = self.get_active_orders(pair)
         result = []
         for o in orders:
-            if o.active:
+            if o.active():
                 output = self.__order_to_dict(o)
                 output['status'] = 'NEW'
                 result.append(output)
