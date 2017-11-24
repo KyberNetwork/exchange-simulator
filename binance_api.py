@@ -130,7 +130,8 @@ balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
 
 binance = Binance(
-    "binance",
+    'binance',
+    config.PRIVATE_KEY['binance'],
     list(supported_tokens.values()),
     rdb,
     order_handler,

@@ -90,7 +90,8 @@ balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
 
 liqui = Liqui(
-    "liqui",
+    'liqui',
+    config.PRIVATE_KEY['liqui'],
     list(supported_tokens.values()),
     rdb,
     order_handler,
@@ -104,6 +105,6 @@ if config.MODE != 'dev':
                     '17e24d6686d34465b8a97801e6e31ba4@sentry.io/241770')
 
 
-if __name__ == "__main__":
-    logger.info("Running in {} mode".format(config.MODE))
+if __name__ == '__main__':
+    logger.info('Running in {} mode'.format(config.MODE))
     app.run(host='0.0.0.0', port=5000, debug=True)

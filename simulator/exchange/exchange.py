@@ -10,7 +10,7 @@ logger = utils.get_logger()
 
 class Exchange:
 
-    def __init__(self, exchange_name, supported_tokens, db,
+    def __init__(self, exchange_name, private_key, supported_tokens, db,
                  order_handler, balance_handler,
                  deposit_address, deposit_delay_in_secs):
         self.name = exchange_name
@@ -21,6 +21,7 @@ class Exchange:
         self.deposit_address = deposit_address
         self.deposit_delay_in_secs = deposit_delay_in_secs
         self.processed_order_ids = set()
+        self.private_key = private_key
 
     def get_balance(self, user, type):
         return self.balance.get(user=user, type=type)
@@ -159,10 +160,11 @@ class Exchange:
 
         current_time = utils.get_timestamp()
         if(current_time >= last_check + self.deposit_delay_in_secs * 1000):
+            token_addresses = [t.address for t in self.supported_tokens]
+
             try:
-                balances = web3_interface.get_balances(
-                    self.deposit_address,
-                    [token.address for token in self.supported_tokens])
+                balances = web3_interface.get_balances(self.deposit_address,
+                                                       token_addresses)
             except Exception as e:
                 logger.error('Checking deposit fail: {}.'.format(e))
                 return
@@ -170,10 +172,10 @@ class Exchange:
             if(sum(balances) > 0):
                 logger.info('Got some deposit.')
                 try:
-                    tx = web3_interface.clear_deposits(
-                        self.deposit_address,
-                        [token.address for token in self.supported_tokens],
-                        balances)
+                    tx = web3_interface.clear_deposits(self.private_key,
+                                                       self.deposit_address,
+                                                       token_addresses,
+                                                       balances)
                 except Exception as e:
                     logger.error('Clear deposit fail: {}.'.format(e))
                     return
@@ -192,7 +194,8 @@ class Exchange:
         self.balance.withdraw(user=api_key, token=coinName,
                               amount=amount, balance_type='available')
         token = utils.get_token(coinName)
-        tx = web3_interface.withdraw(self.deposit_address,
+        tx = web3_interface.withdraw(self.private_key,
+                                     self.deposit_address,
                                      token.address,
                                      int(amount * 10**token.decimals),
                                      address)

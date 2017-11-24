@@ -259,4 +259,9 @@ def test():
     wait_for_tx_confirmation(tx_hash2)
 
 
-test()
+def main():
+    test()
+
+
+if __name__ == '__main__':
+    main()
