@@ -86,7 +86,7 @@ def make_transaction(src_priv_key, dst_address, value, data):
     # data_as_string, gas_price)
     start_gas = "0xF4240"
 
-    # nonce = int(nonce, 16)
+    nonce = int(nonce, 16)
     # if(global_nonce < 0):
     # global_nonce = nonce
 
