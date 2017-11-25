@@ -39,12 +39,12 @@ def json_call(method_name, params):
     }
 
     # logger.debug("Payload: {}".format(payload))
-    r = requests.post(url, data=json.dumps(payload), headers=headers)
+    r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=1)
     assert r.status_code == requests.codes.ok, 'Blockchain connection issue.'
     data = r.json()
     try:
         return data['result']
-    except KeyError:        
+    except KeyError:
         raise ValueError(data)
 
 

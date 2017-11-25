@@ -10,17 +10,16 @@ logger = utils.get_logger()
 
 class Exchange:
 
-    def __init__(self, exchange_name, private_key, supported_tokens, db,
+    def __init__(self, exchange_name, private_key,
+                 supported_tokens, db,
                  order_handler, balance_handler,
-                 deposit_address, deposit_delay_in_secs):
+                 deposit_address):
         self.name = exchange_name
         self.supported_tokens = supported_tokens
         self.db = db
         self.balance = balance_handler
         self.orders = order_handler
         self.deposit_address = deposit_address
-        self.deposit_delay_in_secs = deposit_delay_in_secs
-        self.processed_order_ids = set()
         self.private_key = private_key
 
     def get_balance(self, user, type):
@@ -149,34 +148,20 @@ class Exchange:
         self.orders.remove(order_id)
 
     def check_deposits(self, api_key):
-        # check enough time passed since last deposit check
-        check_deposit_key = ','.join([self.name, 'last_deposit_check'])
-        last_check = self.db.get(check_deposit_key)
-
-        if not last_check:
-            last_check = 0
-        else:
-            last_check = int(last_check)
-
-        current_time = utils.get_timestamp()
-        if(current_time >= last_check + self.deposit_delay_in_secs * 1000):
-            token_addresses = [t.address for t in self.supported_tokens]
-            balances = web3_interface.get_balances(
-                self.deposit_address, token_addresses)
-            if(sum(balances) > 0):
-                logger.debug('Got deposit.')                
-                tx = web3_interface.clear_deposits(self.private_key,
-                                                   self.deposit_address,
-                                                   token_addresses,
-                                                   balances)
-
-            for idx, balance in enumerate(balances):
-                token = self.supported_tokens[idx]
-                qty = float(balance) / (10**token.decimals)
-                if qty > 0:
-                    self.balance.deposit(api_key, token.token, qty, 'available')
-
-            self.db.set(check_deposit_key, current_time)
+        token_addresses = [t.address for t in self.supported_tokens]
+        deposits = web3_interface.get_balances(self.deposit_address,
+                                               token_addresses)
+        if(sum(deposits) > 0):
+            logger.debug('Got deposit: {}'.format(deposits))
+            tx = web3_interface.clear_deposits(self.private_key,
+                                               self.deposit_address,
+                                               token_addresses,
+                                               deposits)
+        for idx, deposit in enumerate(deposits):
+            token = self.supported_tokens[idx]
+            qty = float(deposit) / (10**token.decimals)
+            if qty > 0:
+                self.balance.deposit(api_key, token.token, qty, 'available')
 
     def withdraw(self, api_key, coinName, address, amount):
         coinName = coinName.lower()

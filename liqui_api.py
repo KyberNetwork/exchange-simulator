@@ -38,11 +38,6 @@ def index():
 
         logger.debug('Params: {}'.format(params))
 
-        try:
-            liqui.check_deposits(api_key)
-        except Exception as e:
-            logger.error('Check deposit failed {}'.format(e))
-
         if method == 'getInfo':
             output = liqui.get_balance_api(**params)
         elif method == 'Trade':
@@ -57,6 +52,7 @@ def index():
             output = liqui.cancel_order_api(**params)
         else:
             raise AttributeError('Invalid method requested')
+
         logger.debug('Output: {}'.format(output))
         return jsonify({
             'success': 1,
@@ -74,7 +70,6 @@ def index():
 @app.route("/depth/<string:pairs>", methods=['GET'])
 def depth(pairs):
     timestamp = utils.get_timestamp(request.args.to_dict())
-
     try:
         depth = liqui.get_depth_api(pairs, timestamp)
         return jsonify(depth)
@@ -101,8 +96,7 @@ liqui = Liqui(
     rdb,
     order_handler,
     balance_handler,
-    config.LIQUI_ADDRESS,
-    config.DEPOSIT_DELAY
+    config.LIQUI_ADDRESS
 )
 
 if config.MODE != 'dev':

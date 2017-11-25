@@ -47,10 +47,6 @@ def action(expected_params=[], public=False):
                     return str(MISSING_ERROR['api_key'])
                 else:
                     params['api_key'] = api_key.lower()
-                try:
-                    binance.check_deposits(api_key)
-                except Exception as e:
-                    logger.error('Check deposit failed {}'.format(e))
 
             params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
@@ -136,8 +132,7 @@ binance = Binance(
     rdb,
     order_handler,
     balance_handler,
-    config.BINANCE_ADDRESS,
-    config.DEPOSIT_DELAY
+    config.BINANCE_ADDRESS
 )
 
 if __name__ == '__main__':
