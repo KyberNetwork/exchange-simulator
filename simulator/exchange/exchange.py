@@ -51,9 +51,11 @@ class Exchange:
 
         # 1. lock balance
         if type == 'buy':
-            self.balance.lock(api_key, quote, rate * amount)
+            locked = rate * amount
+            self.balance.lock(api_key, quote, locked)
         elif type == 'sell':
-            self.balance.lock(api_key, base, amount)
+            locked = amount
+            self.balance.lock(api_key, base, locked)
         else:
             raise ValueError('Invalid type of order.')
 
@@ -80,6 +82,12 @@ class Exchange:
             else:
                 self.balance.deposit(api_key, quote, quote_change, 'available')
                 self.balance.withdraw(api_key, base, base_change, 'lock')
+
+        if not new_order.active():
+            if type == 'buy':
+                self.balance.unlock(api_key, quote, locked - quote_change)
+            elif type == 'sell':
+                self.balance.unlock(api_key, base, locked - base_change)
 
         return {
             'received': new_order.executed_amount,
