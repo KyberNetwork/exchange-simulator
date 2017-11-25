@@ -69,11 +69,11 @@ def eval_startgas(src, dst, value, data, gas_price):
     return json_call("eth_estimateGas", [params])
 
 
-global_nonce = -1
+# global_nonce = -1
 
 
 def make_transaction(src_priv_key, dst_address, value, data):
-    global global_nonce
+    # global global_nonce
 
     src_address = b2h(utils.privtoaddr(src_priv_key))
     nonce = get_num_transactions(src_address)
@@ -86,14 +86,14 @@ def make_transaction(src_priv_key, dst_address, value, data):
     # data_as_string, gas_price)
     start_gas = "0xF4240"
 
-    nonce = int(nonce, 16)
-    if(global_nonce < 0):
-        global_nonce = nonce
+    # nonce = int(nonce, 16)
+    # if(global_nonce < 0):
+    # global_nonce = nonce
 
-    nonce = global_nonce
-    global_nonce += 1
+    # nonce = global_nonce
+    # global_nonce += 1
 
-    print(nonce)
+    # print(nonce)
 
     gas_price = int(gas_price, 16)
     # int(gas_price, 16)/20
