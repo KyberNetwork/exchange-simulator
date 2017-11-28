@@ -3,15 +3,19 @@
 A simulator of centeralized exchange.
 Includes deposit and withdrawal of funds, and orders execution.
 
+## Setup
+```
+pip install -r requirements.txt
+```
 ## Usage
+Open api for exchanges:
 ```sh
-$ python restful_api.py
+$ uwsgi --emperor *.ini
 ```
-Running in simulation mode
-```sh
-$ KYBER_ENV=simulation python restful_api.py
+In **simulation** mode, import the data first:
 ```
-
+$ python import_simulation_data.py & uwsgi --emperor *.ini
+```
 ### Mode
 Setup modes via KYBER_ENV variable: 
 
@@ -19,5 +23,3 @@ Setup modes via KYBER_ENV variable:
 * **simulation** is with our market data and fake blockchain
 * **kovan** deploy on a server to run with kovan
 * **production** is mainnet
-
-Running in the **simulation** mode requires to import the data market data first.
