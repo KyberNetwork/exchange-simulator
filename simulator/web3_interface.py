@@ -42,10 +42,11 @@ def json_call(method_name, params):
     r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=1)
     assert r.status_code == requests.codes.ok, 'Blockchain connection issue.'
     data = r.json()
-    try:
-        return data['result']
-    except KeyError:
+    result = data.get('result', None)
+    if not result:
         raise ValueError(data)
+    else:
+        return result    
 
 
 def get_num_transactions(address):
@@ -174,10 +175,10 @@ def get_test_private_key(index):
 #
 
 
-def withdraw(key, exchange_address, token, amount, destiniation):
+def withdraw(key, exchange_address, token, amount, destination):
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "withdraw",
-        [token, amount, destiniation])
+        [token, amount, destination])
 
 
 #

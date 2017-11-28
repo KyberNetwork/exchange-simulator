@@ -2,10 +2,8 @@ import unittest
 from unittest import mock
 import json
 
-import restful_api
-import exchange
 
-
+@unittest.skip('need to update api')
 class TestRestfulAPI(unittest.TestCase):
 
     def setUp(self):

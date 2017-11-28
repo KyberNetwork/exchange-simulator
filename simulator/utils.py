@@ -13,8 +13,8 @@ from . import config
 logger = logging.getLogger(config.LOGGER_NAME)
 
 
-def get_redis_db():
-    return redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
+def get_redis_db(db_no=0):
+    return redis.Redis(host='redis', port=6379, db=db_no, decode_responses=True)
 
 
 def normalize_timestamp(t):

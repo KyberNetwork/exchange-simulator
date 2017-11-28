@@ -37,7 +37,8 @@ class Exchange:
         try:
             order_book = self.orders.load(pair, self.name, timestamp)
         except Exception as e:
-            logger.info('Order book {}_{} is missing'.format(pair, timestamp))
+            logger.info('Order book {}_{} is missing: {}'.format(
+                pair, timestamp, e))
             order_book = {'Asks': [], 'Bids': []}
 
         # logger.debug("Order Book: {}".format(order_book))
@@ -86,7 +87,7 @@ class Exchange:
         if not new_order.active():
             if type == 'buy':
                 self.balance.unlock(api_key, quote, locked - quote_change)
-            elif type == 'sell':
+            else:
                 self.balance.unlock(api_key, base, locked - base_change)
 
         return {

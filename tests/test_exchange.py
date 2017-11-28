@@ -1,15 +1,11 @@
 #!/usr/bin/python3
 from unittest import mock
-import constants
-import json
 import unittest
-import exchange
-import exchange_api_interface
+import json
 import math
-import web3_interface
-import constants
 
 
+@unittest.skip('need to remove this test case')
 class TestExchangeWithoutDesposit(unittest.TestCase):
 
     def test_deposit_after_reset(self):
@@ -88,6 +84,7 @@ class TestExchangeWithoutDesposit(unittest.TestCase):
         self.assertEqual(balance, 6)
 
 
+@unittest.skip('need to remove this test case')
 class TestExchangeWithDesposit(unittest.TestCase):
 
     def test_deposit_by_sending_funds(self):
@@ -134,6 +131,7 @@ def mocked_requests_get(*args, **kwargs):
 
 
 @mock.patch('requests.get', side_effect=mocked_requests_get)
+@unittest.skip('need to remove this test case')
 class TestOrderBook(unittest.TestCase):
 
     def testLoadOk(self, mock_get):
