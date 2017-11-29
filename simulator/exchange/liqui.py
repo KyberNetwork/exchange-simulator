@@ -24,8 +24,12 @@ class Liqui(Exchange):
             }
         return depth
 
+    def _get_balance(self, api_key):
+        balance = super().get_balance(api_key, ['available'])
+        return balance['available']
+
     def get_balance_api(self, api_key, *args, **kargs):
-        return {'funds': self.get_balance(user=api_key, type='available')}
+        return {'funds': self._get_balance(api_key)}
 
     def trade_api(self, api_key, type, rate, pair, amount,
                   timestamp, *args, **kargs):
@@ -36,7 +40,7 @@ class Liqui(Exchange):
             'received': result['received'],
             'remains': result['remaining'],
             'order_id': result['order_id'],
-            'funds': self.get_balance(api_key, 'available')
+            'funds': self._get_balance(api_key)
         }
 
     def get_active_orders_api(self, api_key, pair, *args, **kargs):
@@ -70,7 +74,7 @@ class Liqui(Exchange):
         self.cancel_order(api_key, order_id)
         return {
             'order_id': int(order_id),
-            'funds': self.get_balance(api_key, 'available')
+            'funds': self._get_balance(api_key)
         }
 
     def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
@@ -78,5 +82,5 @@ class Liqui(Exchange):
         return {
             'tId': tx,
             'amountSent': amount,
-            'funds': self.get_balance(api_key, 'available')
+            'funds': self._get_balance(api_key)
         }

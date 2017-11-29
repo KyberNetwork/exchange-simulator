@@ -21,14 +21,13 @@ class Binance(Exchange):
         return {'lastUpdateId': timestamp, 'asks': asks, 'bids': bids}
 
     def get_account_api(self, api_key, *args, **kargs):
-        available = self.balance.get(user=api_key, type='available')
-        lock = self.balance.get(user=api_key, type='lock')
-        balances = []
+        balance = self.get_balance(api_key)
+        result = []
         for token in self.supported_tokens:
-            balances.append({
+            result.append({
                 'asset': token.token.upper(),
-                'free': str(available[token.token]),
-                'locked': str(lock[token.token])
+                'free': str(balance['available'][token.token]),
+                'locked': str(balance['lock'][token.token])
             })
 
         return {
@@ -39,7 +38,7 @@ class Binance(Exchange):
             "canTrade": True,
             "canWithdraw": True,
             "canDeposit": True,
-            "balances": balances
+            "balances": result
         }
 
     def trade_api(self, api_key, symbol, quantity, price, side,
