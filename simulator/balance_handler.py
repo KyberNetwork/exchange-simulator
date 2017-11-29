@@ -14,23 +14,24 @@ class BalanceHandler:
         balance = self._db.hgetall(key)
         return {t: float(balance.get(t, 0)) for t in self.supported_token}
 
+    def _check_balance_params(func):
+        def wrapper(self, user, token, amount, balance_type):
+            if token not in self.supported_token:
+                raise ValueError('Invalid token: {}'.format(token))
+
+            amount = float(amount)
+            assert amount >= 0, 'Invalid amount: {}'.format([amount, token])
+
+            return func(self, user, token, amount, balance_type)
+        return wrapper
+
+    @_check_balance_params
     def deposit(self, user, token, amount, balance_type):
-        if token not in self.supported_token:
-            raise ValueError('Invalid token: {}'.format(token))
-
-        amount = float(amount)
-        assert amount >= 0, 'Invalid amount: {}'.format([amount, token])
-
         key = self._key(user, balance_type)
         self._db.hincrbyfloat(key, token, amount)
 
+    @_check_balance_params
     def withdraw(self, user, token, amount, balance_type):
-        if token not in self.supported_token:
-            raise ValueError('Invalid token: {}'.format(token))
-
-        amount = float(amount)
-        assert amount >= 0, 'Invalid amount: {}'.format([amount, token])
-
         key = self._key(user, balance_type)
         new_value = self._db.hincrbyfloat(key, token, -amount)
 

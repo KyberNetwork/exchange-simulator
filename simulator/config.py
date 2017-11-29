@@ -33,7 +33,7 @@ try:
 
         logging.config.dictConfig(cfg['logging'])
 
-        DEPOSIT_DELAY = cfg[MODE]['deposit_delay']
+        DELAY = cfg[MODE]['delay']
         BLOCKCHAIN_URL = cfg[MODE]['blockchain_url']
 
         try:

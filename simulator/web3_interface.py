@@ -46,7 +46,7 @@ def json_call(method_name, params):
     if not result:
         raise ValueError(data)
     else:
-        return result    
+        return result
 
 
 def get_num_transactions(address):

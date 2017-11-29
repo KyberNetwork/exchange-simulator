@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import time
 
-from .. import web3_interface, utils
+from .. import web3_interface, utils, config
 from ..order import Order
 
 
@@ -21,9 +21,28 @@ class Exchange:
         self.orders = order_handler
         self.deposit_address = deposit_address
         self.private_key = private_key
+        self.last_check = 0
 
-    def get_balance(self, user, type):
-        return self.balance.get(user=user, type=type)
+    def _update_balance(func):
+        def wrapper(self, api_key, *args, **kargs):
+            current = utils.get_timestamp()
+            if self.last_check + config.DELAY < current:
+                logger.debug('Check deposit now')
+                try:
+                    # process withdraw
+                    # 1. check deposit
+                    self.check_deposits(api_key)
+                    # TODO 2. match open orders
+                    # TODO 3. process withdraw request
+                    self.last_check = current
+                except Exception as e:
+                    logger.error('Handle deposit fail: {}'.format(e))
+            return func(self, api_key, *args, **kargs)
+        return wrapper
+
+    @_update_balance
+    def get_balance(self, api_key, blc_types=['available', 'lock']):
+        return {t: self.balance.get(api_key, t) for t in blc_types}
 
     def check_pair(self, pair):
         base, quote = pair.split('_')

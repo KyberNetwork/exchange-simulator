@@ -55,7 +55,7 @@ def action(expected_params=[], public=False):
                 result = func(params)
             except Exception as e:
                 # traceback.print_exc()
-                logger.info('Error Output: {}'.format(str(e)))
+                logger.error('Error Output: {}'.format(str(e)))
                 return jsonify({'code': -1, 'msg': str(e)})
 
             logger.debug('Output: {}'.format(result))
