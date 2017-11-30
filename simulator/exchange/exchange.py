@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import time
+import traceback
 
 from .. import web3_interface, utils, config
 from ..order import Order
@@ -36,6 +37,7 @@ class Exchange:
                     # TODO 3. process withdraw request
                     self.last_check = current
                 except Exception as e:
+                    traceback.print_exc()
                     logger.error('Handle deposit fail: {}'.format(e))
             return func(self, api_key, *args, **kargs)
         return wrapper
@@ -175,33 +177,60 @@ class Exchange:
             self.balance.unlock(api_key, base, order.remaining_amount)
         self.orders.remove(order_id)
 
-    def check_deposits(self, api_key):
+    def check_deposits(self, api_key):    
         token_addresses = [t.address for t in self.supported_tokens]
         deposits = web3_interface.get_balances(self.deposit_address,
-                                               token_addresses)
+                                               token_addresses)                                               
+        pending_tnx = utils.get_pending_tnx(exchange=self.name)
         if(sum(deposits) > 0):
             logger.debug('Got deposit: {}'.format(deposits))
             tx = web3_interface.clear_deposits(self.private_key,
                                                self.deposit_address,
                                                token_addresses,
                                                deposits)
+
         for idx, deposit in enumerate(deposits):
-            token = self.supported_tokens[idx]
+            token = self.supported_tokens[idx]            
             qty = float(deposit) / (10**token.decimals)
             if qty > 0:
                 self.balance.deposit(api_key, token.token, qty, 'available')
+                self.complete_tnx(qty, pending_tnx.get(token.token, []), token)
+
+    def complete_tnx(self, total_qty, pending_tnx, token):
+        history = self.balance.get_history('deposit')
+        for tnx in pending_tnx:
+            if tnx['tx'] in history:
+                continue
+            amount = float(tnx['amount']) / (10**token.decimals)
+            if total_qty > amount:
+                total_qty -= amount
+                self.balance.add_activity('deposit',
+                                          amount,
+                                          'address',
+                                          tnx['tx'],
+                                          token.token)
+            if total_qty == 0:
+                break
 
     def withdraw(self, api_key, coinName, address, amount):
         coinName = coinName.lower()
         amount = float(amount)
-        self.balance.withdraw(user=api_key, token=coinName,
-                              amount=amount, balance_type='available')
         token = utils.get_token(coinName)
         tx = web3_interface.withdraw(self.private_key,
                                      self.deposit_address,
                                      token.address,
                                      int(amount * 10**token.decimals),
                                      address)
+        self.balance.withdraw(user=api_key, token=coinName,
+                              amount=amount, balance_type='available')
+        try:
+            self.balance.add_activity('withdraw',
+                                      amount,
+                                      address,
+                                      tx,
+                                      token.token)
+        except Exception as e:
+            logger.error('Add withdraw history failed: {}'.format(e))
         return tx
 
 

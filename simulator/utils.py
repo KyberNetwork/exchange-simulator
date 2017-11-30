@@ -127,6 +127,26 @@ def convert_ob_json_file(ob_json_file, new_file):
                 new_f.write(json.dumps(ob) + '\n')
 
 
+def get_pending_tnx(exchange):
+    r = requests.get('http://core:8000/pending-activities')    
+    data = r.json()    
+    activities = data.get('data', [])
+    pending_deposits = {}
+    for a in activities:
+        if (a['Destination'] != exchange) or (a['Status'] == 'done'):
+            continue
+
+        if (not a['Result']['error']) and (a['Action'] == 'deposit'):
+            token = a['Params']['token'].lower()
+            if token not in pending_deposits:
+                pending_deposits[token] = []
+            pending_deposits[token].append({
+                'amount': a['Params']['amount'],
+                'tx': a['Result']['tx']
+            })    
+    return pending_deposits
+
+
 if __name__ == '__main__':
     src, dst = 'data/full_ob', 'data/full_ob.dat'
     # src, dst = 'data/sample_ob', 'data/sample_ob.dat'

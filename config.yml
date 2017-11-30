@@ -1,10 +1,14 @@
 dev: &common
   delay: 300000 # -> 300s
+  # blockchain_url: https://kovan.infura.io
+  # blockchain_url: https://kovan.kyber.network
+  blockchain_url: http://blockchain:8545
+  addresses: shared/deployment_dev.json
+
+kovan:  
+  <<: *common
   blockchain_url: https://kovan.infura.io
   addresses: shared/deployment_kovan.json
-
-kovan:
-  <<: *common
 
 simulation:
   <<: *common

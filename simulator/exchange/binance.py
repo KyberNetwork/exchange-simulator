@@ -97,6 +97,39 @@ class Binance(Exchange):
             'id': str(tx)[2:]  # remove 0x in transaction id
         }
 
+    def withdraw_history_api(self, *args, **kargs):
+        def format(a):
+            return {
+                'id': str(a.tx)[2:],
+                'amount': a.amount,
+                'address': a.address,
+                'asset': a.token.upper(),
+                'txId': str(a.tx)[2:],
+                'applyTime': a.timestamp,
+                'status': 6  # completed
+            }
+        activities = self.balance.get_history('withdraw').values()
+        return {
+            'withdrawList': [format(a) for a in activities],
+            'success': True
+        }
+
+    def deposit_history_api(self, *args, **kargs):
+        def format(a):
+            return {
+                'amount': a.amount,
+                'address': a.address,
+                'asset': a.token.upper(),
+                'txId': str(a.tx)[2:],
+                'insertTime': a.timestamp,
+                'status': 1  # completed
+            }
+        activities = self.balance.get_history('deposit').values()
+        return {
+            'depositList': [format(a) for a in activities],
+            'success': True
+        }
+
     def __order_to_dict(self, order):
         return {
             'symbol': self.__pair_to_symbol(order.pair),

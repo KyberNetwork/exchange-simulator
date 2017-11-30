@@ -113,6 +113,18 @@ def withdraw(params):
     return binance.withdraw_api(**params)
 
 
+@api.route('/wapi/v3/withdrawHistory.html', methods=['GET'])
+@action(public=False)
+def withdraw_history(params):
+    return binance.withdraw_history_api(**params)
+
+
+@api.route('/wapi/v3/depositHistory.html', methods=['GET'])
+@action(public=False)
+def deposit_history(params):
+    return binance.deposit_history_api(**params)
+
+
 logger.info("Running in {} mode".format(config.MODE))
 
 rdb = utils.get_redis_db()

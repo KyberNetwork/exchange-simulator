@@ -8,6 +8,10 @@ class BalanceHandler:
     def __init__(self, db, supported_token):
         self._db = db
         self.supported_token = supported_token
+        self.activities = {
+            'withdraw': {},
+            'deposit': {}
+        }
 
     def get(self, user, type):
         key = self._key(user, type)
@@ -53,3 +57,20 @@ class BalanceHandler:
 
     def _key(self, user, type):
         return '_'.join(['balance', user, type]).lower()
+
+    def add_activity(self, type, amount, address, tx, token):
+        a = BalanceActivity(type, amount, address, tx, token)
+        self.activities[type][tx] = a
+
+    def get_history(self, type):
+        return self.activities.get(type, {})
+
+
+class BalanceActivity:
+    def __init__(self, type, amount, address, tx, token):
+        self.type = type
+        self.amount = amount
+        self.address = address
+        self.tx = tx
+        self.token = token
+        self.timestamp = utils.get_timestamp()
