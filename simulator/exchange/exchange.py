@@ -177,10 +177,10 @@ class Exchange:
             self.balance.unlock(api_key, base, order.remaining_amount)
         self.orders.remove(order_id)
 
-    def check_deposits(self, api_key):    
+    def check_deposits(self, api_key):
         token_addresses = [t.address for t in self.supported_tokens]
         deposits = web3_interface.get_balances(self.deposit_address,
-                                               token_addresses)                                               
+                                               token_addresses)
         pending_tnx = utils.get_pending_tnx(exchange=self.name)
         if(sum(deposits) > 0):
             logger.debug('Got deposit: {}'.format(deposits))
@@ -190,7 +190,7 @@ class Exchange:
                                                deposits)
 
         for idx, deposit in enumerate(deposits):
-            token = self.supported_tokens[idx]            
+            token = self.supported_tokens[idx]
             qty = float(deposit) / (10**token.decimals)
             if qty > 0:
                 self.balance.deposit(api_key, token.token, qty, 'available')
@@ -201,7 +201,7 @@ class Exchange:
         for tnx in pending_tnx:
             if tnx['tx'] in history:
                 continue
-            amount = float(tnx['amount']) / (10**token.decimals)
+            amount = float(tnx['amount'])
             if total_qty > amount:
                 total_qty -= amount
                 self.balance.add_activity('deposit',
