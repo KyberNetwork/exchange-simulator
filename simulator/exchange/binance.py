@@ -94,17 +94,17 @@ class Binance(Exchange):
         return {
             'msg': 'success',
             'success': True,
-            'id': str(tx)[2:]  # remove 0x in transaction id
+            'id': str(tx)
         }
 
     def withdraw_history_api(self, *args, **kargs):
         def format(a):
             return {
-                'id': str(a.tx)[2:],
+                'id': str(a.tx),
                 'amount': a.amount,
                 'address': a.address,
                 'asset': a.token.upper(),
-                'txId': str(a.tx)[2:],
+                'txId': str(a.tx),
                 'applyTime': a.timestamp,
                 'status': 6  # completed
             }
@@ -120,7 +120,7 @@ class Binance(Exchange):
                 'amount': a.amount,
                 'address': a.address,
                 'asset': a.token.upper(),
-                'txId': str(a.tx)[2:],
+                'txId': str(a.tx),
                 'insertTime': a.timestamp,
                 'status': 1  # completed
             }
