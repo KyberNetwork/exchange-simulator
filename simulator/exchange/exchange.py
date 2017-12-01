@@ -202,14 +202,14 @@ class Exchange:
             if tnx['tx'] in history:
                 continue
             amount = float(tnx['amount'])
-            if total_qty > amount:
+            if total_qty >= amount:
                 total_qty -= amount
                 self.balance.add_activity('deposit',
                                           amount,
                                           'address',
                                           tnx['tx'],
                                           token.token)
-            if total_qty == 0:
+            if total_qty < 1e-10:
                 break
 
     def withdraw(self, api_key, coinName, address, amount):
