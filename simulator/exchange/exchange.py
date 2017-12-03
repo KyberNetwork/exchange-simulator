@@ -83,6 +83,7 @@ class Exchange:
 
         # 2. open new order
         new_order = Order(pair, type, rate, amount)
+        self.orders.add(new_order)
 
         # 3. match new order
         base_change, quote_change = self._match_order(api_key,
@@ -95,9 +96,12 @@ class Exchange:
         # 4.1. update order
         new_order.executed_amount = base_change
         new_order.remaining_amount = amount - base_change
-        self.orders.add(new_order)
+        if new_order.remaining_amount == 0:
+            new_order.status = 'filled'
+        elif new_order.remaining_amount > 0 and new_order.executed_amount > 0:
+            new_order.status = 'partially_filled'
         # 4.2. update balance
-        if new_order.executed_amount > 0:
+        if new_order.status in ['filled', 'partially_filled']:        
             if type == 'buy':
                 self.balance.deposit(api_key, base, base_change, 'available')
                 self.balance.withdraw(api_key, quote, quote_change, 'lock')
@@ -105,7 +109,7 @@ class Exchange:
                 self.balance.deposit(api_key, quote, quote_change, 'available')
                 self.balance.withdraw(api_key, base, base_change, 'lock')
 
-        if not new_order.active():
+        if new_order.status == 'filled':        
             if type == 'buy':
                 self.balance.unlock(api_key, quote, locked - quote_change)
             else:
@@ -159,7 +163,7 @@ class Exchange:
     def get_order(self, order_id):
         return self.orders.get(order_id)
 
-    def get_active_orders(self, pair):
+    def get_all_orders(self, pair):
         if not pair:
             pair = None
         else:
@@ -175,7 +179,7 @@ class Exchange:
                 api_key, quote, order.remaining_amount * order.rate)
         else:
             self.balance.unlock(api_key, base, order.remaining_amount)
-        self.orders.remove(order_id)
+        order.status = 'canceled'        
 
     def check_deposits(self, api_key):
         token_addresses = [t.address for t in self.supported_tokens]

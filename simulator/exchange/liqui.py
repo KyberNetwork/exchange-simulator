@@ -44,10 +44,10 @@ class Liqui(Exchange):
         }
 
     def get_active_orders_api(self, api_key, pair, *args, **kargs):
-        orders = self.get_active_orders(pair)
+        orders = self.get_all_orders(pair)
         result = {}
         for o in orders:
-            if o.active():
+            if o.status in ['new', 'partially_filled']:
                 result[o.id] = {
                     'pair': o.pair,
                     'type': o.type,
@@ -59,7 +59,16 @@ class Liqui(Exchange):
         return result
 
     def get_order_api(self, order_id, *args, **kargs):
-        order = self.get_order(order_id)
+        order = self.get_order(order_id)                    
+        if order.status in ['new', 'partially_filled']:
+            stt = 0
+        elif order.status == 'filled':
+            stt = 1
+        elif order.status == 'canceled':
+            if order.executed_amount > 0:
+                stt = 3
+            else:
+                stt = 2
         return {
             'pair': order.pair,
             'type': order.type,
@@ -67,7 +76,7 @@ class Liqui(Exchange):
             'amount': order.remaining_amount,
             'rate': order.rate,
             'timestamp_created': 0,
-            'status': order.status()
+            'status': stt
         }
 
     def cancel_order_api(self, api_key, order_id, *args, **kargs):
