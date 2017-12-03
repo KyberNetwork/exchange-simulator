@@ -58,7 +58,7 @@ class Exchange:
         try:
             order_book = self.orders.load(pair, self.name, timestamp)
         except Exception as e:
-            logger.info('Order book {}_{} is missing: {}'.format(
+            logger.error('Order book {}_{} is missing: {}'.format(
                 pair, timestamp, e))
             order_book = {'Asks': [], 'Bids': []}
 

@@ -1,4 +1,5 @@
 from functools import wraps
+import traceback
 
 from flask import Flask, request, jsonify
 
@@ -38,9 +39,9 @@ def action(expected_params):
                 params['timestamp'] = utils.get_timestamp(
                     request.args.to_dict())
 
-                logger.info('Params: {}'.format(params))
+                logger.debug('Params: {}'.format(params))
                 result = func(params)
-                logger.info('Output: {}'.format(result))
+                logger.debug('Output: {}'.format(result))
 
                 return jsonify({
                     'success': True,
@@ -48,6 +49,8 @@ def action(expected_params):
                     'result': result
                 })
             except Exception as e:
+                # traceback.print_exc()
+                logger.error(e)
                 return jsonify({
                     'success': False,
                     'message': str(e),
@@ -83,33 +86,59 @@ def sell_limit(params):
     return bittrex.trade_api(**params)
 
 
+@api.route('/market/getopenorders')
+@action(expected_params=['apikey', 'nonce'])
+def get_open_orders(params):
+    return bittrex.get_open_orders_api(**params)
+
+
+@api.route('/getorder')
+@action(expected_params=['apikey', 'nonce'])
+def get_order(params):
+    return bittrex.get_order_api(**params)
+
+
+@api.route('/market/cancel')
+@action(expected_params=['apikey', 'nonce'])
+def cancel_order(params):
+    return bittrex.cancel_order_api(**params)
+
+
 @api.route('/account/withdraw')
 @action(expected_params=['apikey', 'nonce'])
 def withdraw(params):
     return bittrex.withdraw_api(**params)
 
 
-def main():
-    api.run(port=5001, debug=True)
+@api.route('/account/getdeposithistory')
+@action(expected_params=['apikey', 'nonce'])
+def deposit_history(params):
+    return bittrex.deposit_history_api(**params)
 
+
+@api.route('/account/getwithdrawalhistory')
+@action(expected_params=['apikey', 'nonce'])
+def withdrawal_history(params):
+    return bittrex.withdrawal_history_api(**params)
+
+
+rdb = utils.get_redis_db()
+if config.MODE == 'simulation':
+    order_handler = SimulationOrder(rdb)
+else:
+    order_handler = CoreOrder()
+supported_tokens = config.SUPPORTED_TOKENS
+balance_handler = BalanceHandler(rdb, supported_tokens.keys())
+bittrex = Bittrex(
+    "bittrex",
+    config.PRIVATE_KEY['bittrex'],
+    list(supported_tokens.values()),
+    rdb,
+    order_handler,
+    balance_handler,
+    config.BITTREX_ADDRESS
+)
 
 if __name__ == '__main__':
-    rdb = utils.get_redis_db()
-    if config.MODE == 'simulation':
-        utils.setup_data(rdb)
-        order_handler = SimulationOrder(rdb)
-    else:
-        order_handler = CoreOrder()
-    supported_tokens = config.SUPPORTED_TOKENS
-    balance_handler = BalanceHandler(rdb, supported_tokens.keys())
-
-    bittrex = Bittrex(
-        "bittrex",
-        list(supported_tokens.values()),
-        rdb,
-        order_handler,
-        balance_handler,
-        config.BITTREX_ADDRESS,
-        config.DEPOSIT_DELAY
-    )
-    main()
+    logger.info('Running in {} mode'.format(config.MODE))
+    api.run(host='0.0.0.0', port=5300, debug=True)

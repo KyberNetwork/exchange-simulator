@@ -66,7 +66,7 @@ def setup_data(rdb, ob_file):
 
 
 def copy_order_books_to_db(ob_file, rdb):
-    EXCHANGES = ['liqui', 'binance']
+    EXCHANGES = ['liqui', 'binance', 'bittrex']
 
     def load_order_books(ob_file):
         with open(ob_file, 'r')as f:
@@ -128,8 +128,8 @@ def convert_ob_json_file(ob_json_file, new_file):
 
 
 def get_pending_tnx(exchange):
-    r = requests.get('http://core:8000/pending-activities')    
-    data = r.json()    
+    r = requests.get('http://core:8000/pending-activities')
+    data = r.json()
     activities = data.get('data', [])
     pending_deposits = {}
     for a in activities:
@@ -143,14 +143,22 @@ def get_pending_tnx(exchange):
             pending_deposits[token].append({
                 'amount': a['Params']['amount'],
                 'tx': a['Result']['tx']
-            })    
+            })
     return pending_deposits
 
 
+def view_simulation_ob(exchange, base, quote, timestamp):
+    rdb = get_redis_db()
+    timestamp = normalize_timestamp(timestamp)
+    key = '_'.join(map(str, [exchange, base, quote, timestamp]))
+    ob = rdb.get(key)
+    print(json.loads(ob))
+
+
 if __name__ == '__main__':
-    src, dst = 'data/full_ob', 'data/full_ob.dat'
+    # src, dst = 'data/full_ob', 'data/full_ob.dat'
     # src, dst = 'data/sample_ob', 'data/sample_ob.dat'
-    convert_ob_json_file(src, dst)
+    # convert_ob_json_file(src, dst)
 
     # import time
 
@@ -159,3 +167,4 @@ if __name__ == '__main__':
     # copy_order_books_to_db(dst, rdb)
     # end = time.time()
     # print("Import time: {}s".format(end - start))
+    view_simulation_ob('binance', 'eos', 'eth', 1510009456430)

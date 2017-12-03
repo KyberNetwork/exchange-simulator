@@ -26,13 +26,14 @@ class Bittrex(Exchange):
         return result
 
     def get_balance_api(self, apikey, *args, **kargs):
-        balance = self.balance.get(user=apikey)
+        blc = self.get_balance(api_key=apikey)
         result = []
         for token in self.supported_tokens:
+            asset = token.token
             result.append({
-                'Currency': token.token.upper(),
-                'Balance': balance[token.token],
-                'Available': balance[token.token],
+                'Currency': asset.upper(),
+                'Balance': blc['available'][asset] + blc['lock'][asset],
+                'Available': blc['available'][asset],
                 'Pending': 0.0,
                 'CryptoAddress': hex(token.address),
                 'Requested': False,
@@ -49,5 +50,5 @@ class Bittrex(Exchange):
         return {'uuid': result['order_id']}
 
     def withdraw_api(self, apikey, currency, quantity, address, *args, **kargs):
-        tx = self.withdraw(apikey, currency, quantity, address)
+        tx = self.withdraw(apikey, currency, address, quantity)
         return {'uuid': tx}
