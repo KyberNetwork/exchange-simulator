@@ -101,7 +101,7 @@ class Exchange:
         elif new_order.remaining_amount > 0 and new_order.executed_amount > 0:
             new_order.status = 'partially_filled'
         # 4.2. update balance
-        if new_order.status in ['filled', 'partially_filled']:        
+        if new_order.status in ['filled', 'partially_filled']:
             if type == 'buy':
                 self.balance.deposit(api_key, base, base_change, 'available')
                 self.balance.withdraw(api_key, quote, quote_change, 'lock')
@@ -109,7 +109,7 @@ class Exchange:
                 self.balance.deposit(api_key, quote, quote_change, 'available')
                 self.balance.withdraw(api_key, base, base_change, 'lock')
 
-        if new_order.status == 'filled':        
+        if new_order.status == 'filled':
             if type == 'buy':
                 self.balance.unlock(api_key, quote, locked - quote_change)
             else:
@@ -172,6 +172,10 @@ class Exchange:
 
     def cancel_order(self, api_key, order_id):
         order = self.orders.get(order_id)
+        if order.status == 'canceled':
+            raise ValueError('Order is already canceled.')
+        else:
+            order.status = 'canceled'
         base, quote = order.pair.split('_')
         # unlock balance
         if order.type == 'buy':
@@ -179,7 +183,6 @@ class Exchange:
                 api_key, quote, order.remaining_amount * order.rate)
         else:
             self.balance.unlock(api_key, base, order.remaining_amount)
-        order.status = 'canceled'        
 
     def check_deposits(self, api_key):
         token_addresses = [t.address for t in self.supported_tokens]
