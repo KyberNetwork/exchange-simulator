@@ -89,10 +89,12 @@ def sell_limit(params):
 @api.route('/market/getopenorders')
 @action(expected_params=['apikey', 'nonce'])
 def get_open_orders(params):
+    if 'market' not in params:
+        params['market'] = None
     return bittrex.get_open_orders_api(**params)
 
 
-@api.route('/getorder')
+@api.route('/account/getorder')
 @action(expected_params=['apikey', 'nonce'])
 def get_order(params):
     return bittrex.get_order_api(**params)
@@ -113,13 +115,19 @@ def withdraw(params):
 @api.route('/account/getdeposithistory')
 @action(expected_params=['apikey', 'nonce'])
 def deposit_history(params):
-    return bittrex.deposit_history_api(**params)
+    params['act_type'] = 'deposit'
+    if 'currency' not in params:
+        params['currency'] = None
+    return bittrex.history_api(**params)
 
 
 @api.route('/account/getwithdrawalhistory')
 @action(expected_params=['apikey', 'nonce'])
 def withdrawal_history(params):
-    return bittrex.withdrawal_history_api(**params)
+    params['act_type'] = 'withdraw'
+    if 'currency' not in params:
+        params['currency'] = None
+    return bittrex.history_api(**params)
 
 
 rdb = utils.get_redis_db()
@@ -130,7 +138,7 @@ else:
 supported_tokens = config.SUPPORTED_TOKENS
 balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 bittrex = Bittrex(
-    "bittrex",
+    'bittrex',
     config.PRIVATE_KEY['bittrex'],
     list(supported_tokens.values()),
     rdb,
