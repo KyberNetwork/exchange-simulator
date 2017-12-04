@@ -16,9 +16,12 @@ def main():
     # init deposit
     initialized_balance = rdb.get('INITIALIZED_BINANCE_BALANCE')
     if not initialized_balance:
-        utils.init_deposit(balance=balance_handler,
-                           user=config.DEFAULT_BINANCE_API_KEY,
-                           amount=100000, tokens=supported_tokens)
+        user = config.DEFAULT_BINANCE_API_KEY
+        balance_handler.deposit(user, 'omg', 50, 'available')
+        balance_handler.deposit(user, 'eth', 1, 'available')
+        # utils.init_deposit(balance=balance_handler,
+        #                    user=user,
+        #                    amount=100000, tokens=supported_tokens)
         rdb.set('INITIALIZED_BINANCE_BALANCE', True)
 
     # init deposit
