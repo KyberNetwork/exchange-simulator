@@ -54,27 +54,14 @@ class Binance(Exchange):
 
     def get_all_orders_api(self, api_key, symbol, *args, **kargs):
         pair = self.__symbol_to_pair(symbol)
-        orders = self.get_active_orders(pair)
-        result = []
-        for o in orders:
-            output = self.__order_to_dict(o)
-            if o.active():
-                output['status'] = 'NEW'
-            else:
-                output['status'] = 'FILLED'
-            result.append(output)
-        return result
+        orders = self.get_all_orders(pair)
+        return list(map(self.__order_to_dict, orders))
 
     def get_open_orders_api(self, api_key, symbol, *args, **kargs):
         pair = self.__symbol_to_pair(symbol)
-        orders = self.get_active_orders(pair)
-        result = []
-        for o in orders:
-            if o.active():
-                output = self.__order_to_dict(o)
-                output['status'] = 'NEW'
-                result.append(output)
-        return result
+        orders = self.get_all_orders(pair)        
+        open_orders = filter(lambda o: o.status in ['new', 'partially_filled'], orders)
+        return list(map(self.__order_to_dict, open_orders))
 
     def get_order_api(self, orderId, *args, **kargs):
         order = self.get_order(orderId)
@@ -138,6 +125,7 @@ class Binance(Exchange):
             'price': str(order.rate),
             'origQty': str(order.original_amount),
             'executedQty': str(order.executed_amount),
+            'status': order.status.upper(),
             'timeInForce': 'GTC',
             'type': 'LIMIT',
             'side': order.type,
