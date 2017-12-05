@@ -49,11 +49,9 @@ class CoreOrder(OrderHandler):
         r = requests.get(host)
         assert r.status_code == requests.codes.ok, 'Cannot connect to core'
         data = r.json()
-        order_book = data['exchanges'][exchange_name]
-        if not order_book['Bids']:
-            order_book['Bids'] = []
-        if not order_book['Asks']:
-            order_book['Asks'] = []
+        order_book = data['exchanges'].get(exchange_name, None)
+        if not order_book:
+            raise ValueError("{}'s data is not available".format(exchange_name))
         return order_book
 
 

@@ -26,13 +26,14 @@ class Bittrex(Exchange):
         return result
 
     def get_balance_api(self, apikey, *args, **kargs):
-        balance = self.balance.get(user=apikey)
+        blc = self.get_balance(api_key=apikey)
         result = []
         for token in self.supported_tokens:
+            asset = token.token
             result.append({
-                'Currency': token.token.upper(),
-                'Balance': balance[token.token],
-                'Available': balance[token.token],
+                'Currency': asset.upper(),
+                'Balance': blc['available'][asset] + blc['lock'][asset],
+                'Available': blc['available'][asset],
                 'Pending': 0.0,
                 'CryptoAddress': hex(token.address),
                 'Requested': False,
@@ -42,12 +43,81 @@ class Bittrex(Exchange):
 
     def trade_api(self, apikey, market, quantity, rate,
                   type, timestamp, *args, **kargs):
-        quote, base = market.split('-')
-        pair = '_'.join([base, quote]).lower()
+        pair = self.__market_to_pair(market)
         result = self.trade(apikey, type, rate,
                             pair, quantity, timestamp)
         return {'uuid': result['order_id']}
 
+    def get_open_orders_api(self, market, *args, **kargs):
+        if market:
+            pair = self.__market_to_pair(market)
+        else:
+            pair = None
+        orders = self.get_all_orders(pair)
+        open_orders = filter(lambda o: o.status in [
+                             'new', 'partially_filled'], orders)
+        return list(map(self.__order_to_dict, open_orders))
+
+    def get_order_api(self, uuid, *args, **kargs):
+        order = self.get_order(uuid)
+        return self.__order_to_dict(order)
+
+    def cancel_order_api(self, apikey, uuid, *args, **kargs):
+        self.cancel_order(apikey, uuid)
+
     def withdraw_api(self, apikey, currency, quantity, address, *args, **kargs):
-        tx = self.withdraw(apikey, currency, quantity, address)
+        tx = self.withdraw(apikey, currency, address, quantity)
         return {'uuid': tx}
+
+    def history_api(self, apikey, currency, act_type, *args, **kargs):
+        all_acts = self.balance.get_history(act_type).values()
+        if currency:
+            acts = filter(lambda a: a.token == currency.lower(), all_acts)
+        else:
+            acts = all_acts
+        return list(map(self.__format_activity, acts))
+
+    def __format_activity(self, a):
+        return {
+            'PaymentUuid': a.tx,
+            'Currency': a.token.upper(),
+            'Amount': a.amount,
+            'Address': a.address,
+            'Opened': "2014-07-09T04:24:47.217",
+            'Authorized': True,
+            'PendingPayment': False,
+            'TxCost': 0,
+            'TxId': a.tx,
+            'Canceled': False,
+            'InvalidAddress': False
+        }
+
+    def __market_to_pair(self, market):
+        quote, base = market.split('-')
+        return '_'.join([base, quote]).lower()
+
+    def __pair_to_market(self, pair):
+        base, quote = pair.split('_')
+        return '-'.join([quote, base]).upper()
+
+    def __order_to_dict(self, o):
+        closed = o.status in ['filled', 'canceled']
+        return {
+            'Uuid': o.id,
+            'OrderUuid': o.id,
+            'Exchange': self.__pair_to_market(o.pair),
+            'OrderType': 'LIMIT_{}'.format(o.type.upper()),
+            'Quantity': o.original_amount,
+            'QuantityRemaining': o.remaining_amount,
+            'Limit': 0,
+            'CommissionPaid': 0,
+            'Price': o.rate,
+            'PricePerUnit': None,
+            'Opened': '2014-07-09T03:55:48.77',
+            'Closed': closed,
+            'CancelInitiated': False,
+            'ImmediateOrCancel': False,
+            'IsConditional': False,
+            'Condition': None,
+            'ConditionTarget': None
+        }
