@@ -1,5 +1,5 @@
 from .exchange import Exchange
-from .. import web3_interface, utils
+from .. import utils
 
 logger = utils.get_logger()
 
@@ -59,8 +59,9 @@ class Binance(Exchange):
 
     def get_open_orders_api(self, api_key, symbol, *args, **kargs):
         pair = self.__symbol_to_pair(symbol)
-        orders = self.get_all_orders(pair)        
-        open_orders = filter(lambda o: o.status in ['new', 'partially_filled'], orders)
+        orders = self.get_all_orders(pair)
+        open_orders = filter(lambda o: o.status in [
+                             'new', 'partially_filled'], orders)
         return list(map(self.__order_to_dict, open_orders))
 
     def get_order_api(self, orderId, *args, **kargs):

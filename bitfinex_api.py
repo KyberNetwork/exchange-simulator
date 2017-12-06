@@ -1,10 +1,15 @@
-from flask import Flask
+from functools import wraps
+
+from flask import Flask, request, jsonify
 
 from simulator import config, utils
+from simulator.order_handler import CoreOrder, SimulationOrder
+from simulator.balance_handler import BalanceHandler
 from simulator.exchange import Bitfinex
 
 api = Flask(__name__)
 
+logger = utils.get_logger()
 
 MISSING_ERROR = {
     'symbol': {
@@ -33,7 +38,7 @@ def action(expected_params=[]):
             if error:
                 return str(error)
 
-            params = request.args.to_dict()
+            params = request.form.to_dict()
 
             api_key = request.headers.get('X-BFX-APIKEY')
             if not api_key:
@@ -43,59 +48,89 @@ def action(expected_params=[]):
             params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
             logger.info('Params: {}'.format(params))
-            result = func(params)
-            logger.info('Output: {}'.format(result))
-
-            return jsonify(result)
+            try:
+                result = func(params)
+                logger.info('Output: {}'.format(result))
+                return jsonify(result)
+            except Exception as e:
+                logger.error(e)
+                return jsonify({
+                    'message': str(e)
+                })
         return wrapper
     return decorator
 
 
-@api.route('/book/<symbol>')
+@api.route('/v1/book/<symbol>', methods=['GET'])
 def order_book(symbol):
     timestamp = utils.get_timestamp(request.args.to_dict())
-    return bitfinex.order_book_api(symbol, timestamp)
+    try:
+        return jsonify(bitfinex.order_book_api(symbol, timestamp))
+    except Exception as e:
+        return jsonify({
+            'message': str(e)
+        })
 
 
-@api.route('/balances')
+@api.route('/v1/balances', methods=['POST'])
 @action()
 def balances(params):
     return bitfinex.balances_api(**params)
 
 
-@api.route('/order/new')
+@api.route('/v1/order/new', methods=['POST'])
 @action()
 def new_order(params):
     return bitfinex.trade_api(**params)
 
 
-@api.route('/withdraw')
+@api.route('/v1/orders', methods=['POST'])
+@action()
+def active_orders(params):
+    return bitfinex.active_orders_api(**params)
+
+
+@api.route('/v1/order/status', methods=['POST'])
+@action()
+def order_status(params):
+    return bitfinex.order_status_api(**params)
+
+
+@api.route('/v1/order/cancel', methods=['POST'])
+@action()
+def cancel_order(params):
+    return bitfinex.cancel_order_api(**params)
+
+
+@api.route('/v1/withdraw', methods=['POST'])
 @action()
 def withdraw(params):
     return bitfinex.withdraw_api(**params)
 
 
-def main():
-    api.run(port=5003, debug=True)
+@api.route('/v1/history/movements', methods=['POST'])
+@action()
+def history(params):
+    return bitfinex.history_api(**params)
 
+
+rdb = utils.get_redis_db()
+if config.MODE == 'simulation':
+    order_handler = SimulationOrder(rdb)
+else:
+    order_handler = CoreOrder()
+supported_tokens = config.SUPPORTED_TOKENS
+balance_handler = BalanceHandler(rdb, supported_tokens.keys())
+bitfinex = Bitfinex(
+    'liqui',
+    config.PRIVATE_KEY['bitfinex'],
+    list(supported_tokens.values()),
+    rdb,
+    order_handler,
+    balance_handler,
+    config.BITFINEX_ADDRESS
+)
 
 if __name__ == '__main__':
-    rdb = utils.get_redis_db()
-    if config.MODE == 'simulation':
-        utils.setup_data(rdb)
-        order_handler = SimulationOrder(rdb)
-    else:
-        order_handler = CoreOrder()
-    supported_tokens = config.SUPPORTED_TOKENS
-    balance_handler = BalanceHandler(rdb, supported_tokens.keys())
-
-    bitfinex = Bitfinex(
-        "bitfinex",
-        list(supported_tokens.values()),
-        rdb,
-        order_handler,
-        balance_handler,
-        config.BITTREX_ADDRESS,
-        config.DEPOSIT_DELAY
-    )
-    main()
+    logger.info('Running in {} mode'.format(config.MODE))
+    api.run(host='0.0.0.0', port=5400, debug=True)

@@ -163,10 +163,8 @@ class Exchange:
     def get_order(self, order_id):
         return self.orders.get(order_id)
 
-    def get_all_orders(self, pair):
-        if not pair:
-            pair = None
-        else:
+    def get_all_orders(self, pair=None):
+        if pair:
             self.check_pair(pair)
         return self.orders.get_all(pair)
 
