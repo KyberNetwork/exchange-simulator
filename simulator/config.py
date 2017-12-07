@@ -44,6 +44,7 @@ try:
                 BITTREX_ADDRESS = get_int(addr['exchanges']['bittrex']['ETH'])
                 BINANCE_ADDRESS = get_int(addr['exchanges']['binance']['ETH'])
                 BITFINEX_ADDRESS = get_int(addr['exchanges']['bitfinex']['ETH'])
+                POLONIEX_ADDRESS = get_int(addr['exchanges']['poloniex']['ETH'])
 
                 BANK_ADDRESS = get_int(addr['bank'])
                 SUPPORTED_TOKENS = {}

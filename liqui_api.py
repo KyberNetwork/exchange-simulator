@@ -23,14 +23,14 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def index():
     try:
-        api_key = request.headers.get('Key', None)
+        api_key = request.headers.get('Key')
         if not api_key:
             raise AttributeError("Missing 'Key' Header")
 
         params = request.form.to_dict()
         params['api_key'] = api_key.lower()
 
-        method = params.get('method', None)
+        method = params.get('method')
         if not method:
             raise KeyError('Method is missing in your request')
 

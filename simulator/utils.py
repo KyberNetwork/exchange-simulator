@@ -27,6 +27,8 @@ def get_logger(name=config.LOGGER_NAME):
 
 
 def get_token(name):
+    if name not in config.SUPPORTED_TOKENS:
+        raise ValueError('Not supported: {}'.format(name))
     return config.SUPPORTED_TOKENS[name]
 
 

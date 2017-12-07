@@ -1,5 +1,5 @@
 from .exchange import Exchange
-from .. import web3_interface, utils
+from .. import utils
 
 logger = utils.get_logger()
 
@@ -10,8 +10,7 @@ class Bittrex(Exchange):
         super().__init__(*args)
 
     def get_order_book_api(self, market, type, timestamp):
-        quote, base = market.split('-')
-        pair = '_'.join([base, quote]).lower()
+        pair = self.__market_to_pair(market)
         order_book = self.get_order_book(pair, timestamp)
 
         if type == 'sell':

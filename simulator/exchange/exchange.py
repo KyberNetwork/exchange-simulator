@@ -172,6 +172,8 @@ class Exchange:
         order = self.orders.get(order_id)
         if order.status == 'canceled':
             raise ValueError('Order is already canceled.')
+        elif order.status == 'filled':
+            raise ValueError('Unable to cancel a filled order.')
         else:
             order.status = 'canceled'
         base, quote = order.pair.split('_')
