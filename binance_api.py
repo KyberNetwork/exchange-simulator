@@ -125,8 +125,6 @@ def deposit_history(params):
     return binance.deposit_history_api(**params)
 
 
-logger.info("Running in {} mode".format(config.MODE))
-
 rdb = utils.get_redis_db()
 if config.MODE == 'simulation':
     order_handler = SimulationOrder(rdb)
@@ -148,4 +146,5 @@ binance = Binance(
 )
 
 if __name__ == '__main__':
+    logger.info("Running in {} mode".format(config.MODE))
     api.run(host='0.0.0.0', port=5100, debug=True)

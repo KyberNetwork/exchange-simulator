@@ -37,7 +37,7 @@ class Exchange:
                     # TODO 3. process withdraw request
                     self.last_check = current
                 except Exception as e:
-                    traceback.print_exc()
+                    # traceback.print_exc()
                     logger.error('Handle deposit fail: {}'.format(e))
             return func(self, api_key, *args, **kargs)
         return wrapper
@@ -47,7 +47,11 @@ class Exchange:
         return {t: self.balance.get(api_key, t) for t in blc_types}
 
     def check_pair(self, pair):
-        base, quote = pair.split('_')
+        try:
+            base, quote = pair.split('_')
+        except Exception as e:
+            logger.error(e)
+            raise ValueError('Invalid pair {}.'.format(pair))
         base_is_supported = any(base == t.token for t in self.supported_tokens)
         quote_is_ether = quote == 'eth'
         if (not base_is_supported) or (not quote_is_ether):

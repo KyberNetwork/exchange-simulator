@@ -21,7 +21,7 @@ production:
 
 logging:
   version: 1
-  disable_existing_loggers: False
+  disable_existing_loggers: True
 
   formatters:
     simple:
@@ -50,4 +50,4 @@ logging:
 
   root:
     level: DEBUG
-    handlers: [console]
+    handlers: [file_handler]

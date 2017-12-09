@@ -145,7 +145,7 @@ class TestExchange(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_match_order(self):
-        pass
+        self.exchange._match_order()
 
     @unittest.expectedFailure
     def test_get_order(self):
