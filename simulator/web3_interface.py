@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+import time
+import logging
 
 from pycoin.serialize import b2h, h2b
 from pycoin import encoding
@@ -11,8 +13,11 @@ from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 import time
 
-local_url = "http://localhost:5000/"
-# local_url = "https://kovan.infura.io"
+from . import config
+from . import utils as simulation_utils
+
+
+logger = simulation_utils.get_logger()
 
 
 def merge_two_dicts(x, y):
@@ -23,19 +28,25 @@ def merge_two_dicts(x, y):
 
 
 def json_call(method_name, params):
-    url = local_url
+    url = config.BLOCKCHAIN_URL
     headers = {'content-type': 'application/json'}
     # Example echo method
-    payload = {"method": method_name,
-               "params": params,
-               "jsonrpc": "2.0",
-               "id": 1,
-               }
-    # print (payload)
-    response = requests.post(
-        url, data=json.dumps(payload), headers=headers).json()
-    # print(response)
-    return response['result']
+    payload = {
+        "method": method_name,
+        "params": params,
+        "jsonrpc": "2.0",
+        "id": 1,
+    }
+
+    # logger.debug("Payload: {}".format(payload))
+    r = requests.post(url, data=json.dumps(payload), headers=headers, timeout=5)
+    assert r.status_code == requests.codes.ok, 'Blockchain connection issue.'
+    data = r.json()
+    result = data.get('result', None)
+    if not result:
+        raise ValueError(data)
+    else:
+        return result
 
 
 def get_num_transactions(address):
@@ -59,11 +70,11 @@ def eval_startgas(src, dst, value, data, gas_price):
     return json_call("eth_estimateGas", [params])
 
 
-global_nonce = -1
+# global_nonce = -1
 
 
 def make_transaction(src_priv_key, dst_address, value, data):
-    global global_nonce
+    # global global_nonce
 
     src_address = b2h(utils.privtoaddr(src_priv_key))
     nonce = get_num_transactions(src_address)
@@ -77,13 +88,13 @@ def make_transaction(src_priv_key, dst_address, value, data):
     start_gas = "0xF4240"
 
     nonce = int(nonce, 16)
-    if(global_nonce < 0):
-        global_nonce = nonce
+    # if(global_nonce < 0):
+    # global_nonce = nonce
 
-    nonce = global_nonce
-    global_nonce += 1
+    # nonce = global_nonce
+    # global_nonce += 1
 
-    print(nonce)
+    # print(nonce)
 
     gas_price = int(gas_price, 16)
     # int(gas_price, 16)/20
@@ -102,7 +113,7 @@ def make_transaction(src_priv_key, dst_address, value, data):
     params = ["0x" + tx_hex]
     return_value = json_call("eth_sendRawTransaction", params)
     if return_value == "0x0000000000000000000000000000000000000000000000000000000000000000":
-        print ("Transaction failed")
+        print("Transaction failed")
         return return_value
 
     return return_value
@@ -142,10 +153,12 @@ def call_const_function(priv_key, value, contract_hash, contract_abi, function_n
 
 #
 
-reserve_abi = \
-    '[{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"srcAmount","type":"uint256"},{"name":"dest","type":"address"},{"name":"destAmount","type":"uint256"}],"name":"convert","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"tokenAmount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"tokens","type":"address[]"},{"name":"amounts","type":"uint256[]"}],"name":"clearBalances","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"exchange","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_exchange","type":"string"},{"name":"_bank","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
+
+reserve_abi = '[{"constant":true,"inputs":[],"name":"ETH_TOKEN_ADDRESS","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"src","type":"address"},{"name":"srcAmount","type":"uint256"},{"name":"dest","type":"address"},{"name":"destAmount","type":"uint256"}],"name":"convert","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"tokenAmount","type":"uint256"},{"name":"destination","type":"address"}],"name":"withdraw","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"bank","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"depositEther","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"name":"tokens","type":"address[]"},{"name":"amounts","type":"uint256[]"}],"name":"clearBalances","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"exchange","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"token","type":"address"}],"name":"getBalance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_exchange","type":"string"},{"name":"_bank","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}]'
 
 #
+# this is not a real key.
+key = h2b("dae8043a6b75fbf1c88efa28f05434ca8fd6d3270b8cc5086b64a3319512e3f6")
 
 #
 
@@ -162,25 +175,21 @@ def get_test_private_key(index):
 #
 
 
-def withdraw(key, exchange_address, token, amount, destiniation):
+def withdraw(key, exchange_address, token, amount, destination):
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "withdraw",
-                         [token, amount, destiniation])
+        [token, amount, destination])
 
 
 #
 
 def get_balances(exchange_address, tokens):
-    # this is not a real key.
-    key = h2b(
-        "c4eaa80c080739abe71089f41859453d9238b89069c046e5382d71ae1bf8bce9")
-
     result = []
 
     for token in tokens:
         balance = call_const_function(
             key, 0, to_hex_address(exchange_address), reserve_abi, "getBalance",
-                                      [token])[0]
+            [token])[0]
         result = result + [balance]
 
     return result
@@ -216,7 +225,7 @@ def wait_for_tx_confirmation(tx_hash):
 def clear_deposits(key, exchange_address, token_array, amounts):
     return call_function(
         key, 0, to_hex_address(exchange_address), reserve_abi, "clearBalances",
-                         [token_array, amounts])
+        [token_array, amounts])
 
 
 def post():
@@ -240,14 +249,19 @@ def test():
         "dae8043a6b75fbf1c88efa28f05434ca8fd6d3270b8cc5086b64a3319512e3f6")
     tx_hash2 = make_transaction(key, 0x124, 10**18, h2b("1234"))
 
-    print (tx_hash1)
+    print(tx_hash1)
     wait_for_tx_confirmation(tx_hash1)
 
-    print (tx_hash15)
+    print(tx_hash15)
     wait_for_tx_confirmation(tx_hash1)
 
-    print (tx_hash2)
+    print(tx_hash2)
     wait_for_tx_confirmation(tx_hash2)
 
 
-test()
+def main():
+    test()
+
+
+if __name__ == '__main__':
+    main()
