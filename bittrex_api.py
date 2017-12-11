@@ -60,33 +60,33 @@ def action(expected_params):
     return decorator
 
 
-@api.route('/getorderbook')
+@api.route('/api/v1.1/public/getorderbook')
 @action(expected_params=['type', 'market'])
 def get_order_book(params):
     return bittrex.get_order_book_api(**params)
 
 
-@api.route('/account/getbalances')
+@api.route('/api/v1.1/account/getbalances')
 @action(expected_params=['apikey', 'nonce'])
 def get_balances(params):
     return bittrex.get_balance_api(**params)
 
 
-@api.route('/market/buylimit')
+@api.route('/api/v1.1/market/buylimit')
 @action(expected_params=['apikey', 'nonce'])
 def buy_limit(params):
     params['type'] = 'buy'
     return bittrex.trade_api(**params)
 
 
-@api.route('/market/selllimit')
+@api.route('/api/v1.1/market/selllimit')
 @action(expected_params=['apikey', 'nonce'])
 def sell_limit(params):
     params['type'] = 'sell'
     return bittrex.trade_api(**params)
 
 
-@api.route('/market/getopenorders')
+@api.route('/api/v1.1/market/getopenorders')
 @action(expected_params=['apikey', 'nonce'])
 def get_open_orders(params):
     if 'market' not in params:
@@ -94,25 +94,25 @@ def get_open_orders(params):
     return bittrex.get_open_orders_api(**params)
 
 
-@api.route('/account/getorder')
+@api.route('/api/v1.1/account/getorder')
 @action(expected_params=['apikey', 'nonce'])
 def get_order(params):
     return bittrex.get_order_api(**params)
 
 
-@api.route('/market/cancel')
+@api.route('/api/v1.1/market/cancel')
 @action(expected_params=['apikey', 'nonce'])
 def cancel_order(params):
     return bittrex.cancel_order_api(**params)
 
 
-@api.route('/account/withdraw')
+@api.route('/api/v1.1/account/withdraw')
 @action(expected_params=['apikey', 'nonce'])
 def withdraw(params):
     return bittrex.withdraw_api(**params)
 
 
-@api.route('/account/getdeposithistory')
+@api.route('/api/v1.1/account/getdeposithistory')
 @action(expected_params=['apikey', 'nonce'])
 def deposit_history(params):
     params['act_type'] = 'deposit'
@@ -121,7 +121,7 @@ def deposit_history(params):
     return bittrex.history_api(**params)
 
 
-@api.route('/account/getwithdrawalhistory')
+@api.route('/api/v1.1/account/getwithdrawalhistory')
 @action(expected_params=['apikey', 'nonce'])
 def withdrawal_history(params):
     params['act_type'] = 'withdraw'

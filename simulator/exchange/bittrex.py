@@ -45,7 +45,7 @@ class Bittrex(Exchange):
         pair = self.__market_to_pair(market)
         result = self.trade(apikey, type, rate,
                             pair, quantity, timestamp)
-        return {'uuid': result['order_id']}
+        return {'uuid': str(result['order_id'])}
 
     def get_open_orders_api(self, market, *args, **kargs):
         if market:
@@ -100,10 +100,10 @@ class Bittrex(Exchange):
         return '-'.join([quote, base]).upper()
 
     def __order_to_dict(self, o):
-        closed = o.status in ['filled', 'canceled']
+        is_open = o.status in ['new', 'partially_filled']
         return {
-            'Uuid': o.id,
-            'OrderUuid': o.id,
+            'Uuid': str(o.id),
+            'OrderUuid': str(o.id),
             'Exchange': self.__pair_to_market(o.pair),
             'OrderType': 'LIMIT_{}'.format(o.type.upper()),
             'Quantity': o.original_amount,
@@ -113,7 +113,8 @@ class Bittrex(Exchange):
             'Price': o.rate,
             'PricePerUnit': None,
             'Opened': '2014-07-09T03:55:48.77',
-            'Closed': closed,
+            'Closed': None,
+            'IsOpen': is_open,
             'CancelInitiated': False,
             'ImmediateOrCancel': False,
             'IsConditional': False,

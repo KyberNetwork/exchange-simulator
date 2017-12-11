@@ -11,26 +11,25 @@ def main():
         rdb = utils.get_redis_db()
         ob_file = 'data/full_ob.dat'
         # ob_file = 'data/sample_ob.dat'
-        utils.setup_data(rdb, ob_file)
+        utils.setup_data(rdb, ob_file) 
 
     # init deposit
-    initialized_balance = rdb.get('INITIALIZED_BINANCE_BALANCE')
-    if not initialized_balance:
-        user = config.DEFAULT_BINANCE_API_KEY
-        balance_handler.deposit(user, 'omg', 50, 'available')
-        balance_handler.deposit(user, 'eth', 1, 'available')
-        # utils.init_deposit(balance=balance_handler,
-        #                    user=user,
-        #                    amount=100000, tokens=supported_tokens)
-        rdb.set('INITIALIZED_BINANCE_BALANCE', True)
+    initialized_balances = rdb.get('INITIALIZED_BALANCES')
+    default_api_keys = [
+        config.DEFAULT_LIQUI_API_KEY,        
+        config.DEFAULT_BITTREX_API_KEY,
+        config.DEFAULT_BINANCE_API_KEY
+    ]
+    if not initialized_balances:
+        # key = config.DEFAULT_BINANCE_API_KEY
+        # balance_handler.deposit(key, 'omg', 50, 'available')
+        # balance_handler.deposit(key, 'eth', 1, 'available')        
 
-    # init deposit
-    initialized_balance = rdb.get('INITIALIZED_LIQUI_BALANCE')
-    if not initialized_balance:
-        utils.init_deposit(balance=balance_handler,
-                           user=config.DEFAULT_LIQUI_API_KEY,
-                           amount=100000, tokens=supported_tokens)
-        rdb.set('INITIALIZED_LIQUI_BALANCE', True)
+        for token in supported_tokens:
+            for key in default_api_keys:
+                balance_handler.deposit(key, token, 100000, 'available')
+        rdb.set('INITIALIZED_BALANCES', True)
+
 
 
 if __name__ == '__main__':
