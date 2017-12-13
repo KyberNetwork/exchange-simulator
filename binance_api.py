@@ -125,6 +125,11 @@ def deposit_history(params):
     return binance.deposit_history_api(**params)
 
 
+@api.route('/ping')
+def ping():
+    return 'pong'
+
+
 rdb = utils.get_redis_db()
 if config.MODE == 'simulation':
     order_handler = SimulationOrder(rdb)
@@ -143,6 +148,8 @@ binance = Binance(
     order_handler,
     balance_handler,
     config.BINANCE_ADDRESS
+
+
 )
 
 if __name__ == '__main__':
