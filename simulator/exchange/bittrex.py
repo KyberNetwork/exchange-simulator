@@ -25,13 +25,13 @@ class Bittrex(Exchange):
         return result
 
     def get_balance_api(self, apikey, *args, **kargs):
-        blc = self.get_balance(api_key=apikey)
+        blc = self.get_balance(api_key=apikey, blc_types=['available'])
         result = []
         for token in self.supported_tokens:
             asset = token.token
             result.append({
                 'Currency': asset.upper(),
-                'Balance': blc['available'][asset] + blc['lock'][asset],
+                'Balance': blc['available'][asset],
                 'Available': blc['available'][asset],
                 'Pending': 0.0,
                 'CryptoAddress': hex(token.address),
