@@ -9,7 +9,7 @@ class Bittrex(Exchange):
     def __init__(self, *args):
         super().__init__(*args)
 
-    def get_order_book_api(self, market, type, timestamp):
+    def get_order_book_api(self, market, type, timestamp, *args, **kargs):
         pair = self.__market_to_pair(market)
         order_book = self.get_order_book(pair, timestamp)
 
@@ -92,7 +92,10 @@ class Bittrex(Exchange):
         }
 
     def __market_to_pair(self, market):
-        quote, base = market.split('-')
+        try:
+            quote, base = market.split('-')
+        except:
+            raise ValueError('Invalid pair {}.'.format(market))
         return '_'.join([base, quote]).lower()
 
     def __pair_to_market(self, pair):
