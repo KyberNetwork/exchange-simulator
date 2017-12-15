@@ -234,15 +234,12 @@ class Exchange:
                                      address)
         self.balance.withdraw(user=api_key, token=coinName,
                               amount=amount, balance_type='available')
-        try:
-            self.balance.add_activity('withdraw',
-                                      amount,
-                                      address,
-                                      tx,
-                                      token.token)
-        except Exception as e:
-            logger.error('Add withdraw history failed: {}'.format(e))
-        return tx
+        act = self.balance.add_activity('withdraw',
+                                        amount,
+                                        address,
+                                        tx,
+                                        token.token)
+        return act
 
 
 MAX_ORDER_ID = 2 ** 31

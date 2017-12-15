@@ -83,11 +83,11 @@ class Bitfinex(Exchange):
                      *args, **kargs):
         # TODO convert withdraw_type to token
         # e.g: ethereum -> eth
-        tx = self.withdraw(api_key, withdraw_type[:3], address, amount)
+        result = self.withdraw(api_key, withdraw_type[:3], address, amount)
         return [{
             'status': 'success',
             'message': 'Your withdrawal request has been successfully submitted.',
-            'withdrawal_id': tx
+            'withdrawal_id': result.uuid
         }]
 
     def history_api(self, currency, *args, **kargs):

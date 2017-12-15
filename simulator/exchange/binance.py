@@ -78,17 +78,17 @@ class Binance(Exchange):
         }
 
     def withdraw_api(self, api_key, asset, amount, address, *args, **kargs):
-        tx = self.withdraw(api_key, asset, address, amount)
+        result = self.withdraw(api_key, asset, address, amount)
         return {
             'msg': 'success',
             'success': True,
-            'id': str(tx)
+            'id': str(result.uuid)
         }
 
     def withdraw_history_api(self, *args, **kargs):
         def format(a):
             return {
-                'id': str(a.tx),
+                'id': str(a.uuid),
                 'amount': a.amount,
                 'address': a.address,
                 'asset': a.token.upper(),

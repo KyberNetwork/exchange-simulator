@@ -148,8 +148,6 @@ binance = Binance(
     order_handler,
     balance_handler,
     config.BINANCE_ADDRESS
-
-
 )
 
 if __name__ == '__main__':

@@ -59,7 +59,7 @@ class Liqui(Exchange):
         return result
 
     def get_order_api(self, order_id, *args, **kargs):
-        order = self.get_order(order_id)                    
+        order = self.get_order(order_id)
         if order.status in ['new', 'partially_filled']:
             stt = 0
         elif order.status == 'filled':
@@ -87,9 +87,9 @@ class Liqui(Exchange):
         }
 
     def withdraw_api(self, api_key, coinName, address, amount, *args, **kargs):
-        tx = self.withdraw(api_key, coinName, address, amount)
+        result = self.withdraw(api_key, coinName, address, amount)
         return {
-            'tId': tx,
+            'tId': result.tx,
             'amountSent': amount,
             'funds': self._get_balance(api_key)
         }

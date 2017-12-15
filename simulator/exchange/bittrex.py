@@ -65,8 +65,8 @@ class Bittrex(Exchange):
         self.cancel_order(apikey, uuid)
 
     def withdraw_api(self, apikey, currency, quantity, address, *args, **kargs):
-        tx = self.withdraw(apikey, currency, address, quantity)
-        return {'uuid': tx}
+        result = self.withdraw(apikey, currency, address, quantity)
+        return {'uuid': result.uuid}
 
     def history_api(self, apikey, currency, act_type, *args, **kargs):
         all_acts = self.balance.get_history(act_type).values()
@@ -74,11 +74,14 @@ class Bittrex(Exchange):
             acts = filter(lambda a: a.token == currency.lower(), all_acts)
         else:
             acts = all_acts
-        return list(map(self.__format_activity, acts))
+        return [self.__format_activity(a, act_type) for a in acts]
 
-    def __format_activity(self, a):
+    def __format_activity(self, a, act_type):
+        tx = a.tx
+        if act_type == 'deposit':
+            tx = '0xdifferent_deposit_tx'
         return {
-            'PaymentUuid': a.tx,
+            'PaymentUuid': a.uuid,
             'Currency': a.token.upper(),
             'Amount': a.amount,
             'Address': a.address,
@@ -86,7 +89,7 @@ class Bittrex(Exchange):
             'Authorized': True,
             'PendingPayment': False,
             'TxCost': 0,
-            'TxId': a.tx,
+            'TxId': tx,
             'Canceled': False,
             'InvalidAddress': False
         }

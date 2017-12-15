@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 import time
+import uuid
 from datetime import datetime
 
 import requests
@@ -51,6 +52,10 @@ def get_timestamp(data={}):
     else:
         timestamp = data.get('timestamp', int(time.time()) * 1000)
     return timestamp
+
+
+def get_random_uuid():
+    return str(uuid.uuid4())
 
 
 def setup_data(rdb, ob_file):
