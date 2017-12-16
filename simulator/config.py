@@ -40,11 +40,9 @@ try:
             with open(cfg[MODE]['addresses'], 'r') as f:
                 addr = json.loads(f.read())
 
-                LIQUI_ADDRESS = get_int(addr['exchanges']['liqui']['ETH'])
-                BITTREX_ADDRESS = get_int(addr['exchanges']['bittrex']['ETH'])
-                BINANCE_ADDRESS = get_int(addr['exchanges']['binance']['ETH'])
-                BITFINEX_ADDRESS = get_int(addr['exchanges']['bitfinex']['ETH'])
-                POLONIEX_ADDRESS = get_int(addr['exchanges']['poloniex']['ETH'])
+                EXCHANGES_ADDRESS = addr['exchangesAddress']
+                for k, v in EXCHANGES_ADDRESS.items():
+                    EXCHANGES_ADDRESS[k] = get_int(v)
 
                 BANK_ADDRESS = get_int(addr['bank'])
                 SUPPORTED_TOKENS = {}
@@ -61,9 +59,12 @@ except FileNotFoundError:
 
 LOGGER_NAME = "simulator"
 EXCHANGE_NAME = "liqui"
-DEFAULT_LIQUI_API_KEY = "s7kwmscu-u6myvpjh-47evo234-y2uxw61t-raxby17f"
-DEFAULT_BINANCE_API_KEY = '3wixkht774mwnwrufv9ccsxocdawro3aiokxx77bjbkglc10ee2nhv4kys7jc07c'
-DEFAULT_BITTREX_API_KEY = '665ab1c6a04d4e4b855bd13639520c0a'
+
+API_KEY = {
+    'liqui': 's7kwmscu-u6myvpjh-47evo234-y2uxw61t-raxby17f',
+    'binance': '3wixkht774mwnwrufv9ccsxocdawro3aiokxx77bjbkglc10ee2nhv4kys7jc07c',
+    'bittrex': '665ab1c6a04d4e4b855bd13639520c0a'
+}
 
 PRIVATE_KEY = {
     'bittrex': '7e72df544ce569ccd35b53a2e8411aaefebad8bb42b2ef443593663b1979ac9b',

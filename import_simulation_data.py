@@ -11,25 +11,15 @@ def main():
         rdb = utils.get_redis_db()
         ob_file = 'data/full_ob.dat'
         # ob_file = 'data/sample_ob.dat'
-        utils.setup_data(rdb, ob_file) 
+        utils.setup_data(rdb, ob_file)
 
     # init deposit
     initialized_balances = rdb.get('INITIALIZED_BALANCES')
-    default_api_keys = [
-        config.DEFAULT_LIQUI_API_KEY,        
-        config.DEFAULT_BITTREX_API_KEY,
-        config.DEFAULT_BINANCE_API_KEY
-    ]
     if not initialized_balances:
-        # key = config.DEFAULT_BINANCE_API_KEY
-        # balance_handler.deposit(key, 'omg', 50, 'available')
-        # balance_handler.deposit(key, 'eth', 1, 'available')        
-
         for token in supported_tokens:
-            for key in default_api_keys:
+            for ex, key in config.API_KEY.items():
                 balance_handler.deposit(key, token, 100000, 'available')
         rdb.set('INITIALIZED_BALANCES', True)
-
 
 
 if __name__ == '__main__':

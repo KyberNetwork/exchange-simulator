@@ -149,7 +149,7 @@ bittrex = Bittrex(
     rdb,
     order_handler,
     balance_handler,
-    config.BITTREX_ADDRESS
+    config.EXCHANGES_ADDRESS['bittrex']
 )
 
 if __name__ == '__main__':

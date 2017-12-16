@@ -96,7 +96,7 @@ liqui = Liqui(
     rdb,
     order_handler,
     balance_handler,
-    config.LIQUI_ADDRESS
+    config.EXCHANGES_ADDRESS['liqui']
 )
 
 if config.MODE != 'dev':

@@ -147,7 +147,7 @@ binance = Binance(
     rdb,
     order_handler,
     balance_handler,
-    config.BINANCE_ADDRESS
+    config.EXCHANGES_ADDRESS['binance']
 )
 
 if __name__ == '__main__':
