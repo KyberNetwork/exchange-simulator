@@ -79,20 +79,29 @@ class Bittrex(Exchange):
     def __format_activity(self, a, act_type):
         tx = a.tx
         if act_type == 'deposit':
-            tx = '0xdifferent_deposit_tx'
-        return {
-            'PaymentUuid': a.uuid,
-            'Currency': a.token.upper(),
-            'Amount': a.amount,
-            'Address': a.address,
-            'Opened': "2014-07-09T04:24:47.217",
-            'Authorized': True,
-            'PendingPayment': False,
-            'TxCost': 0,
-            'TxId': tx,
-            'Canceled': False,
-            'InvalidAddress': False
-        }
+            return {
+                'Id': 0,
+                'Amount': a.amount,
+                'Currency': a.token.upper(),
+                'Confirmations': 42,
+                'LastUpdated': utils.bittrex_fmt_time(a.timestamp),
+                'TxId': '0xdeposit_tx',
+                'CryptoAddress': hex(utils.get_token(a.token).address)
+            }
+        else:
+            return {
+                'PaymentUuid': a.uuid,
+                'Currency': a.token.upper(),
+                'Amount': a.amount,
+                'Address': a.address,
+                'Opened': utils.bittrex_fmt_time(a.timestamp),
+                'Authorized': True,
+                'PendingPayment': False,
+                'TxCost': 0,
+                'TxId': a.tx,
+                'Canceled': False,
+                'InvalidAddress': False
+            }
 
     def __market_to_pair(self, market):
         try:

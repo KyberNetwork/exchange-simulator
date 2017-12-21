@@ -14,6 +14,11 @@ from . import config
 logger = logging.getLogger(config.LOGGER_NAME)
 
 
+def bittrex_fmt_time(t):
+    dt = datetime.fromtimestamp(t / 1000)
+    return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
+
+
 def get_redis_db(db_no=0):
     return redis.Redis(host='redis', port=6379, db=db_no, decode_responses=True)
 
