@@ -84,7 +84,8 @@ class Bittrex(Exchange):
                 'Amount': a.amount,
                 'Currency': a.token.upper(),
                 'Confirmations': 42,
-                'LastUpdated': utils.bittrex_fmt_time(a.timestamp),
+                'LastUpdated': utils.bittrex_fmt_time(
+                    utils.get_real_timestamp()),
                 'TxId': '0xdeposit_tx',
                 'CryptoAddress': hex(utils.get_token(a.token).address)
             }
@@ -94,7 +95,8 @@ class Bittrex(Exchange):
                 'Currency': a.token.upper(),
                 'Amount': a.amount,
                 'Address': a.address,
-                'Opened': utils.bittrex_fmt_time(a.timestamp),
+                'Opened': utils.bittrex_fmt_time(
+                    utils.get_real_timestamp()),
                 'Authorized': True,
                 'PendingPayment': False,
                 'TxCost': 0,

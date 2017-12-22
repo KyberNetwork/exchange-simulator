@@ -45,6 +45,10 @@ def init_deposit(balance, user, tokens, amount):
         balance.withdraw(user, token, amount, 'lock')
 
 
+def get_real_timestamp():
+    return int(time.time() * 1000)
+
+
 def get_timestamp(data={}):
     if config.MODE == 'simulation':
         try:
