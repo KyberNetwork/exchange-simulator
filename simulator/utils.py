@@ -4,6 +4,7 @@ import logging
 import time
 import uuid
 from datetime import datetime
+import random
 
 import requests
 import json
@@ -61,6 +62,10 @@ def get_timestamp(data={}):
     else:
         timestamp = data.get('timestamp', int(time.time()) * 1000)
     return timestamp
+
+
+def get_random_id():
+    return random.randint(0, 10000000)
 
 
 def get_random_uuid():

@@ -80,7 +80,7 @@ class Bittrex(Exchange):
         tx = a.tx
         if act_type == 'deposit':
             return {
-                'Id': 0,
+                'Id': a.id,
                 'Amount': a.amount,
                 'Currency': a.token.upper(),
                 'Confirmations': 42,

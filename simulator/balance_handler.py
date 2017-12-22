@@ -76,3 +76,4 @@ class BalanceActivity:
         self.token = token
         self.timestamp = utils.get_timestamp()
         self.uuid = utils.get_random_uuid()
+        self.id = utils.get_random_id()
