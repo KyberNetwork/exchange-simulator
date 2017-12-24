@@ -149,7 +149,7 @@ def convert_ob_json_file(ob_json_file, new_file):
 
 
 def get_pending_tnx(exchange):
-    r = requests.get('http://core:8000/pending-activities')
+    r = requests.get('http://core:8000/immediate-pending-activities')
     data = r.json()
     activities = data.get('data', [])
     pending_deposits = {}
