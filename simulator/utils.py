@@ -154,7 +154,7 @@ def get_pending_tnx(exchange):
     activities = data.get('data', [])
     pending_deposits = {}
     for a in activities:
-        if (a['Destination'] != exchange) or (a['Status'] == 'done'):
+        if (a['Destination'] != exchange) or (a['MiningStatus'] == 'done'):
             continue
 
         if (not a['Result']['error']) and (a['Action'] == 'deposit'):
