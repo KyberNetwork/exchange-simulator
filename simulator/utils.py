@@ -151,10 +151,13 @@ def convert_ob_json_file(ob_json_file, new_file):
 def get_pending_tnx(exchange):
     r = requests.get('http://core:8000/immediate-pending-activities')
     data = r.json()
+
+    logger.info('Pending response: {}'.format(data))
+
     activities = data.get('data', [])
     pending_deposits = {}
     for a in activities:
-        if (a['Destination'] != exchange) or (a['MiningStatus'] == 'done'):
+        if a['Destination'] != exchange:
             continue
 
         if (not a['Result']['error']) and (a['Action'] == 'deposit'):

@@ -204,11 +204,15 @@ class Exchange:
             token = self.supported_tokens[idx]
             qty = float(deposit) / (10**token.decimals)
             if qty > 0:
+                logger.info('Got deposit {} {}'.format(token.token, qty))
                 self.balance.deposit(api_key, token.token, qty, 'available')
                 self.complete_tnx(qty, pending_tnx.get(token.token, []), token)
 
     def complete_tnx(self, total_qty, pending_tnx, token):
         history = self.balance.get_history('deposit')
+        logger.info('Save deposit activity {} {}'.format(
+            token.token, total_qty))
+        logger.info('Pending tnx {}'.format(pending_tnx))
         for tnx in pending_tnx:
             if tnx['tx'] in history:
                 continue

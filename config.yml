@@ -38,7 +38,7 @@ logging:
       level: DEBUG
       formatter: simple
       filename: simulator.log
-      maxBytes: 10485760 # 10MB
+      maxBytes: 104857600 # 100MB
       backupCount: 2
       encoding: utf8
 
