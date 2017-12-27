@@ -81,7 +81,7 @@ class Bittrex(Exchange):
         if act_type == 'deposit':
             return {
                 'Id': a.id,
-                'Amount': a.amount,
+                'Amount': round(a.amount, 8),
                 'Currency': a.token.upper(),
                 'Confirmations': 42,
                 'LastUpdated': utils.bittrex_fmt_time(
@@ -93,7 +93,7 @@ class Bittrex(Exchange):
             return {
                 'PaymentUuid': a.uuid,
                 'Currency': a.token.upper(),
-                'Amount': a.amount,
+                'Amount': round(a.amount, 8),
                 'Address': a.address,
                 'Opened': utils.bittrex_fmt_time(
                     utils.get_real_timestamp()),
