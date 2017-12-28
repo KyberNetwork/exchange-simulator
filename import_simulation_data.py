@@ -16,9 +16,10 @@ def main():
     # init deposit
     initialized_balances = rdb.get('INITIALIZED_BALANCES')
     if not initialized_balances:
-        for token in supported_tokens:
-            for ex, key in config.API_KEY.items():
-                balance_handler.deposit(key, token, 100000, 'available')
+        for ex, balance in config.INITIAL_BALANCE.items():
+            key = config.API_KEY[ex]
+            for token, amount in balance.items():
+                balance_handler.deposit(key, token, amount, 'available')
         rdb.set('INITIALIZED_BALANCES', True)
 
 

@@ -73,3 +73,51 @@ PRIVATE_KEY = {
     'binance': 'cf0994187eedbeb765dd931372b75d542fd121577911486605352b32c1764b1e',
     'bitfinex': 'be0a3d742ee009b1cc7e69abcaa4dc9a5960a4bcbe0c55a11b1333826bcc13cc'
 }
+
+INITIAL_BALANCE = {
+    'bittrex': {
+        'omg': 9000,
+        'eth': 1000,
+        'dgd': 1000,
+        'cvc': 1000,
+        'fun': 1000,
+        'mco': 1000,
+        'gnt': 1000,
+        'adx': 1000,
+        'pay': 1000,
+        'bat': 1000,
+        'knc': 1000,
+        'eos': 1000,
+        'link': 1000
+    },
+    'liqui': {
+        'omg': 1000,
+        'eth': 1000,
+        'dgd': 1000,
+        'cvc': 1000,
+        'fun': 1000,
+        'mco': 1000,
+        'gnt': 1000,
+        'adx': 1000,
+        'pay': 1000,
+        'bat': 1000,
+        'knc': 1000,
+        'eos': 1000,
+        'link': 1000
+    },
+    'binance': {
+        'omg': 9000,
+        'eth': 1000,
+        'dgd': 1000,
+        'cvc': 1000,
+        'fun': 1000,
+        'mco': 1000,
+        'gnt': 1000,
+        'adx': 1000,
+        'pay': 1000,
+        'bat': 1000,
+        'knc': 1000,
+        'eos': 1000,
+        'link': 1000
+    }
+}
