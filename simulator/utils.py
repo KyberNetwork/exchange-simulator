@@ -5,6 +5,9 @@ import time
 import uuid
 from datetime import datetime
 import random
+import hmac
+import hashlib
+import urllib
 
 import requests
 import json
@@ -149,7 +152,13 @@ def convert_ob_json_file(ob_json_file, new_file):
 
 
 def get_pending_tnx(exchange):
-    r = requests.get('http://core:8000/immediate-pending-activities')
+    url = 'http://core:8000/immediate-pending-activities'
+    params = {'nonce': get_real_timestamp()}
+    paybytes = urllib.parse.urlencode(params).encode('utf8')
+    headers = {
+        'signed': hmac.new(config.SECRET, paybytes, hashlib.sha512).hexdigest()
+    }
+    r = requests.get(url, headers=headers, params=params)
     data = r.json()
 
     logger.info('Pending response: {}'.format(data))

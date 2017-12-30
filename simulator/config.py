@@ -57,6 +57,8 @@ try:
 except FileNotFoundError:
     sys.exit('Config file is missing.')
 
+
+SECRET = b'vtHpz1l0kxLyGc4R1qJBkFlQre5352xGJU9h8UQTwUTz5p6VrxcEslF4KnDI21s1'
 LOGGER_NAME = "simulator"
 EXCHANGE_NAME = "liqui"
 
