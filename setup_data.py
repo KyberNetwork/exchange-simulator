@@ -15,6 +15,11 @@ def init_balance():
     supported_tokens = config.SUPPORTED_TOKENS
     balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
+    # reset balance
+    rdb.delete('INITIALIZED_BALANCES')
+    for k in rdb.keys('balance*available'):
+        rdb.delete(k)
+
     # init deposit
     initialized_balances = rdb.get('INITIALIZED_BALANCES')
     if not initialized_balances:
