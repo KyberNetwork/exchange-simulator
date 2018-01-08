@@ -126,27 +126,29 @@ def call_function(priv_key, value, contract_hash, contract_abi, function_name, a
 
 
 def call_const_function(priv_key, value, contract_hash, contract_abi, function_name, args):
-    src_address = b2h(utils.privtoaddr(priv_key))
+    # src_address = b2h(utils.privtoaddr(priv_key))
     translator = ContractTranslator(json.loads(contract_abi))
     call = translator.encode_function_call(function_name, args)
-    nonce = get_num_transactions(src_address)
-    gas_price = get_gas_price_in_wei()
+    # nonce = get_num_transactions(src_address)
+    # gas_price = get_gas_price_in_wei()
 
-    start_gas = eval_startgas(
-        src_address, contract_hash, value, b2h(call), gas_price)
-    nonce = int(nonce, 16)
-    gas_price = int(gas_price, 16)
-    start_gas = int(start_gas, 16) + 100000
-    start_gas = 7612288
+    # start_gas = eval_startgas(
+    # src_address, contract_hash, value, b2h(call), gas_price)
+    # nonce = int(nonce, 16)
+    # gas_price = int(gas_price, 16)
+    # start_gas = int(start_gas, 16) + 100000
+    # start_gas = 7612288
 
-    params = {"from": "0x" + src_address,
-              "to": "0x" + contract_hash,
-              "gas": "0x" + "%x" % start_gas,
-              "gasPrice": "0x" + "%x" % gas_price,
-              "value": "0x" + str(value),
-              "data": "0x" + b2h(call)}
+    params = {
+        # "from": "0x" + src_address,
+        "to": "0x" + contract_hash,
+        #   "gas": "0x" + "%x" % start_gas,
+        #   "gasPrice": "0x" + "%x" % gas_price,
+        #   "value": "0x" + str(value),
+        "data": "0x" + b2h(call)
+    }
 
-    return_value = json_call("eth_call", [params])
+    return_value = json_call("eth_call", [params, "latest"])
     # print return_value
     return_value = h2b(return_value[2:])  # remove 0x
     return translator.decode_function_result(function_name, return_value)
