@@ -14,7 +14,7 @@ class Exchange:
     def __init__(self, exchange_name, private_key,
                  supported_tokens, db,
                  order_handler, balance_handler,
-                 deposit_address):
+                 deposit_address, info):
         self.name = exchange_name
         self.supported_tokens = supported_tokens
         self.db = db
@@ -23,6 +23,7 @@ class Exchange:
         self.deposit_address = deposit_address
         self.private_key = private_key
         self.last_check = 0
+        self._info = info
 
     def _update_balance(func):
         def wrapper(self, api_key, *args, **kargs):
@@ -41,6 +42,9 @@ class Exchange:
                     logger.error('Handle deposit fail: {}'.format(e))
             return func(self, api_key, *args, **kargs)
         return wrapper
+
+    def get_info(self):
+        return self._info
 
     @_update_balance
     def get_balance(self, api_key, blc_types=['available', 'lock']):

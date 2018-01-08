@@ -9,6 +9,14 @@ class Binance(Exchange):
     def __init__(self, *args):
         super().__init__(*args)
 
+    def get_info_api(self):
+        result = {
+            'timezone': 'UTC',
+            'serverTime': utils.get_timestamp()
+        }
+        result.update(self.get_info())
+        return result
+
     def get_order_book_api(self, symbol, timestamp, *args, **kargs):
         pair = self.__symbol_to_pair(symbol)
         order_book = self.get_order_book(pair, timestamp)

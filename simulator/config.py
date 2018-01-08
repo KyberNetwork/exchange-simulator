@@ -57,6 +57,11 @@ try:
 except FileNotFoundError:
     sys.exit('Config file is missing.')
 
+EXCHANGE_INFO = {}
+with open('info/binance.json', 'r') as f:
+    EXCHANGE_INFO['binance'] = json.loads(f.read())
+with open('info/bittrex.json', 'r') as f:
+    EXCHANGE_INFO['bittrex'] = json.loads(f.read())
 
 SECRET = b'vtHpz1l0kxLyGc4R1qJBkFlQre5352xGJU9h8UQTwUTz5p6VrxcEslF4KnDI21s1'
 LOGGER_NAME = "simulator"

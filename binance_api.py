@@ -65,6 +65,12 @@ def action(expected_params=[], public=False):
     return decorator
 
 
+@api.route('/api/v1/exchangeInfo', methods=['GET'])
+@action(public=True)
+def exchange_info(params):
+    return binance.get_info_api()
+
+
 @api.route('/api/v1/depth', methods=['GET'])
 @action(expected_params=['symbol'], public=True)
 def order_book(params):
@@ -147,7 +153,8 @@ binance = Binance(
     rdb,
     order_handler,
     balance_handler,
-    config.EXCHANGES_ADDRESS['binance']
+    config.EXCHANGES_ADDRESS['binance'],
+    config.EXCHANGE_INFO['binance']
 )
 
 if __name__ == '__main__':

@@ -60,6 +60,12 @@ def action(expected_params):
     return decorator
 
 
+@api.route('/api/v1.1/public/getmarkets', methods=['GET'])
+@action(expected_params=[])
+def markets(params):
+    return bittrex.get_markets_api()
+
+
 @api.route('/api/v1.1/public/getorderbook')
 @action(expected_params=['type', 'market'])
 def get_order_book(params):
@@ -149,7 +155,8 @@ bittrex = Bittrex(
     rdb,
     order_handler,
     balance_handler,
-    config.EXCHANGES_ADDRESS['bittrex']
+    config.EXCHANGES_ADDRESS['bittrex'],
+    config.EXCHANGE_INFO['bittrex']
 )
 
 if __name__ == '__main__':

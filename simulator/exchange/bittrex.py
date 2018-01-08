@@ -9,6 +9,9 @@ class Bittrex(Exchange):
     def __init__(self, *args):
         super().__init__(*args)
 
+    def get_markets_api(self):
+        return self.get_info()
+
     def get_order_book_api(self, market, type, timestamp, *args, **kargs):
         pair = self.__market_to_pair(market)
         order_book = self.get_order_book(pair, timestamp)
