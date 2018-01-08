@@ -2,16 +2,18 @@ from simulator import utils, config
 from simulator.balance_handler import BalanceHandler
 
 
-def main():
-    rdb = utils.get_redis_db()
-    supported_tokens = config.SUPPORTED_TOKENS
-    balance_handler = BalanceHandler(rdb, supported_tokens.keys())
-
+def import_order_book():
     if config.MODE == 'simulation':
         rdb = utils.get_redis_db()
         ob_file = 'data/full_ob.dat'
         # ob_file = 'data/sample_ob.dat'
         utils.setup_data(rdb, ob_file)
+
+
+def init_balance():
+    rdb = utils.get_redis_db()
+    supported_tokens = config.SUPPORTED_TOKENS
+    balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
     # init deposit
     initialized_balances = rdb.get('INITIALIZED_BALANCES')
@@ -24,4 +26,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # import_order_book()
+    init_balance()
