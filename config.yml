@@ -5,6 +5,11 @@ dev: &common
   blockchain_url: http://blockchain:8545
   addresses: shared/deployment_dev.json
 
+ropsten:
+  <<: *common
+  blockchain_url: https://ropsten.infura.io
+  addresses: shared/deployment_ropsten.json
+
 kovan:  
   <<: *common
   blockchain_url: https://kovan.infura.io
