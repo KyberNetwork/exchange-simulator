@@ -188,16 +188,61 @@ def view_simulation_ob(exchange, base, quote, timestamp):
     print(json.loads(ob))
 
 
+def import_order_book_to_db(rdb, ob_path):
+    EXCHANGES = ['Liqui', 'Binance', 'Bittrex', 'Bitfinex']
+
+    def load_order_books(ob_file):
+        print(ob_file)
+        with open(ob_file, 'r') as f:
+            for line in f:
+                ob = json.loads(line)
+                if ob['exchange'] in EXCHANGES:
+                    yield ob
+
+    print(ob_path)
+
+    for file in os.listdir(ob_path):
+        if file.startswith('ob'):
+            ob_file = os.path.join(ob_path, file)
+            print(ob_file)
+            order_books = load_order_books(ob_file)
+
+            for ob in order_books:
+
+                exchange = ob['exchange']
+                base = ob['pair']['base']
+                quote = ob['pair']['quote']
+                timestamp = normalize_timestamp(ob['timestamp'] * 1000)
+
+                key = '_'.join(
+                    map(str, [exchange, base, quote, timestamp])).lower()
+                print(key)
+                value = {
+                    'Asks': ob['Asks'],
+                    'Bids': ob['Bids']
+                }
+
+                rdb.set(key, json.dumps(value))
+
+
 if __name__ == '__main__':
+    # conver order book from one format to another
     # src, dst = 'data/full_ob', 'data/full_ob.dat'
     # src, dst = 'data/sample_ob', 'data/sample_ob.dat'
     # convert_ob_json_file(src, dst)
 
+    # copy order book to db
     # import time
-
     # start = time.time()
     # rdb = get_redis_db()
     # copy_order_books_to_db(dst, rdb)
     # end = time.time()
     # print("Import time: {}s".format(end - start))
-    view_simulation_ob('binance', 'eos', 'eth', 1510009456430)
+
+    # view a specific order book
+    # view_simulation_ob('binance', 'eos', 'eth', 1510009456430)
+
+    # import multiple order book to db
+    rdb = get_redis_db()
+    ob_path = 'data/order_books/'
+    import_order_book_to_db(ob_path, rdb)
