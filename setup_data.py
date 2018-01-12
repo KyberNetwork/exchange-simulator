@@ -5,9 +5,15 @@ from simulator.balance_handler import BalanceHandler
 def import_order_book():
     if config.MODE == 'simulation':
         rdb = utils.get_redis_db()
-        ob_file = 'data/full_ob.dat'
+
+        # import one big file container order books to redis
+        # ob_file = 'data/full_ob.dat'
         # ob_file = 'data/sample_ob.dat'
-        utils.setup_data(rdb, ob_file)
+        # utils.setup_data(rdb, ob_file)
+
+        # import multiple order book file to redis
+        ob_path = 'data/order_books/'
+        utils.import_order_book_to_db(rdb, ob_path)
 
 
 def init_balance():
@@ -31,5 +37,5 @@ def init_balance():
 
 
 if __name__ == '__main__':
-    # import_order_book()
-    init_balance()
+    import_order_book()
+    # init_balance()
