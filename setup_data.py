@@ -37,5 +37,5 @@ def init_balance():
 
 
 if __name__ == '__main__':
-    import_order_book()
-    # init_balance()
+    # import_order_book()
+    init_balance()
