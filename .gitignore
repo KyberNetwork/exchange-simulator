@@ -2,3 +2,4 @@ __pycache__
 simulator.log*
 data/
 *.pyc
+.DS_Store
