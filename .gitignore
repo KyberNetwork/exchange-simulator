@@ -3,3 +3,4 @@ simulator.log*
 data/
 *.pyc
 .DS_Store
+.vscode
