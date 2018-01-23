@@ -1,0 +1,9 @@
+server {
+    listen 5100;
+    server_name localhost;
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/exchange-simulator/binance.sock;
+    }
+}

@@ -127,6 +127,11 @@ def history():
     return exec(huobi.history_api)
 
 
+@api.route('/ping')
+def ping():
+    return 'pong'
+
+
 rdb = utils.get_redis_db()
 if config.MODE == 'simulation':
     order_handler = SimulationOrder(rdb)

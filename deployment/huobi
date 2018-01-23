@@ -1,0 +1,9 @@
+server {
+    listen 5200;
+    server_name localhost;
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/exchange-simulator/huobi.sock;
+    }
+}
