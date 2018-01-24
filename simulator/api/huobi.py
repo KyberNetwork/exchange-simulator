@@ -143,12 +143,12 @@ balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
 huobi = Huobi(
     'binance',
-    config.PRIVATE_KEY['liqui'],
+    config.PRIVATE_KEY['huobi'],
     list(supported_tokens.values()),
     rdb,
     order_handler,
     balance_handler,
-    config.EXCHANGES_ADDRESS['liqui'],
+    config.EXCHANGES_ADDRESS['huobi'],
     config.EXCHANGE_INFO['huobi']
 )
 

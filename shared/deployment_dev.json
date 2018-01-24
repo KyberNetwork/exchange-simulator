@@ -35,9 +35,8 @@
     "bittrex": "0xcfa55b9b5c1c05e81a7f306a841ae6f3b489d057",
     "liqui": "0x82ec589e41c8f03086ae0c2acd18db3da4262e31",
     "huobi": "0xb014e899ddb9a55af72fe09e8570e700a5167b6d",
-    "poloniex": "0x4f05afbc371854d027263e756487bdefd099178f",
-    "binance": "0xe56e1cca3cac5e631669d69dc2fb0f430c384b42",
-    "bitfinex": "0xf7c994c53183136ae0ef7df7405c19b407e4244c"
+    "binance": "0x4f05afbc371854d027263e756487bdefd099178f",
+    "bitfinex": "0xe56e1cca3cac5e631669d69dc2fb0f430c384b42"
   },
   "exchanges": {
     "bittrex": {
@@ -64,7 +63,7 @@
       "SNT": "0x90ef5512a489c80cddde13c14bbb7f1cee03e2a4",
       "ETH": "0x0d533dd36a0d6077694955513c0e56941b57acd3"
     },
-    "poloniex": {
+    "binance": {
       "OMG": "0x7fb907ea904e2ff70da8d0ee06c5d6078bc57243",
       "KNC": "0x03f39e30587a09bdb9ebef2daaec24cfd654c6ea",
       "EOS": "0x62fb8ec10074d29bf43415b60b3f4c7829525550",
@@ -72,27 +71,19 @@
       "SNT": "0x8e3c4ed66cd1d971d1b74e90910602182e1bf145",
       "ETH": "0x811907c0b7d77b53501d3e8c075bd99601c0d0c5"
     },
-    "binance": {
+    "bitfinex": {
       "OMG": "0x7d8253214ac25050138fcd0ddf1df3efdff0c99d",
       "KNC": "0x018d18e9dddaea0254f940b641a5fd16e2e332d3",
       "EOS": "0x7822da62929e8ea69963d9fdc35447513462c079",
       "SALT": "0xc83e10a0697e6fa62c2b5365cf4f386a6122100b",
       "SNT": "0xe0d9e1efe9d608fa0189f4fd196b173752a77b37",
       "ETH": "0x235742b3ccf1507f855de114a7712abdc5509375"
-    },
-    "bitfinex": {
-      "OMG": "0x6a69ef72d2d0726c3307c60e0af31f7148e0ea89",
-      "KNC": "0xbd54a7ee94789bd788328f8d2a23db74f248489b",
-      "EOS": "0xc0f9471c456d422a08e8e952b20653628818d356",
-      "SALT": "0xc0d1988ba318dfa33dc12ff0e8fa0eaded448352",
-      "SNT": "0xc88ea1d944f329a097a19f83686ca9cccac260d1",
-      "ETH": "0x03c0b78d14d300e480c579bebd19cd34ce6c6667"
     }
   },
   "bank": "0x3f85d0b6119b38b7e6b119f7550290fec4be0e3c",
   "reserve": "0x13fbd0351503fbea7a59a6ad2d65b9ec61435a5c",
   "pricing": "0x093514489c4b42ff54f942f4f91de3f89c797aab",
   "network": "0x385b2e03433c816def636278fb600ecd056b0e8d",
-  "wrapper": "0x08ed5359e4fc1f3cdb2a60d263496f63da700d41",
-  "feeburner": "0xf8b0c684ac649d64693e9f099ff22d23b4c5d4e7"
+  "wrapper": "0x21b50064c6d8e128f7e700cea7201d9e1486eb96",
+  "feeburner": "0x93a6ff765da70f035b3bae57617ae54441ed7336"
 }
