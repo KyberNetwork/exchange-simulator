@@ -100,8 +100,8 @@ class Huobi(Exchange):
         elif types == 'deposit':
             activities = self.balance.get_history('deposit').values()
         else:
-            withdraw = self.balance.get_history('withdraw').values()
-            deposit = self.balance.get_history('deposit').values()
+            withdraw = list(self.balance.get_history('withdraw').values())
+            deposit = list(self.balance.get_history('deposit').values())
             activities = withdraw + deposit
 
         result = []

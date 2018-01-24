@@ -28,9 +28,9 @@ def exec(f, additional_params={}):
         params.update(additional_params)
         params['timestamp'] = utils.get_timestamp(request.args.to_dict())
 
-        logger.info('params', params)
+        logger.info('Params: {}'.format(params))
         result = f(**params)
-        # logger.info('result', result)
+        logger.info('Result: {}'.format(result))
         return jsonify({
             'status': 'ok',
             'data': result
