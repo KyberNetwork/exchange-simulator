@@ -57,11 +57,12 @@ try:
 except FileNotFoundError:
     sys.exit('Config file is missing.')
 
+
 EXCHANGE_INFO = {}
-with open('info/binance.json', 'r') as f:
-    EXCHANGE_INFO['binance'] = json.loads(f.read())
-with open('info/bittrex.json', 'r') as f:
-    EXCHANGE_INFO['bittrex'] = json.loads(f.read())
+for exchange in ['binance', 'bittrex', 'huobi']:
+    with open("info/{}.json".format(exchange), 'r') as f:
+        EXCHANGE_INFO[exchange] = json.loads(f.read())
+
 
 SECRET = b'vtHpz1l0kxLyGc4R1qJBkFlQre5352xGJU9h8UQTwUTz5p6VrxcEslF4KnDI21s1'
 LOGGER_NAME = "simulator"
@@ -70,7 +71,8 @@ EXCHANGE_NAME = "liqui"
 API_KEY = {
     'liqui': 's7kwmscu-u6myvpjh-47evo234-y2uxw61t-raxby17f',
     'binance': '3wixkht774mwnwrufv9ccsxocdawro3aiokxx77bjbkglc10ee2nhv4kys7jc07c',
-    'bittrex': '665ab1c6a04d4e4b855bd13639520c0a'
+    'bittrex': '665ab1c6a04d4e4b855bd13639520c0a',
+    'huobi': '48c32ba6-a86f961a-48fa19f1-bdbdc'
 }
 
 PRIVATE_KEY = {
@@ -83,6 +85,14 @@ PRIVATE_KEY = {
 
 INITIAL_BALANCE = {
     'bittrex': {
+        'eth': 125,
+        'omg': 69.25,
+        'knc': 400.0,
+        'eos': 125.0,
+        'salt': 156.25,
+        'snt': 4462.5
+    },
+    'huobi': {
         'eth': 125,
         'omg': 69.25,
         'knc': 400.0,

@@ -1,8 +1,8 @@
 [[source]]
 
+url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
-url = "https://pypi.python.org/simple"
 
 
 [dev-packages]
@@ -16,8 +16,8 @@ ethereum = "==2.1.5"
 requests = "==2.18.4"
 jsonrpc = "==1.2"
 rlp = "==0.6.0"
-Flask = "==0.12.2"
+flask = "==0.12.2"
 redis = "==2.10.6"
-raven = {version = "==6.3.0", extras = ["flask"]}
-uWSGI = "==2.0.15"
+raven = {extras = ["flask"], version = "==6.3.0"}
+uwsgi = "*"
 jsonrpcserver = "==3.5.2"
