@@ -142,7 +142,7 @@ supported_tokens = config.SUPPORTED_TOKENS
 balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
 huobi = Huobi(
-    'binance',
+    'huobi',
     config.PRIVATE_KEY['huobi'],
     list(supported_tokens.values()),
     rdb,
