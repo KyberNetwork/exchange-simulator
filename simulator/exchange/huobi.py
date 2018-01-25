@@ -94,10 +94,10 @@ class Huobi(Exchange):
         result = self.withdraw(api_key, currency, address, amount)
         return result.id
 
-    def history_api(self, types, *args, **kargs):
-        if types == 'withdraw':
+    def history_api(self, types=None, *args, **kargs):
+        if types == 'withdraw-virtual':
             activities = self.balance.get_history('withdraw').values()
-        elif types == 'deposit':
+        elif types == 'deposit-virtual':
             activities = self.balance.get_history('deposit').values()
         else:
             withdraw = list(self.balance.get_history('withdraw').values())
