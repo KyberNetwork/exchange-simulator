@@ -64,7 +64,7 @@ for exchange in ['binance', 'bittrex', 'huobi']:
         EXCHANGE_INFO[exchange] = json.loads(f.read())
 
 
-SECRET = b'vtHpz1l0kxLyGc4R1qJBkFlQre5352xGJU9h8UQTwUTz5p6VrxcEslF4KnDI21s1'
+SECRET = b'vtHpz1lUQTwUTz5p6VrxcEslF4KnDI21s1'
 LOGGER_NAME = "simulator"
 EXCHANGE_NAME = "liqui"
 
