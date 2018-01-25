@@ -96,22 +96,36 @@ class Huobi(Exchange):
 
     def history_api(self, types=None, *args, **kargs):
         if types == 'withdraw-virtual':
-            activities = self.balance.get_history('withdraw').values()
+            withdraw = self.balance.get_history('withdraw').values()
+            deposit = []
         elif types == 'deposit-virtual':
-            activities = self.balance.get_history('deposit').values()
+            withdraw = []
+            deposit = self.balance.get_history('deposit').values()
         else:
-            withdraw = list(self.balance.get_history('withdraw').values())
-            deposit = list(self.balance.get_history('deposit').values())
-            activities = withdraw + deposit
-
+            withdraw = self.balance.get_history('withdraw').values()
+            deposit = self.balance.get_history('deposit').values()
         result = []
-        for a in activities:
+        for a in deposit:
             result.append({
-                'id': str(a.id),
+                'id': a.id,
+                'type': 'deposit-virtual',
+                'direction': 'in',
                 'currency': a.token,
-                'amount': a.amount,
+                'amount': str(a.amount),
                 'address': str(a.address),
-                'tx-hash': str(a.tx)
+                'tx-hash': str(a.tx),
+                'state': 'safe'
+            })
+        for a in withdraw:
+            result.append({
+                'id': a.id,
+                'type': 'withdraw-virtual',
+                'direction': 'out',
+                'currency': a.token,
+                'amount': str(a.amount),
+                'address': str(a.address),
+                'tx-hash': str(a.tx),
+                'state': 'safe'
             })
         return result
 
