@@ -189,7 +189,7 @@ def view_simulation_ob(exchange, base, quote, timestamp):
 
 
 def import_order_book_to_db(rdb, ob_path):
-    EXCHANGES = ['Liqui', 'Binance', 'Bittrex', 'Bitfinex']
+    EXCHANGES = ['Binance', 'Bittrex', 'Huobi']
 
     def load_order_books(ob_file):
         print(ob_file)
@@ -204,7 +204,6 @@ def import_order_book_to_db(rdb, ob_path):
     for file in os.listdir(ob_path):
         if file.startswith('ob'):
             ob_file = os.path.join(ob_path, file)
-            print(ob_file)
             order_books = load_order_books(ob_file)
 
             for ob in order_books:
