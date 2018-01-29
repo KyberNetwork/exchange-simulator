@@ -6,28 +6,19 @@ import jsonrpc
 import rlp
 import time
 
-from flask import Flask, request, jsonify
-from flask_restful import Resource, Api
+from flask import Flask, request, jsonify, Response
 
 from pycoin.serialize import b2h, h2b
 from pycoin import encoding
 from ethereum import utils, abi, transactions
-import requests
-import json
-import jsonrpc
-import rlp
 from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
 
-from flask import Flask, request, Response
-from jsonrpcserver import methods
-from flask import jsonify
-
 app = Flask(__name__)
 
 
-local_url = "http://localhost:8545/jsonrpc"
+local_url = "http://blockchain:8545/jsonrpc"
 
 
 def blockchain_json_call(method_name, params, rpc_version, id):
@@ -55,6 +46,7 @@ class PendingTx:
         self.raw_tx = raw_tx
         self.tx_hash = tx_hash
         self.submission_time = current_timestamp
+
 
 pending_txs = set()
 current_rpc_id = 1024 * 1024 * 1024
@@ -95,7 +87,7 @@ def index():
     check_pending_txs(timestamp)
 
     req = request.get_data().decode()
-    print (str(req))
+    print(str(req))
     json_req = json.loads(req)
     output_is_array = False
     if (len(json_req) == 1):
@@ -124,6 +116,7 @@ def index():
         response = [response]
     print(str(response))
     return json.dumps(response)
+
 
 if __name__ == '__main__':
     app.run()

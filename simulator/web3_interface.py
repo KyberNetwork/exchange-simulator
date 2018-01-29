@@ -217,8 +217,8 @@ def wait_for_tx_confirmation(tx_hash):
     while(not is_tx_confirmed(tx_hash)):
         round += 1
         time.sleep(1)
-        print("wait")
-        if(round > 100):
+        print("wait", round)
+        if(round > 50):
             return False
 
 
@@ -249,15 +249,15 @@ def test():
 
     key = h2b(
         "dae8043a6b75fbf1c88efa28f05434ca8fd6d3270b8cc5086b64a3319512e3f6")
-    tx_hash2 = make_transaction(key, 0x124, 10**18, h2b("1234"))
+    tx_hash2 = make_transaction(key, 0x123, 10**18, h2b("1234"))
 
-    print(tx_hash1)
+    print('tx1:', tx_hash1)
     wait_for_tx_confirmation(tx_hash1)
 
-    print(tx_hash15)
-    wait_for_tx_confirmation(tx_hash1)
+    print('tx15:', tx_hash15)
+    wait_for_tx_confirmation(tx_hash15)
 
-    print(tx_hash2)
+    print('tx2:', tx_hash2)
     wait_for_tx_confirmation(tx_hash2)
 
 
