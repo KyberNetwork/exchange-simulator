@@ -7,7 +7,6 @@ import rlp
 import time
 
 from flask import Flask, request, jsonify, Response
-
 from pycoin.serialize import b2h, h2b
 from pycoin import encoding
 from ethereum import utils, abi, transactions
@@ -51,7 +50,7 @@ class PendingTx:
 pending_txs = set()
 current_rpc_id = 1024 * 1024 * 1024
 confirmation_delay_in_sec = 5
-use_delay = False
+use_delay = True
 
 
 def check_pending_txs(current_timestamp):

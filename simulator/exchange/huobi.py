@@ -107,7 +107,7 @@ class Huobi(Exchange):
         result = []
         for a in deposit:
             result.append({
-                'id': a.id,
+                'transaction-id': a.id,
                 'type': 'deposit-virtual',
                 'direction': 'in',
                 'currency': a.token,
@@ -118,14 +118,14 @@ class Huobi(Exchange):
             })
         for a in withdraw:
             result.append({
-                'id': a.id,
+                'transaction-id': a.id * 100 + 1,
                 'type': 'withdraw-virtual',
                 'direction': 'out',
                 'currency': a.token,
                 'amount': str(a.amount),
                 'address': str(a.address),
                 'tx-hash': str(a.tx),
-                'state': 'safe'
+                'state': 'confirmed'
             })
         return result
 
