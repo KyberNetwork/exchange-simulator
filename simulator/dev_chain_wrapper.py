@@ -53,6 +53,7 @@ pending_txs = set()
 current_rpc_id = 1024 * 1024 * 1024
 confirmation_delay_in_milis = 10 * 1000
 use_delay = True
+use_get_transaction_by_hash = False
 
 
 def check_pending_txs(current_timestamp):
@@ -78,12 +79,29 @@ def handle_send_raw_tx(method_name, params, rpc_version, id, current_timestamp):
     raw_tx = params[0]
     tx_hash = b2h(utils.sha3(h2b(raw_tx[2:])))
     pending_txs.add(PendingTx(raw_tx, tx_hash, current_timestamp))
-    return {"id": id, "jsonrpc": rpc_version, "result": tx_hash}
+    return {"id": id, "jsonrpc": rpc_version, "result": "0x" + tx_hash}
+
+
+def handle_getTransactionByHash(method_name, params, rpc_version, id):
+    response = blockchain_json_call(method_name, params, rpc_version, id)
+    if(response['result'] != None):
+        # tx already in parity client
+        return response
+
+    # check if it is in pending txs
+    tx_hash = (params[0])[2:]  # chop 0x from the beginning
+    for pending_tx in pending_txs:
+        if pending_tx.tx_hash == tx_hash:
+            # found tx
+            return {"id": id, "jsonrpc": rpc_version, "result": {"hash": "0x" + tx_hash}}
+    else:
+        return {"id": id, "jsonrpc": rpc_version, "result": None}
 
 
 @app.route('/', methods=['POST'])
 def index():
     global use_delay
+    global use_get_transaction_by_hash
     timestamp = simulator_utils.get_timestamp()
     check_pending_txs(timestamp)
 
@@ -101,15 +119,25 @@ def index():
     id = json_req["id"]
 
     # some commands are not supported in delay mode
-    if((method_name == "eth_sendTransaction" or
-            method_name == "eth_getTransactionByHash") and use_delay):
-        respone = {"id": id, "jsonrpc": rpc_version,
-                   "result": "unsuppoted command in delay mode"}
+    # some commands are not supported in delay mode
+    if(method_name == "eth_sendTransaction" and use_delay):
+        response = {"id": id, "jsonrpc": rpc_version,
+                    "result": "unsuppoted command in delay mode"}
+    elif(method_name == "eth_getTransactionByHash" and use_delay):
+        if(use_get_transaction_by_hash):
+            response = handle_getTransactionByHash(
+                method_name, params, rpc_version, id)
+        else:
+            response = {"id": id, "jsonrpc": rpc_version,
+                        "result": "unsuppoted command in delay mode"}
     elif(method_name == "eth_sendRawTransaction" and use_delay):
         response = handle_send_raw_tx(
             method_name, params, rpc_version, id, timestamp)
     elif(method_name == "enableDelay"):
         use_delay = True
+        response = {"id": id, "jsonrpc": rpc_version, "result": "Ok"}
+    elif(method_name == "enableGetTransactionByHash"):
+        use_get_transaction_by_hash = True
         response = {"id": id, "jsonrpc": rpc_version, "result": "Ok"}
     else:
         response = blockchain_json_call(method_name, params, rpc_version, id)
