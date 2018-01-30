@@ -13,6 +13,8 @@ from ethereum import utils, abi, transactions
 from ethereum.abi import ContractTranslator
 from ethereum.utils import mk_contract_address
 
+from simulator import utils as simulator_utils
+
 
 app = Flask(__name__)
 
@@ -49,7 +51,7 @@ class PendingTx:
 
 pending_txs = set()
 current_rpc_id = 1024 * 1024 * 1024
-confirmation_delay_in_sec = 5
+confirmation_delay_in_milis = 10 * 1000
 use_delay = True
 
 
@@ -59,7 +61,7 @@ def check_pending_txs(current_timestamp):
 
     txs_to_remove = []
     for tx in pending_txs:
-        if(tx.submission_time + confirmation_delay_in_sec <= current_timestamp):
+        if(tx.submission_time + confirmation_delay_in_milis <= current_timestamp):
             params = [tx.raw_tx]
             blockchain_json_call(
                 "eth_sendRawTransaction", params, "2.0", str(current_rpc_id))
@@ -82,7 +84,7 @@ def handle_send_raw_tx(method_name, params, rpc_version, id, current_timestamp):
 @app.route('/', methods=['POST'])
 def index():
     global use_delay
-    timestamp = int(time.time())
+    timestamp = simulator_utils.get_timestamp()
     check_pending_txs(timestamp)
 
     req = request.get_data().decode()

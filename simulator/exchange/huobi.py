@@ -117,6 +117,14 @@ class Huobi(Exchange):
                 'state': 'safe'
             })
         for a in withdraw:
+            if a.status == 'done':
+                state = 'confirmed'
+            else:
+                done = self.check_activity_is_done('withdraw', a)
+                if done:
+                    state = 'confirmed'
+                else:
+                    state = 'pending'
             result.append({
                 'transaction-id': a.id * 100 + 1,
                 'type': 'withdraw-virtual',
@@ -125,7 +133,7 @@ class Huobi(Exchange):
                 'amount': str(a.amount),
                 'address': str(a.address),
                 'tx-hash': str(a.tx),
-                'state': 'confirmed'
+                'state': state
             })
         return result
 

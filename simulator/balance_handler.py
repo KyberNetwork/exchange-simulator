@@ -63,6 +63,9 @@ class BalanceHandler:
         self.activities[type][tx] = a
         return a
 
+    def update(self, type, a):
+        self.activities[type][a.tx] = a
+
     def get_history(self, type):
         return self.activities.get(type, {})
 
