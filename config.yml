@@ -54,7 +54,11 @@ logging:
       level: DEBUG
       handlers: [console, file_handler]
       propagate: no
-
+    dev_chain_wrapper:
+      level: DEBUG
+      handlers: [console, file_handler]
+      propagate: no
+      
   root:
     level: DEBUG
     handlers: [file_handler]

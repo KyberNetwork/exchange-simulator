@@ -16,6 +16,9 @@ from ethereum.utils import mk_contract_address
 from simulator import utils as simulator_utils
 
 
+logger = simulator_utils.get_logger('dev_chain_wrapper')
+
+
 app = Flask(__name__)
 
 
@@ -35,7 +38,7 @@ def blockchain_json_call(method_name, params, rpc_version, id):
     response = requests.post(
         url, data=json.dumps(payload), headers=headers).json()
     # print(response)
-    print(str(response))
+    logger.info('Real blockchain response: {}'.format(response))
     return response
 
 #
@@ -84,7 +87,7 @@ def handle_send_raw_tx(method_name, params, rpc_version, id, current_timestamp):
 
 def handle_getTransactionByHash(method_name, params, rpc_version, id):
     response = blockchain_json_call(method_name, params, rpc_version, id)
-    if(response['result'] != None):
+    if(response['result'] is not None):
         # tx already in parity client
         return response
 
@@ -106,7 +109,7 @@ def index():
     check_pending_txs(timestamp)
 
     req = request.get_data().decode()
-    print(str(req))
+    logger.info('Request params to delay: {}'.format(req))
     json_req = json.loads(req)
     output_is_array = False
     if (len(json_req) == 1):
@@ -118,7 +121,6 @@ def index():
     rpc_version = json_req["jsonrpc"]
     id = json_req["id"]
 
-    # some commands are not supported in delay mode
     # some commands are not supported in delay mode
     if(method_name == "eth_sendTransaction" and use_delay):
         response = {"id": id, "jsonrpc": rpc_version,
@@ -143,7 +145,8 @@ def index():
         response = blockchain_json_call(method_name, params, rpc_version, id)
     if(output_is_array):
         response = [response]
-    print(str(response))
+    logger.info('Delay response: {}'.format(response))
+    # print(str(response))
     return json.dumps(response)
 
 

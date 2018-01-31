@@ -49,10 +49,20 @@ def json_call(method_name, params):
         return result
 
 
+nonce = -1
+
+
 def get_num_transactions(address):
-    params = ["0x" + address, "pending"]
-    nonce = json_call("eth_getTransactionCount", params)
-    return nonce
+    global nonce
+    if nonce < 0:
+        params = ["0x" + address, "pending"]
+        trxCount = json_call("eth_getTransactionCount", params)
+        nonce = int(trxCount, 16)
+        output = trxCount
+    else:
+        output = hex(nonce)
+    nonce += 1
+    return output
 
 
 def get_gas_price_in_wei():
