@@ -20,6 +20,10 @@ simulation:
   delay: 10000 # -> 10s
   blockchain_url: http://blockchain:8545
   addresses: shared/deployment_dev.json
+
+staging:
+  <<: *common
+  addresses: shared/deployment_staging.json
   
 production:
   <<: *common
