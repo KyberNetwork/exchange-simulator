@@ -130,8 +130,8 @@ func (s Server) index(c *gin.Context) {
 			)
 		}
 
-		tmp := params.([]string)
-		txh := tmp[0]
+		tmp := params.([]interface{})
+		txh := tmp[0].(string)
 		for _, tx := range *s.pendingTxs {
 			if tx.TxHash == txh {
 				c.JSON(

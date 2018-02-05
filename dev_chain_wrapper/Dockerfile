@@ -1,4 +1,4 @@
-FROM golang:1.8
+FROM golang
 
 LABEL Name=kyber_dev_chain_wrapper Version=0.0.1
 
