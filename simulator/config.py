@@ -70,7 +70,7 @@ EXCHANGE_NAME = "liqui"
 
 API_KEY = {
     'liqui': 's7kwmscu-u6myvpjh-47evo234-y2uxw61t-raxby17f',
-    'binance': '3wixkht774mwnwrufv9ccsxocdawro3aiokxx77bjbkglc10ee2nhv4kys7jc07c',
+    'binance': 'bbpcycmIbqJmudPrqeDzrt9CkY7nnl2ljvpRJ8CVenhejyhsyTBKQJ76BlDflR1K',
     'bittrex': '665ab1c6a04d4e4b855bd13639520c0a',
     'huobi': '48c32ba6-a86f961a-48fa19f1-bdbdc'
 }
