@@ -3,6 +3,7 @@ dev: &common
   # blockchain_url: https://kovan.infura.io
   # blockchain_url: https://kovan.kyber.network
   blockchain_url: http://blockchain:8545
+  # blockchain_url: http://blockchain:8540 # dev_chain_wrapper_with DELAY
   addresses: shared/deployment_dev.json
 
 ropsten:
@@ -18,7 +19,8 @@ kovan:
 simulation:
   <<: *common
   delay: 10000 # -> 10s
-  blockchain_url: http://blockchain:8545
+  # blockchain_url: http://blockchain:8545
+  blockchain_url: http://dev_chain_wrapper:8540 # use dev_chain_wrapper with DELAY
   addresses: shared/deployment_dev.json
 
 staging:
@@ -56,7 +58,11 @@ logging:
       level: DEBUG
       handlers: [console, file_handler]
       propagate: no
-
+    dev_chain_wrapper:
+      level: DEBUG
+      handlers: [console, file_handler]
+      propagate: no
+      
   root:
     level: DEBUG
     handlers: [file_handler]

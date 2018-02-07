@@ -95,6 +95,14 @@ class Binance(Exchange):
 
     def withdraw_history_api(self, *args, **kargs):
         def format(a):
+            if a.status == 'done':
+                status = 6  # completed
+            else:
+                done = self.check_activity_is_done('withdraw', a)
+                if done:
+                    status = 6  # completed
+                else:
+                    status = 4  # processesing
             return {
                 'id': str(a.uuid),
                 'amount': a.amount,
@@ -102,7 +110,7 @@ class Binance(Exchange):
                 'asset': a.token.upper(),
                 'txId': str(a.tx),
                 'applyTime': a.timestamp,
-                'status': 6  # completed
+                'status': status
             }
         activities = self.balance.get_history('withdraw').values()
         return {

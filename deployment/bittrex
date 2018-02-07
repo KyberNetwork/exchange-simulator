@@ -1,9 +1,0 @@
-server {
-    listen 5300;
-    server_name localhost;
-
-    location / {
-        include uwsgi_params;
-        uwsgi_pass unix:/exchange-simulator/bittrex.sock;
-    }
-}

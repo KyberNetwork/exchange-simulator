@@ -93,6 +93,14 @@ class Bittrex(Exchange):
                 'CryptoAddress': hex(utils.get_token(a.token).address)
             }
         else:
+            if a.status == 'done':
+                pending = False
+            else:
+                done = self.check_activity_is_done('withdraw', a)
+                if done:
+                    pending = False
+                else:
+                    pending = True
             return {
                 'PaymentUuid': a.uuid,
                 'Currency': a.token.upper(),
@@ -101,7 +109,7 @@ class Bittrex(Exchange):
                 'Opened': utils.bittrex_fmt_time(
                     utils.get_real_timestamp()),
                 'Authorized': True,
-                'PendingPayment': False,
+                'PendingPayment': pending,
                 'TxCost': 0,
                 'TxId': a.tx,
                 'Canceled': False,

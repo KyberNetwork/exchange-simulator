@@ -58,22 +58,26 @@ class BalanceHandler:
     def _key(self, user, type):
         return '_'.join(['balance', user, type]).lower()
 
-    def add_activity(self, type, amount, address, tx, token):
-        a = BalanceActivity(type, amount, address, tx, token)
+    def add_activity(self, type, amount, address, tx, token, status):
+        a = BalanceActivity(type, amount, address, tx, token, status)
         self.activities[type][tx] = a
         return a
+
+    def update(self, type, a):
+        self.activities[type][a.tx] = a
 
     def get_history(self, type):
         return self.activities.get(type, {})
 
 
 class BalanceActivity:
-    def __init__(self, type, amount, address, tx, token):
+    def __init__(self, type, amount, address, tx, token, status):
         self.type = type
         self.amount = amount
         self.address = address
         self.tx = tx
         self.token = token
+        self.status = status
         self.timestamp = utils.get_timestamp()
         self.uuid = utils.get_random_uuid()
         self.id = utils.get_random_id()

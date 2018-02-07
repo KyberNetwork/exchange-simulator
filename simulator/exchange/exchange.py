@@ -227,7 +227,8 @@ class Exchange:
                                           amount,
                                           'address',
                                           tnx['tx'],
-                                          token.token)
+                                          token.token,
+                                          'done')
             if total_qty < 1e-10:
                 break
 
@@ -246,8 +247,20 @@ class Exchange:
                                         amount,
                                         address,
                                         tx,
-                                        token.token)
+                                        token.token,
+                                        'pending')
         return act
+
+    def check_activity_is_done(self, type, a):
+        try:
+            if web3_interface.is_tx_confirmed(a.tx):
+                a.status = 'done'
+                self.balance.update(type, a)
+                return True
+        except Exception as e:
+            logger.error("Check activity got error: {}".format(e))
+            return False
+        return False
 
 
 MAX_ORDER_ID = 2 ** 31
