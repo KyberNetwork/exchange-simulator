@@ -189,7 +189,7 @@ def view_simulation_ob(exchange, base, quote, timestamp):
 
 
 def import_order_book_to_db(rdb, ob_path):
-    EXCHANGES = ['Binance', 'Bittrex', 'Huobi']
+    EXCHANGES = ['Binance']
 
     def load_order_books(ob_file):
         print(ob_file)
@@ -211,7 +211,7 @@ def import_order_book_to_db(rdb, ob_path):
                 exchange = ob['exchange']
                 base = ob['pair']['base']
                 quote = ob['pair']['quote']
-                timestamp = normalize_timestamp(ob['timestamp'] * 1000)
+                timestamp = normalize_timestamp(ob['timestamp'])
 
                 key = '_'.join(
                     map(str, [exchange, base, quote, timestamp])).lower()
@@ -221,6 +221,12 @@ def import_order_book_to_db(rdb, ob_path):
                     'Bids': ob['Bids']
                 }
 
+                rdb.set(key, json.dumps(value))
+
+                # correction missing data
+                key = '_'.join(
+                    map(str, [exchange, base, quote, timestamp + 10000]))
+                key = key.lower()
                 rdb.set(key, json.dumps(value))
 
 
