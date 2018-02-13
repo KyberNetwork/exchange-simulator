@@ -20,70 +20,121 @@
       "name": "Eos",
       "decimals": 18
     },
-    "SALT": {
-      "address": "0xee35211c4d9126d520bbfeaf3cfee5fe7b86f221",
-      "name": "SALT",
-      "decimals": 8
-    },
     "SNT": {
-      "address": "0x7c276dcaab99bd16163c1bcce671cad6a1ec0945",
+      "address": "0xee35211c4d9126d520bbfeaf3cfee5fe7b86f221",
       "name": "STATUS",
       "decimals": 18
+    },
+    "ELF": {
+      "address": "0x7c276dcaab99bd16163c1bcce671cad6a1ec0945",
+      "name": "AELF",
+      "decimals": 18
+    },
+    "POWR": {
+      "address": "0x3f85d0b6119b38b7e6b119f7550290fec4be0e3c",
+      "name": "Power Ledger",
+      "decimals": 6
+    },
+    "MANA": {
+      "address": "0xd5f051401ca478b34c80d0b5a119e437dc6d9df5",
+      "name": "MANA",
+      "decimals": 18
+    },
+    "BAT": {
+      "address": "0x492934308e98b590a626666b703a6ddf2120e85e",
+      "name": "Basic Attention Token",
+      "decimals": 18
+    },
+    "REQ": {
+      "address": "0x0a64df94bc0e039474db42bb52feca0c1d540402",
+      "name": "Request",
+      "decimals": 18
+    },
+    "GTO": {
+      "address": "0x3dd0864668c36d27b53a98137764c99f9fd5b7b2",
+      "name": "Gifto",
+      "decimals": 5
     }
   },
   "exchangesAddress": {
-    "bittrex": "0xcfa55b9b5c1c05e81a7f306a841ae6f3b489d057",
-    "liqui": "0x82ec589e41c8f03086ae0c2acd18db3da4262e31",
-    "huobi": "0xb014e899ddb9a55af72fe09e8570e700a5167b6d",
-    "binance": "0x4f05afbc371854d027263e756487bdefd099178f",
-    "bitfinex": "0xe56e1cca3cac5e631669d69dc2fb0f430c384b42"
+    "bittrex": "0x32ee2bf1267253f76298d4199095b9c6b5a389c0",
+    "liqui": "0x8e23974b151827f0e8151ac526c4c4c974c06a90",
+    "huobi": "0x00effd25fb5ca719ca70fd740f484228412fdb60",
+    "binance": "0x1d86e95aacb65f5ad662b66befd7acc32d6f4cc6",
+    "bitfinex": "0x6cffa453ccfa0eba4c55c7d9f911a2de5323b14e"
   },
   "exchanges": {
     "bittrex": {
-      "OMG": "0x8cd15bc14b80495ccc04101bab6944504027beb7",
-      "KNC": "0x691dde45934bfb4a5433f0d41a411b00fe47d09b",
-      "EOS": "0x66ea49adf4252bf9f95b8a843afdadccc1b44596",
-      "SALT": "0x33b4053b1e6f586d3977a09369e873fb4dc8a09c",
-      "SNT": "0x529c7277e763ae2934239c52bb3ec497739ff6a0",
-      "ETH": "0xd0f366cddfaaedf214d6b0e39864c21c3df0b04f"
+      "OMG": "0x3ec32531c29bb2b8c13f30a38a5795a2d1296bad",
+      "KNC": "0xea8fa3a1050e9891d587c65d122491e22ef42c71",
+      "EOS": "0x6ca06db9a5dab123b09ea31875f0ca76abab52ff",
+      "SNT": "0xf31e7ab6648c6b808fa4ceb51c849be8d28cd71d",
+      "ELF": "0x089bd1f5b2b9f1ada800f1b9499e97a6a73adcf2",
+      "POWR": "0x21407b4d49a9737e2f9c95e6ea57a2d7d99210a7",
+      "MANA": "0xded6b2678d9155418745867ee4ebb5b9ec757924",
+      "BAT": "0x89b181f861f12e9e14b210e8b1d8ac5dec1cc9c1",
+      "REQ": "0x1b851d170ae46a4b5f1f5057b15a243d21ef4628",
+      "GTO": "0x34def3a4d2ce8d9fbe4c6c390808bc63683ee4ca",
+      "ETH": "0xa15e422be2920b0bcd5fbb7dd8bcb015e78ba603"
     },
     "liqui": {
-      "OMG": "0xd5da2151058a0f6df02e38b3602c09ddef40f0d7",
-      "KNC": "0xbaa1560538a0d1c7ff9e01df3185ac79a62f551e",
-      "EOS": "0x129738f4bd2a983a8b1d0ae04c40d8f6fd110e6f",
-      "SALT": "0x268ef6fe78faaf96fe984322b5ba71b216eeed75",
-      "SNT": "0x94ff351bc63b3708034e9977cc269cca1a6ccca3",
-      "ETH": "0x1cafbd91d8aabf408429e6528e00782b6b48cd28"
+      "OMG": "0xc8e740bd444eb6862f9e545ac50dfebea096fef3",
+      "KNC": "0x35f7aeb2ec89182888cf06ee0b82369926c15e38",
+      "EOS": "0xb7409687b22dc8ed2572f3225ab2924379940c41",
+      "SNT": "0x3e601c7909e30420dedbe77735af5d5053cffffa",
+      "ELF": "0x7dc1a5d6ccc84c71ba3d7225c43826a28f410729",
+      "POWR": "0xf57d7fa9b97b79b124dfca5709752d5a91d9a6fa",
+      "MANA": "0x676356a3898778530eb3da6597e2b46df00abb56",
+      "BAT": "0xf200974acb5ee4e6217c8eb2c8fdc74afe6cc979",
+      "REQ": "0x5c37dd24bffbdc6f426d733cd8d9119a9ff778d0",
+      "GTO": "0x8c6688902b4c7fd886d357daca09c021a37e9e8f",
+      "ETH": "0x36bbcf93ba3d3b715a046d1e55f0bfe503337c94"
     },
     "huobi": {
-      "OMG": "0x2152bd43b756acd543beac9c0acd1b4c41bf6be0",
-      "KNC": "0xed8a5bf05392198fec76ba3cdc4dd916929dc271",
-      "EOS": "0xdf3ea4879e1469671190612ba5f26406315f0ea0",
-      "SALT": "0xa8d4067303bb7b175f7d18da4bc9015abf971190",
-      "SNT": "0x90ef5512a489c80cddde13c14bbb7f1cee03e2a4",
-      "ETH": "0x0d533dd36a0d6077694955513c0e56941b57acd3"
+      "OMG": "0x41fc960d6790e6c2461a52ffa19b4aaf1c8504f8",
+      "KNC": "0x3988bb63c1f096e748fbb618b51a024be055f69c",
+      "EOS": "0x5cd65f89dfc0e2c2256f19e825a30d2a77d2a86e",
+      "SNT": "0xe46bc73056acb92cea80ffcc232c4eef01bd9060",
+      "ELF": "0x4f7270b8c185b9d44ad8b56def154cb2c82e278d",
+      "POWR": "0xef57dbcd4dfdcce82c2b8d6d9e76524523f8bdd2",
+      "MANA": "0xac83d0be1a011a83607a503eea42d3e5776acc2b",
+      "BAT": "0x8ff6905a6d5a6633fbedd39c39a9a0ae1f8decd9",
+      "REQ": "0x0e9143cfd01939c0152184f5934ffceb9c2460de",
+      "GTO": "0x6518e0d8683b0f037c61d6b51f2223ce9f892eae",
+      "ETH": "0x554b96e978dd484f3ce56e4bc6a04e8c9b6893ec"
     },
     "binance": {
-      "OMG": "0x7fb907ea904e2ff70da8d0ee06c5d6078bc57243",
-      "KNC": "0x03f39e30587a09bdb9ebef2daaec24cfd654c6ea",
-      "EOS": "0x62fb8ec10074d29bf43415b60b3f4c7829525550",
-      "SALT": "0x47f76ab0502d6f9e1193fd0e248add6a728ad4a6",
-      "SNT": "0x8e3c4ed66cd1d971d1b74e90910602182e1bf145",
-      "ETH": "0x811907c0b7d77b53501d3e8c075bd99601c0d0c5"
+      "OMG": "0x81494bbdc1164ff8642b1116a90fe75edfedf5eb",
+      "KNC": "0xcad08f0fedb6337b2690dce6cf3e0b9aa59a621a",
+      "EOS": "0xf80f95911c48524db9a88069c8581dfcde49eb39",
+      "SNT": "0xe58a793a95b1f235fe302c2a6dbacd513b3a3550",
+      "ELF": "0xae4fc21d436ff8d7e92851cecbeefe5daff7d8eb",
+      "POWR": "0x213ef4e9b7928c3f429cc9806699069fad9ee9c6",
+      "MANA": "0xa94bb282cc483a2a7191620ca3c89b312f897ec2",
+      "BAT": "0xdc73deafbcafb59240f52efd3cb2df2343c3efa3",
+      "REQ": "0x4dabffad955f7083064bb89cc430bab1556c536d",
+      "GTO": "0x2315dd23006929d631786164220e5ba72b0b3154",
+      "ETH": "0xeebb06b165afab91068d717fdb7b304c6ca785a0"
     },
     "bitfinex": {
-      "OMG": "0x7d8253214ac25050138fcd0ddf1df3efdff0c99d",
-      "KNC": "0x018d18e9dddaea0254f940b641a5fd16e2e332d3",
-      "EOS": "0x7822da62929e8ea69963d9fdc35447513462c079",
-      "SALT": "0xc83e10a0697e6fa62c2b5365cf4f386a6122100b",
-      "SNT": "0xe0d9e1efe9d608fa0189f4fd196b173752a77b37",
-      "ETH": "0x235742b3ccf1507f855de114a7712abdc5509375"
+      "OMG": "0x5332eb3c8f972f4542e89433487b6e19690f5c6e",
+      "KNC": "0x0c025c8bd1e39249de12af5c785bc47da23e6197",
+      "EOS": "0x1c0cb5557946df6aa2a58367cc81b431bd268160",
+      "SNT": "0x4a5f9304355b1a5a31ca1c38d2d20fe4620b8e25",
+      "ELF": "0xfe7695aa514a3fad645d7c9f60fc2c8648eb4787",
+      "POWR": "0x741733b26f5ffd2a05c3e52b6e9fb7847b8b1d82",
+      "MANA": "0x099f5168a78b08a471038ce19ceca91112155f1f",
+      "BAT": "0x5415a7c545780b4e3d25f4493b8298126cc2b6cb",
+      "REQ": "0x0f7747ae503cf514324f7e96d3d8a5aa689c97f2",
+      "GTO": "0x3d5b2700a44e59ca5596762c4bdc21c63c6d53e1",
+      "ETH": "0x16c7099b256016bfb4986b02792c655cb7cf9fa5"
     }
   },
-  "bank": "0x3f85d0b6119b38b7e6b119f7550290fec4be0e3c",
-  "reserve": "0x13fbd0351503fbea7a59a6ad2d65b9ec61435a5c",
-  "pricing": "0x093514489c4b42ff54f942f4f91de3f89c797aab",
-  "network": "0x385b2e03433c816def636278fb600ecd056b0e8d",
-  "wrapper": "0x21b50064c6d8e128f7e700cea7201d9e1486eb96",
-  "feeburner": "0x93a6ff765da70f035b3bae57617ae54441ed7336"
+  "bank": "0x46662e22d131ea49249e0920c286e1484feef76e",
+  "reserve": "0xe248e2462f226a4ddeba4f09caafc98a7235adeb",
+  "pricing": "0x53584cac0a699c78add761fe17b289dc45da4f2e",
+  "network": "0xf1cb827892c160053ae5f82dd2a8939b9443a6e7",
+  "wrapper": "0x442f1040c8d16a97a3721492ee5613e5509f8a16",
+  "feeburner": "0xc4cc865d89a87837e2c95876caa4197663e2eb0d",
+  "KGT address": "0x26c8d09e5c0b423e2827844c770f61c9af2870e7"
 }
