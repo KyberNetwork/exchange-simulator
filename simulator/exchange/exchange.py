@@ -258,7 +258,7 @@ class Exchange:
                 self.balance.update(type, a)
                 return True
         except Exception as e:
-            logger.error("Check activity got error: {}".format(e))
+            logger.info("withdraw {} failed - PENDING: {}".format(a.tx, e))            
             return False
         return False
 

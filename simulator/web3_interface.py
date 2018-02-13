@@ -210,6 +210,7 @@ def get_balances(exchange_address, tokens):
 
 
 def is_tx_confirmed(tx_hash):
+    logger.info('tx hash pending: {}'.format(tx_hash))
     if(str(tx_hash).startswith("0x")):
         params = str(tx_hash)
     else:
