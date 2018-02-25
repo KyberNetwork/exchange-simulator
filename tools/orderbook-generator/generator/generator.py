@@ -7,7 +7,7 @@ from pathlib import Path
 import aioredis
 import fire
 
-from orderbook import OrderBook, Ask, Bid, orderbook_to_json
+from generator.orderbook import OrderBook, Ask, Bid, orderbook_to_json
 
 Product = namedtuple("Product", ["name", "method"])
 
@@ -15,10 +15,8 @@ PRODUCTS = [
     Product(name="Initial", method="STANDARD")
 ]
 
-PROJECT_ROOT = ".."
-
 # TODO: Move to some "config" module
-OUTPUT_PATH_BASE = f"{PROJECT_ROOT}/output"
+OUTPUT_PATH_BASE = "output"
 
 
 # 127.0.0.1:6379> get binance_trx_eth_1518228220000
@@ -28,8 +26,8 @@ def prepare_current_timestamp():
     return datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
 
-def prepare_output_path():
-    output = Path(OUTPUT_PATH_BASE) / prepare_current_timestamp()
+def prepare_output_path(output_dir):
+    output = Path(output_dir) / prepare_current_timestamp()
     output.mkdir(parents=True)
     log.info(f"Preparing output path: {output.absolute()}")
     return output
@@ -50,70 +48,78 @@ async def prepare_order_books(method):
     return {name: book}
 
 
-def start_redis(product_output_path):
-    # TODO: implement!
-    process = 1
-    log.info(f"Starting redis process: {process} #Implement!")
+async def start_redis(redis_server_cmd, product_output_path, loop):
+    process = await asyncio.subprocess.create_subprocess_shell(
+        cmd=f"{redis_server_cmd} --dir {product_output_path.absolute()}", stdout=asyncio.subprocess.DEVNULL)
+    log.info(f"Started redis process: {process}")
     return process
 
 
-async def connect_to_redis():
-    # TODO: implement!
-    log.info("Connecting to redis #Implement!")
-    return 1
+async def connect_to_redis(loop):
+    log.info("Connecting to redis")
+    for i in range(10):
+        try:
+            return await aioredis.create_redis(address='redis://localhost', timeout=2.0, loop=loop)
+        except OSError:
+            log.debug("Redis is not ready yet...")
+            await asyncio.sleep(0.2)
 
 
-async def write_orderbooks_to_redis(redis_connection, books):
-    # TODO: implement!
-    log.info("Writing orderbook to Redis #Implement!")
+async def write_orderbooks_to_redis(redis, books):
+    log.info("Writing orderbook to Redis")
     for name, book in books.items():
-        log.debug(f"    Writing book {name}: {orderbook_to_json(book)}")
+        log.debug(f"Setting: {name}: {orderbook_to_json(book)}")
+        await redis.set(key=name, value=orderbook_to_json(book))
+
+    log.debug("Saving Redis dump")
+    await redis.save()
 
 
-async def close_redis_connection(connection):
-    log.info("Closing Redis connection #Implement!")
-    # connection.close()
-    # await connection.wait_closed()
+async def close_redis_connection(redis):
+    log.info("Closing Redis connection")
+    redis.close()
+    await redis.wait_closed()
+    # TODO: required?
+    await asyncio.sleep(2)
 
 
 def stop_redis(redis_process):
-    # TODO: implement!
     log.info(f"Stopping Redis process: {redis_process}")
+    redis_process.kill()
 
 
-async def main(loop):
-    # redis = await aioredis.create_redis(address='redis://localhost', loop=loop)
-    # await redis.set('k', [str(i) for i in (1, 2, 3, 4, 5)])
-    # print(await redis.keys('*'))
-
-    base_output_path = prepare_output_path()
+async def _main(redis_server_cmd, output_dir, loop):
+    base_output_path = prepare_output_path(output_dir)
 
     for product in PRODUCTS:
         books = await prepare_order_books(product)
         product_output_path = prepare_product_output_path(product_name=product.name, output_path=base_output_path)
-        redis_process = start_redis(product_output_path)
-        redis_connection = await connect_to_redis()
+        redis_process = await start_redis(redis_server_cmd, product_output_path, loop)
+        redis_connection = await connect_to_redis(loop)
         await write_orderbooks_to_redis(redis_connection, books)
         await close_redis_connection(redis_connection)
         stop_redis(redis_process)
 
 
-def run_on_loop():
+def _run_on_loop(redis_server_cmd, output_dir=OUTPUT_PATH_BASE):
     log.debug('Starting event loop')
     loop = asyncio.get_event_loop()
-    try:
-        loop.run_until_complete(main(loop))
-    finally:
-        log.info('Closing event loop')
-        loop.close()
+    # try:
+    loop.run_until_complete(_main(redis_server_cmd, output_dir, loop))
+    # finally:
+    # log.info('Closing event loop')
+    # loop.close()
+
+
+def _setup_logging():
+    message_format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+    logging.basicConfig(format=message_format, level=logging.DEBUG)
+    logging.getLogger('asyncio').setLevel(logging.INFO)
 
 
 if __name__ == '__main__':
-    message_format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-    logging.basicConfig(format=message_format, level=logging.DEBUG)
-
-    logging.getLogger('asyncio').setLevel(logging.INFO)
+    _setup_logging()
 
     log = logging.getLogger(__name__)
 
-    fire.Fire(run_on_loop)
+    fire.Fire(_run_on_loop)
