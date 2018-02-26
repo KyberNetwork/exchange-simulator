@@ -5,6 +5,7 @@ dev: &common
   blockchain_url: http://blockchain:8545
   # blockchain_url: http://blockchain:8540 # dev_chain_wrapper_with DELAY
   addresses: shared/deployment_dev.json
+  balances: shared/init_balance_dev.json
 
 ropsten:
   <<: *common

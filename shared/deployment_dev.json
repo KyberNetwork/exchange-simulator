@@ -54,6 +54,26 @@
       "address": "0x3dd0864668c36d27b53a98137764c99f9fd5b7b2",
       "name": "Gifto",
       "decimals": 5
+    },
+    "RDN": {
+      "name": "Raiden",
+      "address": "0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6",
+      "decimals": 18
+    },
+    "APPC": {
+      "name": "AppCoins",
+      "address": "0x1a7a8bd9106f2b8d977e08582dc7d24c723ab0db",
+      "decimals": 18
+    },
+    "ENG": {
+      "name": "Enigma",
+      "address": "0xf0ee6b27b759c9893ce4f094b49ad28fd15a23e4",
+      "decimals": 8
+    },
+    "SALT": {
+      "name": "Salt",
+      "address": "0x4156D3342D5c385a87D264F90653733592000581",
+      "decimals": 8
     }
   },
   "exchangesAddress": {
