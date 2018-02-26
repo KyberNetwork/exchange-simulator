@@ -54,6 +54,12 @@ try:
         except FileNotFoundError as e:
             sys.exit('Deployment file is missing.')
 
+        try:
+            with open(cfg[MODE]['balances'], 'r') as f:
+                INITIAL_BALANCE = json.loads(f.read())
+        except FileNotFoundError as e:
+            sys.exit('Initial balance setting is missing.')
+
 except FileNotFoundError:
     sys.exit('Config file is missing.')
 
@@ -82,74 +88,3 @@ PRIVATE_KEY = {
     'binance': 'cf0994187eedbeb765dd931372b75d542fd121577911486605352b32c1764b1e',
     'bitfinex': 'be0a3d742ee009b1cc7e69abcaa4dc9a5960a4bcbe0c55a11b1333826bcc13cc'
 }
-
-if MODE == 'ropsten':
-    INITIAL_BALANCE = {
-        'binance': {
-            'bat': 100000,
-            'elf': 100000,
-            'eos': 100000,
-            'eth': 100000,
-            'gto': 100000,
-            'knc': 100000,
-            'mana': 100000,
-            'omg': 100000,
-            'powr': 100000,
-            'req': 100000,
-            'snt': 100000
-        }
-    }
-else:
-    INITIAL_BALANCE = {
-        'bittrex': {
-            'bat': 16554.708,
-            'elf': 6254.464,
-            'eos': 1260.1556,
-            'eth': 63.26388,
-            'gto': 24004.78,
-            'knc': 2194.2484,
-            'mana': 55340.4,
-            'omg': 708.2968,
-            'powr': 14092.964,
-            'req': 38073.08,
-            'snt': 49400.04,
-            'rdn': 2396.6764,
-            'appc': 9635.912,
-            'eng': 2817.8472,
-            'salt': 1945.8252            
-        },
-        'huobi': {
-            'bat': 16554.708,
-            'elf': 6254.464,
-            'eos': 1260.1556,
-            'eth': 63.26388,
-            'gto': 24004.78,
-            'knc': 2194.2484,
-            'mana': 55340.4,
-            'omg': 708.2968,
-            'powr': 14092.964,
-            'req': 38073.08,
-            'snt': 49400.04,
-            'rdn': 2396.6764,
-            'appc': 9635.912,
-            'eng': 2817.8472,
-            'salt': 1945.8252
-        },
-        'binance': {
-            'bat': 16554.708,
-            'elf': 6254.464,
-            'eos': 1260.1556,
-            'eth': 63.26388,
-            'gto': 24004.78,
-            'knc': 2194.2484,
-            'mana': 55340.4,
-            'omg': 708.2968,
-            'powr': 14092.964,
-            'req': 38073.08,
-            'snt': 49400.04,
-            'rdn': 2396.6764,
-            'appc': 9635.912,
-            'eng': 2817.8472,
-            'salt': 1945.8252
-        }
-    }
