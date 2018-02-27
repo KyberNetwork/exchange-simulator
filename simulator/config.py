@@ -58,7 +58,14 @@ try:
             with open(cfg[MODE]['balances'], 'r') as f:
                 INITIAL_BALANCE = json.loads(f.read())
         except FileNotFoundError as e:
-            sys.exit('Initial balance setting is missing.')
+            print(
+                'Initial balance setting is missing. Use default value.')
+            INITIAL_BALANCE = {}
+            for exchange in ['binance', 'bittrex', 'huobi']:
+                INITIAL_BALANCE[exchange] = {}
+                for token in SUPPORTED_TOKENS:
+                    INITIAL_BALANCE[exchange][token] = 100000
+        print("Initial balance", INITIAL_BALANCE)
 
 except FileNotFoundError:
     sys.exit('Config file is missing.')
