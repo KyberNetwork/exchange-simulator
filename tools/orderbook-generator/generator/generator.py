@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import random
+import sys
 from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
@@ -21,6 +23,8 @@ PRODUCTS = [
 # TODO: Move to some "config" module
 OUTPUT_PATH_BASE = "output"
 
+REDIS_PORT = random.randrange(start=49152, stop=65535)
+
 
 def prepare_current_timestamp():
     return datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -40,11 +44,14 @@ def prepare_product_output_path(product_name, output_path):
     return product_output
 
 
-async def start_redis(redis_server_cmd, product_output_path, loop, verbose=False):
-    stdout = asyncio.subprocess.DEVNULL if not verbose else None
+async def start_redis(redis_server_cmd, product_output_path, verbose):
     process = await asyncio.subprocess.create_subprocess_shell(
-        cmd=f"{redis_server_cmd} --dir {product_output_path.absolute()}", stdout=stdout)
-    log.info(f"Started redis process: {process}")
+        cmd=f'{redis_server_cmd} --dir {product_output_path.absolute()} --port {REDIS_PORT}',
+        stdout=None if verbose else asyncio.subprocess.DEVNULL)
+    if process.returncode is not None and process.returncode != 0:
+        log.error(f"Error starting Redis server.\nError code: {process.returncode}\nOutput: {process.stdout}")
+        sys.exit(1)
+    log.info(f"Started redis process: {process} on port {REDIS_PORT}")
     return process
 
 
@@ -52,7 +59,7 @@ async def connect_to_redis(loop):
     log.info("Connecting to redis")
     for i in range(10):
         try:
-            return await aioredis.create_redis(address='redis://localhost', timeout=2.0, loop=loop)
+            return await aioredis.create_redis(address=f'redis://localhost:{REDIS_PORT}', timeout=2.0, loop=loop)
         except OSError:
             log.debug("Redis is not ready yet...")
             await asyncio.sleep(0.2)
@@ -90,7 +97,7 @@ async def _main(redis_server_cmd, output_dir, verbose, loop):
     for product in PRODUCTS:
         books = await prepare_order_books(product)
         product_output_path = prepare_product_output_path(product_name=product.name, output_path=base_output_path)
-        redis_process = await start_redis(redis_server_cmd, product_output_path, loop, verbose)
+        redis_process = await start_redis(redis_server_cmd, product_output_path, verbose)
         redis_connection = await connect_to_redis(loop)
         await write_orderbooks_to_redis(redis_connection, books)
         await close_redis_connection(redis_connection)
