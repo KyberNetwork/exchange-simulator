@@ -9,8 +9,12 @@
 ## Running it
 Assuming Redis is installed and its' server is at `/usr/local/bin/redis-server`:
 
-    $ python -m generator.generator --redis-server-cmd /usr/local/bin/redis-server
+    $ python -m generator.conductor --redis-server-cmd /usr/local/bin/redis-server
+    
+For additional options run:
+
+    $ python -m generator.conductor -- --help
 
 
 ## Output
-Redis dump file (`dump.rdb`) will be in `/output/TIMESTAMP` directory.
+Redis dump file (`dump.rdb`) will be in `/output/method/TIMESTAMP` directory.

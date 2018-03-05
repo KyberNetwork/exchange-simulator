@@ -11,19 +11,79 @@ import fire
 
 from generator.orderbook import (
     orderbook_to_json,
-    prepare_order_books
+    OrderBookGenerationParams,
+    BlockRandomOrderBookGenerator,
+    StaticOrderBookGenerator
 )
 
-Product = namedtuple("Product", ["name", "method"])
-
-PRODUCTS = [
-    Product(name="Initial", method="STANDARD")
-]
+Product = namedtuple("Product", ["name", "generator"])
 
 # TODO: Move to some "config" module
 OUTPUT_PATH_BASE = "output"
 
 REDIS_PORT = random.randrange(start=49152, stop=65535)
+
+EXCHANGES = ["binance"]
+TOKENS = [
+    "OMG",
+    "KNC",
+    "EOS",
+    "SNT",
+    "ELF",
+    "POWR",
+    "MANA",
+    "BAT",
+    "REQ",
+    "GTO",
+    "ENG",
+    "SALT",
+    "RDN",
+    "APPC",
+]
+BASE_TOKEN = 'ETH'
+
+TIMESTAMP_START = 1518215100000
+TIMESTAMP_STOP = 1518233100000
+TIMESTAMP_STEP = 10_000
+
+MIN_QUANTITY = 0.1
+MAX_QUANTITY = 30
+
+MIN_RATE = 0.000_000_1
+MAX_RATE = 1
+
+NUMBER_OF_ASKS = 50
+NUMBER_OF_BIDS = 50
+
+MIDDLE_RATE = 0.05
+RATE_GAP = 0.001
+
+STATIC_TIMESTAMP_START = 1518215100000
+STATIC_TIMESTAMP_STOP = STATIC_TIMESTAMP_START + 5 * 60_000 + 10_000
+STATIC_TIMESTAMP_STEP = 10_000
+
+INITIAL_GENERATION_PARAMS = OrderBookGenerationParams(exchanges=EXCHANGES, tokens=TOKENS, base_token=BASE_TOKEN,
+                                                      timestamp_start=TIMESTAMP_START, timestamp_stop=TIMESTAMP_STOP,
+                                                      timestamp_step=TIMESTAMP_STEP,
+                                                      min_quantity=MIN_QUANTITY, max_quantity=MAX_QUANTITY,
+                                                      min_rate=MIN_RATE, max_rate=MAX_RATE,
+                                                      number_of_asks=NUMBER_OF_ASKS, number_of_bids=NUMBER_OF_BIDS,
+                                                      middle_rate=MIDDLE_RATE, rate_gap=RATE_GAP)
+
+STATIC_GENERATION_PARAMS = OrderBookGenerationParams(exchanges=EXCHANGES, tokens=TOKENS, base_token=BASE_TOKEN,
+                                                     timestamp_start=STATIC_TIMESTAMP_START,
+                                                     timestamp_stop=STATIC_TIMESTAMP_STOP,
+                                                     timestamp_step=STATIC_TIMESTAMP_STEP,
+                                                     min_quantity=MIN_QUANTITY, max_quantity=MAX_QUANTITY,
+                                                     min_rate=MIN_RATE, max_rate=MAX_RATE,
+                                                     number_of_asks=NUMBER_OF_ASKS, number_of_bids=NUMBER_OF_BIDS,
+                                                     middle_rate=MIDDLE_RATE, rate_gap=RATE_GAP)
+
+PRODUCTS = [
+    Product(name="RandomBlocks",
+            generator=BlockRandomOrderBookGenerator(params=INITIAL_GENERATION_PARAMS, timestamp_step=30_000)),
+    Product(name="Static", generator=StaticOrderBookGenerator(params=INITIAL_GENERATION_PARAMS))
+]
 
 
 def prepare_current_timestamp():
@@ -95,7 +155,8 @@ async def _main(redis_server_cmd, output_dir, verbose, loop):
     base_output_path = prepare_output_path(output_dir)
 
     for product in PRODUCTS:
-        books = await prepare_order_books(product)
+        log.info(f'Handling product {product.name}:')
+        books = await product.generator.prepare_books()
         product_output_path = prepare_product_output_path(product_name=product.name, output_path=base_output_path)
         redis_process = await start_redis(redis_server_cmd, product_output_path, verbose)
         redis_connection = await connect_to_redis(loop)
