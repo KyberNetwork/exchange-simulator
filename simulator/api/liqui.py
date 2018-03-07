@@ -85,19 +85,12 @@ if config.MODE == 'simulation':
     order_handler = SimulationOrder(rdb)
 else:
     order_handler = CoreOrder()
-supported_tokens = config.SUPPORTED_TOKENS
-balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
+balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
 
-liqui = Liqui(
-    'liqui',
-    config.PRIVATE_KEY['liqui'],
-    list(supported_tokens.values()),
-    rdb,
-    order_handler,
-    balance_handler,
-    config.EXCHANGES_ADDRESS['liqui']
-)
+liqui = Liqui(config.EXCHANGES_CFG['liqui']
+              order_handler,
+              balance_handler)
 
 if config.MODE != 'dev':
     sentry = Sentry(app, dsn='https://c2c05c37737d4c0a9e75fc4693005c2c:'

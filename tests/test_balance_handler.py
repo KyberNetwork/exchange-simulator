@@ -10,7 +10,7 @@ class TestBalance((unittest.TestCase)):
     def setUpClass(cls):
         DB_TEST = 1
         cls.rdb = utils.get_redis_db(db_no=DB_TEST)
-        cls.supported_tokens = config.SUPPORTED_TOKENS.keys()
+        cls.supported_tokens = config.TOKENS.keys()
         cls.user = 'default_user'
         cls.balance_type = ['available', 'lock']
         cls.balance = BalanceHandler(cls.rdb, cls.supported_tokens)

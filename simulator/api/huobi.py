@@ -138,19 +138,11 @@ if config.MODE == 'simulation':
 else:
     order_handler = CoreOrder()
 
-supported_tokens = config.SUPPORTED_TOKENS
-balance_handler = BalanceHandler(rdb, supported_tokens.keys())
+balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
 
-huobi = Huobi(
-    'huobi',
-    config.PRIVATE_KEY['huobi'],
-    list(supported_tokens.values()),
-    rdb,
-    order_handler,
-    balance_handler,
-    config.EXCHANGES_ADDRESS['huobi'],
-    config.EXCHANGE_INFO['huobi']
-)
+huobi = Huobi(config.EXCHANGES_CFG['huobi'],
+              order_handler,
+              balance_handler)
 
 if __name__ == '__main__':
     logger.info("Running in {} mode".format(config.MODE))

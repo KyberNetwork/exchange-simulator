@@ -146,18 +146,12 @@ if config.MODE == 'simulation':
     order_handler = SimulationOrder(rdb)
 else:
     order_handler = CoreOrder()
-supported_tokens = config.SUPPORTED_TOKENS
-balance_handler = BalanceHandler(rdb, supported_tokens.keys())
-bittrex = Bittrex(
-    'bittrex',
-    config.PRIVATE_KEY['bittrex'],
-    list(supported_tokens.values()),
-    rdb,
-    order_handler,
-    balance_handler,
-    config.EXCHANGES_ADDRESS['bittrex'],
-    config.EXCHANGE_INFO['bittrex']
-)
+
+balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
+
+bittrex = Bittrex(config.EXCHANGES_CFG['bittrex'],
+                  order_handler,
+                  balance_handler)
 
 if __name__ == '__main__':
     logger.info('Running in {} mode'.format(config.MODE))

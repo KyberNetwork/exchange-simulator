@@ -9,7 +9,7 @@ from simulator import config
 class TestWeb3(unittest.TestCase):
 
     def test_get_balance_and_withdraw(self):
-        knc = config.SUPPORTED_TOKENS['knc']
+        knc = config.TOKENS['knc']
         liqui_priv_key = config.PRIVATE_KEY['liqui']
         balance0 = web3_interface.get_balances(
             config.LIQUI_ADDRESS, [knc.address])[0]

@@ -73,18 +73,12 @@ if config.MODE == 'simulation':
     order_handler = SimulationOrder(rdb)
 else:
     order_handler = CoreOrder()
-supported_tokens = config.SUPPORTED_TOKENS
-balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
-poloniex = Poloniex(
-    'liqui',
-    config.PRIVATE_KEY['poloniex'],
-    list(supported_tokens.values()),
-    rdb,
-    order_handler,
-    balance_handler,
-    config.POLONIEX_ADDRESS
-)
+balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
+
+poloniex = Poloniex(config.EXCHANGES_CFG['poloniex'],
+                    order_handler,
+                    balance_handler)
 
 
 if __name__ == '__main__':

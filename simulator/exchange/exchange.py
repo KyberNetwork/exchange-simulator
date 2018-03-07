@@ -11,19 +11,16 @@ logger = utils.get_logger()
 
 class Exchange:
 
-    def __init__(self, exchange_name, private_key,
-                 supported_tokens, db,
-                 order_handler, balance_handler,
-                 deposit_address, info):
-        self.name = exchange_name
-        self.supported_tokens = supported_tokens
-        self.db = db
+    def __init__(self, config, order_handler, balance_handler):
+        self.name = config.name
+        self.supported_tokens = config.supported_tokens
+        self.deposit_address = config.addr
+        self.private_key = config.private_key
+        self._info = config.info
+
         self.balance = balance_handler
         self.orders = order_handler
-        self.deposit_address = deposit_address
-        self.private_key = private_key
         self.last_check = 0
-        self._info = info
 
     def _update_balance(func):
         def wrapper(self, api_key, *args, **kargs):
@@ -66,7 +63,7 @@ class Exchange:
         try:
             order_book = self.orders.load(pair, self.name, timestamp)
         except Exception as e:
-            logger.error('Order book {}_{} is missing: {}'.format(
+            logger.warning('Order book {}_{} is missing: {}'.format(
                 pair, timestamp, e))
             order_book = {'Asks': [], 'Bids': []}
 
@@ -258,7 +255,7 @@ class Exchange:
                 self.balance.update(type, a)
                 return True
         except Exception as e:
-            logger.info("withdraw {} failed - PENDING: {}".format(a.tx, e))            
+            logger.info("withdraw {} failed - PENDING: {}".format(a.tx, e))
             return False
         return False
 

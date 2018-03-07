@@ -119,17 +119,11 @@ if config.MODE == 'simulation':
     order_handler = SimulationOrder(rdb)
 else:
     order_handler = CoreOrder()
-supported_tokens = config.SUPPORTED_TOKENS
-balance_handler = BalanceHandler(rdb, supported_tokens.keys())
-bitfinex = Bitfinex(
-    'liqui',
-    config.PRIVATE_KEY['bitfinex'],
-    list(supported_tokens.values()),
-    rdb,
-    order_handler,
-    balance_handler,
-    config.BITFINEX_ADDRESS
-)
+
+balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
+bitfinex = Bitfinex(config.EXCHANGES_CFG['bitfinex']
+                    order_handler,
+                    balance_handler)
 
 if __name__ == '__main__':
     logger.info('Running in {} mode'.format(config.MODE))

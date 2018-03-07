@@ -21,7 +21,7 @@ def import_order_book():
 
 def init_balance():
     rdb = utils.get_redis_db()
-    supported_tokens = config.SUPPORTED_TOKENS
+    supported_tokens = config.TOKENS
     balance_handler = BalanceHandler(rdb, supported_tokens.keys())
 
     # reset balance

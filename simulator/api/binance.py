@@ -142,20 +142,12 @@ if config.MODE == 'simulation':
 else:
     order_handler = CoreOrder()
 
-supported_tokens = config.SUPPORTED_TOKENS
-balance_handler = BalanceHandler(rdb, supported_tokens.keys())
+balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
 
+binance = Binance(config.EXCHANGES_CFG['binance'],
+                  order_handler,
+                  balance_handler)
 
-binance = Binance(
-    'binance',
-    config.PRIVATE_KEY['binance'],
-    list(supported_tokens.values()),
-    rdb,
-    order_handler,
-    balance_handler,
-    config.EXCHANGES_ADDRESS['binance'],
-    config.EXCHANGE_INFO['binance']
-)
 
 if __name__ == '__main__':
     logger.info("Running in {} mode".format(config.MODE))

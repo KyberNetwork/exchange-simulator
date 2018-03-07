@@ -37,9 +37,9 @@ def get_logger(name=config.LOGGER_NAME):
 
 
 def get_token(name):
-    if name not in config.SUPPORTED_TOKENS:
+    if name not in config.TOKENS:
         raise ValueError('Not supported: {}'.format(name))
-    return config.SUPPORTED_TOKENS[name]
+    return config.TOKENS[name]
 
 
 def init_deposit(balance, user, tokens, amount):

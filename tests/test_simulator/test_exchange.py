@@ -14,7 +14,7 @@ class TestExchange(unittest.TestCase):
     def setUpClass(cls):
         DB_TEST = 1
         cls.rdb = utils.get_redis_db(db_no=DB_TEST)
-        supported_tokens = config.SUPPORTED_TOKENS
+        supported_tokens = config.TOKENS
         cls.orders = CoreOrder()
         cls.balance = BalanceHandler(cls.rdb, supported_tokens.keys())
         cls.exchange = Exchange(
