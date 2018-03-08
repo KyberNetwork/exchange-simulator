@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange import Bittrex
+from simulator.exchange import Bittrex, NotSupportedTokenError
 
 api = Flask(__name__)
 
@@ -47,6 +47,13 @@ def action(expected_params):
                     'success': True,
                     'message': '',
                     'result': result
+                })
+            except NotSupportedTokenError as e:
+                logger.info(e)
+                return jsonify({
+                    'success': False,
+                    'message': 'INVALID_MARKET',
+                    'result': None
                 })
             except Exception as e:
                 # traceback.print_exc()

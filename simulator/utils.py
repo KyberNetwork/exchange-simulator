@@ -189,7 +189,7 @@ def view_simulation_ob(exchange, base, quote, timestamp):
 
 
 def import_order_book_to_db(rdb, ob_path):
-    EXCHANGES = ['Binance']
+    EXCHANGES = ['Binance', 'Bittrex']
 
     def load_order_books(ob_file):
         print(ob_file)
@@ -198,8 +198,6 @@ def import_order_book_to_db(rdb, ob_path):
                 ob = json.loads(line)
                 if ob['exchange'] in EXCHANGES:
                     yield ob
-
-    print(ob_path)
 
     for file in os.listdir(ob_path):
         if file.startswith('ob'):
@@ -224,10 +222,11 @@ def import_order_book_to_db(rdb, ob_path):
                 rdb.set(key, json.dumps(value))
 
                 # correction missing data
-                key = '_'.join(
-                    map(str, [exchange, base, quote, timestamp + 10000]))
-                key = key.lower()
-                rdb.set(key, json.dumps(value))
+                for pad in range(25):
+                    key = '_'.join(
+                        map(str, [exchange, base, quote, timestamp + 10000 * pad]))
+                    key = key.lower()
+                    rdb.set(key, json.dumps(value))
 
 
 if __name__ == '__main__':
