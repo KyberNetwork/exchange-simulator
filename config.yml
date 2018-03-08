@@ -71,7 +71,7 @@ logging:
 exchanges:
   binance:
     pk: 'cf0994187eedbeb765dd931372b75d542fd121577911486605352b32c1764b1e'
-    supported_tokens: ['eth', 'omg', 'knc', 'eos', 'snt', 'elf', 'powr', 'mana', 'bat', 'req', 'gto', 'rdn', 'appc', 'eng', 'salt']
+    supported_tokens: ['eth', 'omg', 'knc', 'eos', 'snt', 'elf', 'powr', 'mana', 'bat', 'req', 'gto', 'rdn', 'appc', 'eng', 'salt', 'bqx']
   huobi:
     pk: '628fee3875f87594b24c773ca410c5e5e25ad142bf2eef5ea9fc56018064fbad'
     supported_tokens: ['eth', 'omg', 'eos', 'elf', 'powr', 'mana', 'bat', 'req', 'rdn', 'appc', 'eng', 'salt']
