@@ -70,7 +70,8 @@ try:
         for ex_name, ex_cfg in cfg['exchanges'].items():
             supported_tks = []
             for tk in ex_cfg['supported_tokens']:
-                supported_tks.append(TOKENS[tk])
+                if tk in TOKENS:
+                    supported_tks.append(TOKENS.get(tk))
             with open("info/{}.json".format(ex_name), 'r') as f:
                 ex_info = json.loads(f.read())
 
