@@ -4,6 +4,7 @@ import traceback
 
 from .. import web3_interface, utils, config
 from ..order import Order
+from .error import NotSupportedTokenError
 
 
 logger = utils.get_logger()
@@ -56,7 +57,7 @@ class Exchange:
         base_is_supported = any(base == t.token for t in self.supported_tokens)
         quote_is_ether = quote == 'eth'
         if (not base_is_supported) or (not quote_is_ether):
-            raise ValueError('Invalid pair {}.'.format(pair))
+            raise NotSupportedTokenError('Not supported {}.'.format(pair))
 
     def get_order_book(self, pair, timestamp):
         self.check_pair(pair)

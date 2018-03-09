@@ -67,6 +67,6 @@ class SimulationOrder(OrderHandler):
         logger.debug('Looking for order book: {}'.format(key))
         result = self.rdb.get(key)
         if not result:
-            raise ValueError('Order book not found')
+            raise ValueError('Order book not found: {}'.format(key))
         order_book = json.loads(result)
         return order_book
