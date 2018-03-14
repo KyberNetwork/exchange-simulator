@@ -1,7 +1,14 @@
 import pytest
 
-from orderbook import OrderBook, Bid, Ask, orderbook_to_json, StaticOrderBookGenerator, OrderBookGenerationParams, \
+from orderbookgenerator.generators.generators import (
+    OrderBook,
+    Bid,
+    Ask,
+    orderbook_to_json,
+    StaticOrderBookGenerator,
+    OrderBookGenerationParams,
     BlockRandomOrderBookGenerator
+)
 
 PARAMS = OrderBookGenerationParams(exchanges='A',
                                    tokens='B',

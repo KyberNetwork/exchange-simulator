@@ -7,14 +7,14 @@ from datetime import datetime
 from pathlib import Path
 
 import aioredis
-import fire
 
-from generator.orderbook import (
+from orderbookgenerator.generators.generators import (
     orderbook_to_json,
     OrderBookGenerationParams,
     BlockRandomOrderBookGenerator,
     StaticOrderBookGenerator
 )
+from orderbookgenerator.generators.ten_percent_increase import TenPercentIncreaseOrderBookGenerator
 
 Product = namedtuple("Product", ["name", "generator"])
 
@@ -42,9 +42,14 @@ TOKENS = [
 ]
 BASE_TOKEN = 'ETH'
 
-TIMESTAMP_START = 1518215100000
-TIMESTAMP_STOP = 1518233100000
-TIMESTAMP_STEP = 10_000
+RESERVE_INITIALIZE_TIME_IN_MILLIS = 5 * 60 * 1_000
+
+log = logging.getLogger(__name__)
+
+
+def _calculate_timestamp_stop(timestamp_start, test_time_in_seconds, additional_time=RESERVE_INITIALIZE_TIME_IN_MILLIS):
+    return timestamp_start + additional_time + test_time_in_seconds * 1_000
+
 
 MIN_QUANTITY = 0.1
 MAX_QUANTITY = 30
@@ -58,31 +63,45 @@ NUMBER_OF_BIDS = 50
 MIDDLE_RATE = 0.05
 RATE_GAP = 0.001
 
-STATIC_TIMESTAMP_START = 1518215100000
-STATIC_TIMESTAMP_STOP = STATIC_TIMESTAMP_START + 5 * 60_000 + 10_000
-STATIC_TIMESTAMP_STEP = 10_000
-
+TIMESTAMP_START = 1518215100000
 INITIAL_GENERATION_PARAMS = OrderBookGenerationParams(exchanges=EXCHANGES, tokens=TOKENS, base_token=BASE_TOKEN,
-                                                      timestamp_start=TIMESTAMP_START, timestamp_stop=TIMESTAMP_STOP,
-                                                      timestamp_step=TIMESTAMP_STEP,
+                                                      timestamp_start=TIMESTAMP_START,
+                                                      timestamp_stop=_calculate_timestamp_stop(
+                                                          timestamp_start=TIMESTAMP_START, test_time_in_seconds=5 * 60),
+                                                      timestamp_step=10_000,
                                                       min_quantity=MIN_QUANTITY, max_quantity=MAX_QUANTITY,
                                                       min_rate=MIN_RATE, max_rate=MAX_RATE,
                                                       number_of_asks=NUMBER_OF_ASKS, number_of_bids=NUMBER_OF_BIDS,
                                                       middle_rate=MIDDLE_RATE, rate_gap=RATE_GAP)
 
 STATIC_GENERATION_PARAMS = OrderBookGenerationParams(exchanges=EXCHANGES, tokens=TOKENS, base_token=BASE_TOKEN,
-                                                     timestamp_start=STATIC_TIMESTAMP_START,
-                                                     timestamp_stop=STATIC_TIMESTAMP_STOP,
-                                                     timestamp_step=STATIC_TIMESTAMP_STEP,
+                                                     timestamp_start=TIMESTAMP_START,
+                                                     timestamp_stop=_calculate_timestamp_stop(
+                                                         timestamp_start=TIMESTAMP_START,
+                                                         test_time_in_seconds=10),
+                                                     timestamp_step=10_000,
                                                      min_quantity=MIN_QUANTITY, max_quantity=MAX_QUANTITY,
                                                      min_rate=MIN_RATE, max_rate=MAX_RATE,
                                                      number_of_asks=NUMBER_OF_ASKS, number_of_bids=NUMBER_OF_BIDS,
                                                      middle_rate=MIDDLE_RATE, rate_gap=RATE_GAP)
 
+TEN_PERCENT_INCREASE_PARAMS = OrderBookGenerationParams(exchanges=EXCHANGES, tokens=TOKENS, base_token=BASE_TOKEN,
+                                                        timestamp_start=TIMESTAMP_START,
+                                                        timestamp_stop=_calculate_timestamp_stop(
+                                                            timestamp_start=TIMESTAMP_START,
+                                                            test_time_in_seconds=10),
+                                                        timestamp_step=10_000,
+                                                        min_quantity=MIN_QUANTITY, max_quantity=MAX_QUANTITY,
+                                                        min_rate=MIN_RATE, max_rate=MAX_RATE,
+                                                        number_of_asks=NUMBER_OF_ASKS, number_of_bids=NUMBER_OF_BIDS,
+                                                        middle_rate=MIDDLE_RATE, rate_gap=RATE_GAP)
+
 PRODUCTS = [
     Product(name="RandomBlocks",
             generator=BlockRandomOrderBookGenerator(params=INITIAL_GENERATION_PARAMS, timestamp_step=30_000)),
-    Product(name="Static", generator=StaticOrderBookGenerator(params=INITIAL_GENERATION_PARAMS))
+    Product(name="StaticRandom", generator=StaticOrderBookGenerator(params=STATIC_GENERATION_PARAMS)),
+    Product(name="TenPercentIncrease",
+            generator=TenPercentIncreaseOrderBookGenerator(params=TEN_PERCENT_INCREASE_PARAMS))
 ]
 
 
@@ -100,7 +119,7 @@ def prepare_output_path(output_dir):
 def prepare_product_output_path(product_name, output_path):
     product_output = output_path / product_name
     product_output.mkdir()
-    log.info(f"Preparing output path for {product_name}: {product_output.absolute()}")
+    log.info(f"Preparing output path: {product_output.absolute()}")
     return product_output
 
 
@@ -151,11 +170,12 @@ async def stop_redis(redis_process):
         log.warning(f"Cannot find Redis process: {redis_process}")
 
 
-async def _main(redis_server_cmd, output_dir, verbose, loop):
+async def main(redis_server_cmd, output_dir, verbose, loop):
     base_output_path = prepare_output_path(output_dir)
 
     for product in PRODUCTS:
         log.info(f'Handling product {product.name}:')
+        log.info(f'Order Book description: {product.generator}')
         books = await product.generator.prepare_books()
         product_output_path = prepare_product_output_path(product_name=product.name, output_path=base_output_path)
         redis_process = await start_redis(redis_server_cmd, product_output_path, verbose)
@@ -163,24 +183,3 @@ async def _main(redis_server_cmd, output_dir, verbose, loop):
         await write_orderbooks_to_redis(redis_connection, books)
         await close_redis_connection(redis_connection)
         await stop_redis(redis_process)
-
-
-def _run_on_loop(redis_server_cmd, output_dir=OUTPUT_PATH_BASE, verbose=False):
-    log.debug('Starting event loop')
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(_main(redis_server_cmd, output_dir, verbose, loop))
-    log.info('Closing event loop')
-
-
-def _setup_logging():
-    message_format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-    logging.basicConfig(format=message_format, level=logging.INFO)
-    logging.getLogger('asyncio').setLevel(logging.INFO)
-
-
-if __name__ == '__main__':
-    _setup_logging()
-
-    log = logging.getLogger(__name__)
-
-    fire.Fire(_run_on_loop)

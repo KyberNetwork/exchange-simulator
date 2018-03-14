@@ -9,11 +9,11 @@
 ## Running it
 Assuming Redis is installed and its' server is at `/usr/local/bin/redis-server`:
 
-    $ python -m generator.conductor --redis-server-cmd /usr/local/bin/redis-server
+    $ python -m src.orderbookgenerator --redis-server-cmd /usr/local/bin/redis-server
     
 For additional options run:
 
-    $ python -m generator.conductor -- --help
+    $ python -m src.orderbookgenerator -- --help
 
 
 ## Output
