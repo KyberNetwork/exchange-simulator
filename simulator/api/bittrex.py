@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange import Bittrex, NotSupportedTokenError
+from simulator.exchange import Bittrex, NotSupportedTokenError, TradeError, WithdrawError
 
 api = Flask(__name__)
 
@@ -53,6 +53,13 @@ def action(expected_params):
                 return jsonify({
                     'success': False,
                     'message': 'INVALID_MARKET',
+                    'result': None
+                })
+            except (TradeError, WithdrawError) as e:
+                logger.warning(str(e))
+                return jsonify({
+                    'success': False,
+                    'message': str(e),
                     'result': None
                 })
             except Exception as e:
@@ -146,6 +153,13 @@ def withdrawal_history(params):
 @api.route('/ping')
 def ping():
     return 'pong'
+
+
+@api.route('/halt', methods=['POST'])
+def halt():
+    params = request.get_json()
+    logger.info('Halt params: {}'.format(params))
+    return jsonify(bittrex.halt(**params))
 
 
 rdb = utils.get_redis_db()

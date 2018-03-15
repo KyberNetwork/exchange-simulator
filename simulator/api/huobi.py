@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange import Huobi
+from simulator.exchange import Huobi, TradeError, WithdrawError
 
 api = Flask(__name__)
 
@@ -34,6 +34,13 @@ def exec(f, additional_params={}):
         return jsonify({
             'status': 'ok',
             'data': result
+        })
+    except(TradeError, WithdrawError) as e:
+        logger.warning(str(e))
+        return jsonify({
+            'status': 'error',
+            'err-code': '0',
+            'err-msg': str(e)
         })
     except Exception as e:
         # traceback.print_exc()
@@ -130,6 +137,13 @@ def history():
 @api.route('/ping')
 def ping():
     return 'pong'
+
+
+@api.route('/halt', methods=['POST'])
+def halt():
+    params = request.get_json()
+    logger.info('Halt params: {}'.format(params))
+    return jsonify(huobi.halt(**params))
 
 
 rdb = utils.get_redis_db()

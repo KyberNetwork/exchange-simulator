@@ -14,7 +14,7 @@ def run_api(api, port):
 if __name__ == '__main__':
     logger.info('Running in {} mode'.format(config.MODE))
 
-    run_api(huobi_api, 5200)
+    run_api(binance_api, 5100)
 
     '''
     p1 = Process(target=run_api, args=(binance_api, 6100))
