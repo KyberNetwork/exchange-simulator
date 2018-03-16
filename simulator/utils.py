@@ -8,6 +8,7 @@ import random
 import hmac
 import hashlib
 import urllib
+from collections import defaultdict
 
 import requests
 import json
@@ -152,6 +153,10 @@ def convert_ob_json_file(ob_json_file, new_file):
 
 
 def get_pending_tnx(exchange):
+
+    if exchange == 'huobi':
+        return get_huobi_pending_tnx()
+
     url = 'http://core:8000/immediate-pending-activities'
     params = {'nonce': get_real_timestamp()}
     paybytes = urllib.parse.urlencode(params).encode('utf8')
@@ -164,19 +169,36 @@ def get_pending_tnx(exchange):
     logger.info('Pending response: {}'.format(data))
 
     activities = data.get('data', [])
-    pending_deposits = {}
+    pending_deposits = defaultdict(list)
     for a in activities:
         if a['Destination'] != exchange:
             continue
 
         if (not a['Result']['error']) and (a['Action'] == 'deposit'):
             token = a['Params']['token'].lower()
-            if token not in pending_deposits:
-                pending_deposits[token] = []
             pending_deposits[token].append({
                 'amount': a['Params']['amount'],
                 'tx': a['Result']['tx']
             })
+
+    return pending_deposits
+
+
+def get_huobi_pending_tnx():
+    r = requests.get('http://core:12221/pending_intermediate_tx')
+    data = r.json()
+
+    logger.info('Huobi pending tx response: {}'.format(data))
+
+    activities = data.get('data', [])
+    pending_deposits = defaultdict(list)
+    for a in activities.values():
+        token = a['Token'].lower()
+        pending_deposits[token].append({
+            'amount': a['Amount'],
+            'tx': a['Hash']
+        })
+
     return pending_deposits
 
 
