@@ -2,6 +2,7 @@ import requests
 import json
 
 from . import utils
+from .exchange.error import OrderNotFoundError
 
 logger = utils.get_logger()
 
@@ -16,7 +17,7 @@ class OrderHandler:
     def get(self, order_id):
         order_id = str(order_id)
         if order_id not in self.orders:
-            raise ValueError('Order not found.')
+            raise OrderNotFoundError('Order not found.')
         return self.orders[order_id]
 
     def get_all(self, pair=None):
@@ -30,7 +31,7 @@ class OrderHandler:
         try:
             del self.orders[order_id]
         except KeyError:
-            raise ValueError('Order not found.')
+            raise OrderNotFoundError('Order not found.')
 
     def load(self, pair, exchange_name, timestamp):
         raise NotImplementedError

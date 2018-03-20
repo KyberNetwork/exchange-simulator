@@ -4,7 +4,7 @@ import traceback
 
 from .. import web3_interface, utils, config
 from ..order import Order
-from .error import NotSupportedTokenError
+from .error import NotSupportedTokenError, TradeError, WithdrawError
 
 
 logger = utils.get_logger()
@@ -22,6 +22,10 @@ class Exchange:
         self.balance = balance_handler
         self.orders = order_handler
         self.last_check = 0
+
+        self.DEPOSIT = 0
+        self.TRADE = {}
+        self.WITHDRAW = 0
 
     def _update_balance(func):
         def wrapper(self, api_key, *args, **kargs):
@@ -72,6 +76,10 @@ class Exchange:
         return order_book
 
     def trade(self, api_key, type, rate, pair, amount, timestamp):
+        if self.TRADE.get(pair, 0) > 0:
+            self.TRADE[pair] -= 1
+            raise TradeError(
+                f'{self.name} - Trade function on pair {pair} is currently disabled.')
         rate, amount = float(rate), float(amount)
         self.check_pair(pair)
         base, quote = pair.split('_')
@@ -231,6 +239,10 @@ class Exchange:
                 break
 
     def withdraw(self, api_key, coinName, address, amount):
+        if self.WITHDRAW > 0:
+            self.WITHDRAW -= 1
+            raise WithdrawError(
+                f"{self.name} - Withdraw function is currently disabled.")
         coinName = coinName.lower()
         amount = float(amount)
         token = utils.get_token(coinName)
@@ -259,6 +271,19 @@ class Exchange:
             logger.info("withdraw {} failed - PENDING: {}".format(a.tx, e))
             return False
         return False
+
+    def halt(self, deposit=0, trade={}, withdraw=0, *args, **kargs):
+        deposit = int(deposit)
+        withdraw = int(withdraw)
+        if deposit > 0:
+            self.DEPOSIT = deposit
+        if trade:
+            for k, v in trade.items():
+                self.TRADE[k] = int(v)
+        if withdraw > 0:
+            self.WITHDRAW = withdraw
+            logger.info('Halt withdraw {} times'.format(self.WITHDRAW))
+        return {'success': True}
 
 
 MAX_ORDER_ID = 2 ** 31
