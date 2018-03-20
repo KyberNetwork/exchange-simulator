@@ -16,3 +16,8 @@ class TradeError(Exception):
 class WithdrawError(Exception):
     """Raise when exchange is disable withdrawal"""
     pass
+
+
+class OrderNotFoundError(Exception):
+    """Raise when order id is not exist in db"""
+    pass

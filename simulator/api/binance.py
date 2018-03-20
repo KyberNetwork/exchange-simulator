@@ -6,7 +6,8 @@ from flask import Flask, request, jsonify
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange import Binance, TradeError, WithdrawError
+from simulator.exchange import Binance
+from simulator.exchange.error import *
 
 api = Flask(__name__)
 
@@ -53,7 +54,7 @@ def action(expected_params=[], public=False):
             logger.debug('Params: {}'.format(params))
             try:
                 result = func(params)
-            except (TradeError, WithdrawError) as e:
+            except (TradeError, WithdrawError, OrderNotFoundError) as e:
                 logger.warning(str(e))
                 return jsonify({'code': -1, 'msg': str(e)})
             except Exception as e:

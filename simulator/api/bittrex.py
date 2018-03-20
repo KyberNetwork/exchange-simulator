@@ -6,7 +6,8 @@ from flask import Flask, request, jsonify
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange import Bittrex, NotSupportedTokenError, TradeError, WithdrawError
+from simulator.exchange import Bittrex
+from simulator.exchange.error import *
 
 api = Flask(__name__)
 
@@ -55,7 +56,7 @@ def action(expected_params):
                     'message': 'INVALID_MARKET',
                     'result': None
                 })
-            except (TradeError, WithdrawError) as e:
+            except (TradeError, WithdrawError, OrderNotFoundError) as e:
                 logger.warning(str(e))
                 return jsonify({
                     'success': False,

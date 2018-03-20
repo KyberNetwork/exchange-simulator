@@ -4,7 +4,8 @@ from flask import Flask, jsonify, request
 from simulator import config, utils
 from simulator.order_handler import CoreOrder, SimulationOrder
 from simulator.balance_handler import BalanceHandler
-from simulator.exchange import Huobi, TradeError, WithdrawError
+from simulator.exchange import Huobi
+from simulator.exchange.error import *
 
 api = Flask(__name__)
 
@@ -35,7 +36,7 @@ def exec(f, additional_params={}):
             'status': 'ok',
             'data': result
         })
-    except(TradeError, WithdrawError) as e:
+    except(TradeError, WithdrawError, OrderNotFoundError) as e:
         logger.warning(str(e))
         return jsonify({
             'status': 'error',
