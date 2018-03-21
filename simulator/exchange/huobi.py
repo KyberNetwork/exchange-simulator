@@ -35,7 +35,7 @@ class Huobi(Exchange):
                     'balance': str(balance['available'][token.token])
                 },
                 {
-                    'currnecy': token.token,
+                    'currency': token.token,
                     'type': 'frozen',
                     'balance': str(balance['lock'][token.token])
                 }
