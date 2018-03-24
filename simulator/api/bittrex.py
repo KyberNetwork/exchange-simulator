@@ -56,7 +56,8 @@ def action(expected_params):
                     'message': 'INVALID_MARKET',
                     'result': None
                 })
-            except (TradeError, WithdrawError, OrderNotFoundError) as e:
+            except (TradeError, WithdrawError, OrderNotFoundError,
+                    CheckBalanceError) as e:
                 logger.warning(str(e))
                 return jsonify({
                     'success': False,

@@ -4,7 +4,7 @@ import traceback
 
 from .. import web3_interface, utils, config
 from ..order import Order
-from .error import NotSupportedTokenError, TradeError, WithdrawError
+from .error import *
 
 
 logger = utils.get_logger()
@@ -23,6 +23,7 @@ class Exchange:
         self.orders = order_handler
         self.last_check = 0
 
+        self.CHECK_BALANCE = 0
         self.DEPOSIT = 0
         self.TRADE = {}
         self.WITHDRAW = 0
@@ -50,6 +51,11 @@ class Exchange:
 
     @_update_balance
     def get_balance(self, api_key, blc_types=['available', 'lock']):
+        if self.CHECK_BALANCE > 0:
+            self.CHECK_BALANCE -= 1
+            raise CheckBalanceError(
+                f'{self.name} - Check balance function is currently disabled.'
+            )
         return {t: self.balance.get(api_key, t) for t in blc_types}
 
     def check_pair(self, pair):
@@ -272,9 +278,12 @@ class Exchange:
             return False
         return False
 
-    def halt(self, deposit=0, trade={}, withdraw=0, *args, **kargs):
+    def halt(self, deposit=0, trade={}, withdraw=0, check_balance=0, *args, **kargs):
+        check_balance = int(check_balance)
         deposit = int(deposit)
         withdraw = int(withdraw)
+        if check_balance > 0:
+            self.CHECK_BALANCE = check_balance
         if deposit > 0:
             self.DEPOSIT = deposit
         if trade:

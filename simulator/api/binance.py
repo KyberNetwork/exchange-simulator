@@ -54,7 +54,8 @@ def action(expected_params=[], public=False):
             logger.debug('Params: {}'.format(params))
             try:
                 result = func(params)
-            except (TradeError, WithdrawError, OrderNotFoundError) as e:
+            except (TradeError, WithdrawError, OrderNotFoundError,
+                    CheckBalanceError) as e:
                 logger.warning(str(e))
                 return jsonify({'code': -1, 'msg': str(e)})
             except Exception as e:

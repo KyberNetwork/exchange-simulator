@@ -36,7 +36,8 @@ def exec(f, additional_params={}):
             'status': 'ok',
             'data': result
         })
-    except(TradeError, WithdrawError, OrderNotFoundError) as e:
+    except(TradeError, WithdrawError, OrderNotFoundError,
+           CheckBalanceError) as e:
         logger.warning(str(e))
         return jsonify({
             'status': 'error',

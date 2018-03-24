@@ -21,3 +21,7 @@ class WithdrawError(Exception):
 class OrderNotFoundError(Exception):
     """Raise when order id is not exist in db"""
     pass
+
+
+class CheckBalanceError(Exception):
+    """Raise when exchange is disable query balance"""
