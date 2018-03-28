@@ -26,7 +26,7 @@ class Exchange:
         self.CHECK_BALANCE = 0
         self.DEPOSIT = 0
         self.TRADE = {}
-        self.WITHDRAW = 0
+        self.WITHDRAW = {}
 
     def _update_balance(func):
         def wrapper(self, api_key, *args, **kargs):
@@ -245,11 +245,11 @@ class Exchange:
                 break
 
     def withdraw(self, api_key, coinName, address, amount):
-        if self.WITHDRAW > 0:
-            self.WITHDRAW -= 1
-            raise WithdrawError(
-                f"{self.name} - Withdraw function is currently disabled.")
         coinName = coinName.lower()
+        if self.WITHDRAW.get(coinName, 0) > 0:
+            self.WITHDRAW[coinName] -= 1
+            raise WithdrawError(
+                f'{self.name} - Withdraw function is currently disabled with {coinName}.')
         amount = float(amount)
         token = utils.get_token(coinName)
         tx = web3_interface.withdraw(self.private_key,
@@ -278,10 +278,9 @@ class Exchange:
             return False
         return False
 
-    def halt(self, deposit=0, trade={}, withdraw=0, check_balance=0, *args, **kargs):
+    def halt(self, deposit=0, trade={}, withdraw={}, check_balance=0, *args, **kargs):
         check_balance = int(check_balance)
         deposit = int(deposit)
-        withdraw = int(withdraw)
         if check_balance > 0:
             self.CHECK_BALANCE = check_balance
         if deposit > 0:
@@ -289,9 +288,9 @@ class Exchange:
         if trade:
             for k, v in trade.items():
                 self.TRADE[k] = int(v)
-        if withdraw > 0:
-            self.WITHDRAW = withdraw
-            logger.info('Halt withdraw {} times'.format(self.WITHDRAW))
+        if withdraw:
+            for k, v in withdraw.items():
+                self.WITHDRAW[k] = int(v)
         return {'success': True}
 
 
