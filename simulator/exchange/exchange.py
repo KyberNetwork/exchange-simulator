@@ -18,6 +18,7 @@ class Exchange:
         self.deposit_address = config.addr
         self.private_key = config.private_key
         self._info = config.info
+        self._fee = config.fee
 
         self.balance = balance_handler
         self.orders = order_handler
@@ -250,21 +251,41 @@ class Exchange:
             self.WITHDRAW[coinName] -= 1
             raise WithdrawError(
                 f'{self.name} - Withdraw function is currently disabled with {coinName}.')
-        amount = float(amount)
+
+        # CHECK IF ASSET IS SUPPORTED
         token = utils.get_token(coinName)
+        if token not in self.supported_tokens:
+            raise NotSupportedTokenError(
+                f"{self.name} - Not supported {coinName}"
+            )
+
+        # CHECK IF AMOUNT IS VALID
+        amount = float(amount)
+        withdraw_fee = self._fee["Funding"]["Withdraw"].get(coinName.upper(), 0)
+        withdraw_amount = amount + withdraw_fee
+        if amount < withdraw_fee:
+            raise WithdrawError(
+                f"{self.name} - Minimum withdrawal amount {withdraw_fee} {coinName}"
+            )
+
+        self.balance.withdraw(user=api_key,
+                              token=coinName,
+                              amount=withdraw_amount,
+                              balance_type='available')
         tx = web3_interface.withdraw(self.private_key,
                                      self.deposit_address,
                                      token.address,
                                      int(amount * 10**token.decimals),
                                      address)
-        self.balance.withdraw(user=api_key, token=coinName,
-                              amount=amount, balance_type='available')
         act = self.balance.add_activity('withdraw',
                                         amount,
                                         address,
                                         tx,
                                         token.token,
                                         'pending')
+        logger.info(
+            f'{self.name} - withdraw {amount} {coinName} (fee included: {withdraw_amount})'
+        )
         return act
 
     def check_activity_is_done(self, type, a):

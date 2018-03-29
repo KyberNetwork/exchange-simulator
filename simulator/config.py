@@ -25,7 +25,7 @@ class Token:
 
 # Create config for each exchange
 CexConfig = namedtuple('CexConfig', ['name', 'private_key', 'supported_tokens',
-                                     'addr', 'info'])
+                                     'addr', 'info', 'fee'])
 
 EXCHANGES_CFG = {}
 
@@ -67,6 +67,12 @@ try:
         except FileNotFoundError as e:
             sys.exit('Initial balance setting is missing.')
 
+        try:
+            with open("info/fee.json") as f:
+                fee = json.loads(f.read())
+        except FileNotFoundError as e:
+            sys.exit('Fee setting is missing.')
+
         for ex_name, ex_cfg in cfg['exchanges'].items():
             supported_tks = []
             for tk in ex_cfg['supported_tokens']:
@@ -75,13 +81,14 @@ try:
             with open("info/{}.json".format(ex_name), 'r') as f:
                 ex_info = json.loads(f.read())
 
+            exchange_fee = fee["exchanges"][ex_name]
+
             EXCHANGES_CFG[ex_name] = CexConfig(name=ex_name,
                                                private_key=ex_cfg['pk'],
                                                supported_tokens=supported_tks,
                                                addr=EXCHANGES_ADDRESS[ex_name],
-                                               info=ex_info)
-
-
+                                               info=ex_info,
+                                               fee=exchange_fee)
 except FileNotFoundError:
     sys.exit('Config file is missing.')
 
