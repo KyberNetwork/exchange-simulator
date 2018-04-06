@@ -35,6 +35,7 @@ def get_int(hex_str):
 
 
 MODE = os.environ.get('KYBER_ENV', 'dev')
+SUPPORTED_TOKENS = {}
 try:
     with open('config.yml', 'r') as f:
         cfg = yaml.load(f)
@@ -58,6 +59,14 @@ try:
                     TOKENS[name] = Token(name,
                                          get_int(token['address']),
                                          token['decimals'])
+
+                for exchange, tokens in addr['exchanges'].items():
+                    SUPPORTED_TOKENS[exchange] = []
+                    for tk in tokens.keys():
+                        SUPPORTED_TOKENS[exchange].append(
+                            TOKENS.get(tk.lower())
+                        )
+
         except FileNotFoundError as e:
             sys.exit('Deployment file is missing.')
 
@@ -74,10 +83,8 @@ try:
             sys.exit('Fee setting is missing.')
 
         for ex_name, ex_cfg in cfg['exchanges'].items():
-            supported_tks = []
-            for tk in ex_cfg['supported_tokens']:
-                if tk in TOKENS:
-                    supported_tks.append(TOKENS.get(tk))
+            supported_tks = SUPPORTED_TOKENS[ex_name]
+
             with open("info/{}.json".format(ex_name), 'r') as f:
                 ex_info = json.loads(f.read())
 
