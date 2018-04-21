@@ -35,6 +35,8 @@ def get_int(hex_str):
 
 
 MODE = os.environ.get('KYBER_ENV', 'dev')
+if MODE == 'analytic_dev':
+    MODE = 'dev'
 SUPPORTED_TOKENS = {}
 try:
     with open('config.yml', 'r') as f:
