@@ -189,7 +189,7 @@ def view_simulation_ob(exchange, base, quote, timestamp):
 
 
 def import_order_book_to_db(rdb, ob_path):
-    EXCHANGES = ['Binance', 'Bittrex']
+    EXCHANGES = ['Binance', 'Bittrex', 'Huobi']
 
     def load_order_books(ob_file):
         print(ob_file)
@@ -227,6 +227,53 @@ def import_order_book_to_db(rdb, ob_path):
                         map(str, [exchange, base, quote, timestamp + 10000 * pad]))
                     key = key.lower()
                     rdb.set(key, json.dumps(value))
+
+
+def _load_rates_from_file(rate_file):
+        with open(rate_file, 'r') as f:
+            for line in f:
+                yield json.loads(line)
+
+
+def import_rates_to_db(rdb, rate_path):
+    tickers = {}
+
+    for file in os.listdir(rate_path):
+        print(file)
+        rate_file = os.path.join(rate_path, file)
+        rates = _load_rates_from_file(rate_file)
+
+        digix_rates = filter(lambda x: x['source'] == 'Digix', rates)
+
+        for rate in digix_rates:
+            source = rate['source']
+            base = rate['pair']['base']
+            quote = rate['pair']['quote']
+            timestamp = normalize_timestamp(rate['timestamp'])
+            value = rate['value']
+
+
+            for pad in range(2):
+                ts = timestamp + 10000 * pad
+                tick = tickers.get(ts, [])
+
+                existed = False
+                for entry in tick:
+                    if entry['symbol'] == f'{base}{quote}' and entry['time'] == ts:
+                        existed = True
+                        break
+
+                if not existed:
+                    tick.append({
+                        'symbol': f'{base}{quote}',
+                        'price': value,
+                        'time': ts
+                    })
+                    tickers[ts] = tick
+    
+    for k, v in tickers.items():
+        key = f'digix_{k}'
+        rdb.set(f'digix_{k}', json.dumps(v))
 
 
 if __name__ == '__main__':

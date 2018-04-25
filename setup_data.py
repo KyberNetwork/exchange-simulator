@@ -7,16 +7,15 @@ from simulator.balance_handler import BalanceHandler
 logger = utils.get_logger()
 
 
-def import_order_book():
+def import_captured_data():
     rdb = utils.get_redis_db()
-    # import one big file container order books to redis
-    # ob_file = 'data/full_ob.dat'
-    # ob_file = 'data/sample_ob.dat'
-    # utils.setup_data(rdb, ob_file)
-    # import multiple order book file to redis
-    rdb.flushall()
-    ob_path = 'data/order_books/'
-    utils.import_order_book_to_db(rdb, ob_path)
+    
+    # rdb.flushall()
+    # ob_path = 'data/order_books/'
+    # utils.import_order_book_to_db(rdb, ob_path)
+
+    rate_path = 'data/rates'
+    utils.import_rates_to_db(rdb, rate_path)
 
 
 def init_balance():
@@ -42,11 +41,11 @@ def init_balance():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Setup data for simulation.')
     parser.add_argument('-i', '--import-data', action='store_true',
-                        help='import order book into redis')
+                        help='import captured data into redis')
     args = parser.parse_args()
     if args.import_data:
-        logger.info('Import order books ...')
-        import_order_book()
+        logger.info('Import captured data ...')
+        import_captured_data()
     else:
         logger.info('Initialze balance for user/default_api on exchanges ...')
         init_balance()
