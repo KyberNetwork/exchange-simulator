@@ -1,20 +1,21 @@
 from flask import Flask, request, jsonify
 
-from simulator import utils, digix_ticker
+from simulator import utils, forge
 
 api = Flask(__name__)
 
 logger = utils.get_logger()
 
 
-@api.route('/tick', methods=['GET'])
+@api.route('/1.0.3/convert', methods=['GET'])
 def tick():
     try:
         timestamp = utils.get_timestamp(request.args.to_dict())
-        rates = data_ticker.load(timestamp)
+        xau_eth_rate = forge_feeder.load(timestamp)
         return jsonify({
-            'success': True,
-            'data': rates
+            'value': xau_eth_rate,
+            'text': f"1 XAU is worth {xau_eth_rate} ETH",
+            "timestamp": timestamp
         })
     except ValueError as e:
         logger.error(str(e))
@@ -25,9 +26,9 @@ def tick():
 
 
 rdb = utils.get_redis_db()
-data_ticker = digix_ticker.DataTicker(rdb)
+forge_feeder = forge.Feeder(rdb)
 
 
 if __name__ == '__main__':
     logger.debug(f"Running in {config.MODE} mode")
-    api.run(host='0.0.0.0', port=5400, debug=True)
+    api.run(host='0.0.0.0', port=5500, debug=True)
