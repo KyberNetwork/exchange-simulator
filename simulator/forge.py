@@ -6,7 +6,8 @@ logger = utils.get_logger()
 
 
 class Feeder:
-    _START_SIMULATION_TIME = 1518215420000
+    # _START_SIMULATION_TIME = 1518215420000
+    _START_SIMULATION_TIME = 1518215100000
     _START_REAL_TIME = 1524096460000
 
     def __init__(self, rdb):

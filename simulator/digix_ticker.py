@@ -4,8 +4,10 @@ from . import utils
 
 logger = utils.get_logger()
 
+
 class DataTicker:
-    _START_SIMULATION_TIME = 1518215420000
+    # _START_SIMULATION_TIME = 1518215420000
+    _START_SIMULATION_TIME = 1518215100000
     _START_REAL_TIME = 1524096460000
 
     def __init__(self, rdb):
@@ -19,7 +21,7 @@ class DataTicker:
         timestamp = utils.normalize_timestamp(timestamp)
         original_ts = self._shift_time(timestamp)
         key = f'digix_{original_ts}'
-        
+
         logger.debug(f'Get rates with {key}')
 
         result = self.rdb.get(key)
