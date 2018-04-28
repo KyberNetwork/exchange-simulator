@@ -13,13 +13,13 @@ def tick():
         timestamp = utils.get_timestamp(request.args.to_dict())
         rates = data_ticker.load(timestamp)
         return jsonify({
-            'success': True,
+            'status': 'success',
             'data': rates
         })
     except ValueError as e:
         logger.error(str(e))
         return jsonify({
-            'success': False,
+            'status': 'failed',
             'message': str(e)
         })
 
