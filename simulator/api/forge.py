@@ -11,10 +11,16 @@ logger = utils.get_logger()
 def tick():
     try:
         timestamp = utils.get_timestamp(request.args.to_dict())
-        xau_eth_rate = forge_feeder.load(timestamp)
+
+        base = request.args.get('from', 'XAU').upper()
+        quote = request.args.get('to', 'USD').upper()
+        amount = float(request.args.get('quantity', '1'))
+
+        rate = forge_feeder.load(timestamp, base, quote, amount)
+        worth = rate * amount
         return jsonify({
-            'value': xau_eth_rate,
-            'text': f"1 XAU is worth {xau_eth_rate} ETH",
+            'value': worth,
+            'text': f"{amount} {base} is worth {worth} {quote}",
             "timestamp": timestamp
         })
     except ValueError as e:

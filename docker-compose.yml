@@ -1,0 +1,28 @@
+version: '2'
+services:
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - ./data:/data
+  simulator:
+    depends_on:
+      - redis
+    build: .
+    image: exchange_simulator
+    volumes:
+      - .:/exchange-simulator
+      - ./data:/exchange-simulator/data
+    ports:
+      - 5100:5100 # Binance
+      - 5200:5200 # Huobi
+      - 5300:5300 # Bittrex
+      - 5400:5400 # Digix
+      - 5500:5500 # Forge
+      - 5600:5600 # Gdax
+      - 5700:5700 # Kraken
+      - 5800:5800 # Gemini
+    environment:
+      - KYBER_ENV=dev
+    command: bash -c "sleep 10s && cd /exchange-simulator/ && python setup_data.py && uwsgi --emperor /exchange-simulator/vassals"
+
+  # 1518215420000 1518215700000

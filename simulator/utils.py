@@ -19,6 +19,11 @@ from . import config
 logger = logging.getLogger(config.LOGGER_NAME)
 
 
+def fmt_time_from_timestamp(t, fmt='%Y-%m-%dT%H:%M:%S.%f'):
+    dt = datetime.fromtimestamp(t)
+    return dt.strftime(fmt)
+
+
 def bittrex_fmt_time(t):
     dt = datetime.fromtimestamp(t / 1000)
     return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
@@ -252,9 +257,9 @@ def import_order_book_to_db(rdb, ob_path):
 
 
 def _load_rates_from_file(rate_file):
-        with open(rate_file, 'r') as f:
-            for line in f:
-                yield json.loads(line)
+    with open(rate_file, 'r') as f:
+        for line in f:
+            yield json.loads(line)
 
 
 def import_rates_to_db(rdb, rate_path):
@@ -274,7 +279,6 @@ def import_rates_to_db(rdb, rate_path):
             timestamp = normalize_timestamp(rate['timestamp'])
             value = rate['value']
 
-
             for pad in range(2):
                 ts = timestamp + 10000 * pad
                 tick = tickers.get(ts, [])
@@ -292,7 +296,7 @@ def import_rates_to_db(rdb, rate_path):
                         'time': ts
                     })
                     tickers[ts] = tick
-    
+
     for k, v in tickers.items():
         key = f'digix_{k}'
         rdb.set(f'digix_{k}', json.dumps(v))
