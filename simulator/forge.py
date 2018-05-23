@@ -16,7 +16,7 @@ class Feeder:
     def _shift_time(self, timestamp):
         return timestamp - self._START_SIMULATION_TIME + self._START_REAL_TIME
 
-    def load(self, timestamp):
+    def load(self, timestamp, base, quote, amount):
         """Using digix rates to interpret xau/eth from xau/usd and
         eth/usd
         TODO later we will capture forge data
@@ -34,20 +34,28 @@ class Feeder:
             raise ValueError(f'Rates is not available at {timestamp}')
         rates = json.loads(result)
 
-        xau_eth_rate = 0
-        xau_usd_rate = 0
-        eth_usd_rate = 0
+        if base == 'XAU' and quote == 'ETH':
+            xau_eth_rate = 0
+            xau_usd_rate = 0
+            eth_usd_rate = 0
 
-        for rate in rates:
-            if rate['symbol'] == 'XAUUSD':
-                xau_usd_rate = rate['price']
+            for rate in rates:
+                if rate['symbol'] == 'XAUUSD':
+                    xau_usd_rate = rate['price']
+                    continue
+                if rate['symbol'] == 'ETHUSD':
+                    eth_usd_rate = rate['price']
+                    continue
                 continue
-            if rate['symbol'] == 'ETHUSD':
-                eth_usd_rate = rate['price']
-                continue
-            continue
 
-        if eth_usd_rate > 0:
-            xau_eth_rate = round(xau_usd_rate / eth_usd_rate, 5)
+            if eth_usd_rate > 0:
+                xau_eth_rate = xau_usd_rate / eth_usd_rate
 
-        return xau_eth_rate
+            return xau_eth_rate
+        else:
+            symbol = f'{base}{quote}'
+            for rate in rates:
+                if rate['symbol'] == symbol:
+                    return rate['price']
+            raise ValueError(
+                f'Rates is not available with this pair {base}{quote}')
