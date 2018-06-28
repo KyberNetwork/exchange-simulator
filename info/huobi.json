@@ -1022,6 +1022,13 @@
             "price-precision": 8,
             "amount-precision": 2,
             "symbol-partition": "innovation"
+        },
+        {
+            "base-currency": "eng",
+            "quote-currency": "eth",
+            "price-precision": 8,
+            "amount-precision": 2,
+            "symbol-partition": "innovation"
         }
     ]
 }
