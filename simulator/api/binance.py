@@ -136,6 +136,12 @@ def deposit_history(params):
     return binance.deposit_history_api(**params)
 
 
+@api.route('/api/v3/ticker/bookTicker', methods=['GET'])
+@action(public=True)
+def book_ticker(params):
+    return binance.book_ticker_api(**params)
+
+
 @api.route('/ping')
 def ping():
     return 'pong'

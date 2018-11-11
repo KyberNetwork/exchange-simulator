@@ -28,6 +28,23 @@ class Binance(Exchange):
         ]
         return {'lastUpdateId': timestamp, 'asks': asks, 'bids': bids}
 
+    def book_ticker_api(self, symbol, timestamp, *args, **kargs):
+        pair = self.__symbol_to_pair(symbol)
+        order_book = self.get_order_book(pair, timestamp)
+
+        ask_qty = sum(o['Quantity'] for o in order_book['Asks'])
+        ask_price = order_book['Asks'][0]['Rate']
+        bid_qty = sum(o['Quantity'] for o in order_book['Bids'])
+        bid_price = order_book['Bids'][0]['Rate']
+
+        return {
+            'symbol': symbol,
+            'bidPrice': bid_price,
+            'bidQty': bid_qty,
+            'askPrice': ask_price,
+            'askQty': ask_qty
+        }
+
     def get_account_api(self, api_key, *args, **kargs):
         balance = self.get_balance(api_key)
         result = []
