@@ -4,7 +4,7 @@ import time
 
 SOCKET_PATH = '/tmp/'
 ALL_APP = ['binance', 'huobi', 'bittrex',
-           'digix', 'forge', 'gdax', 'gemini', 'kraken']
+           'digix', 'forge', 'gdax', 'gemini', 'kraken', 'bitfinex']
 TIMEOUT = 30
 INTERVAL = 1
 

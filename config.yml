@@ -69,9 +69,22 @@ logging:
     handlers: [file_handler]
 
 exchanges:
+  # from ethereum import utils
+  # pk = utils.sha3("exchange" + str(exchange_idx)).hex()
+  # 0. bittrex
+  # 1. liqui
+  # 2. huobi
+  # 3. binance
+  # 4. bitfinex
+  # 5. stable_exchange
+  #
+  # e.g binance_pk = utils.sha3("exchange" + str(3)).hex()
+
   binance:
     pk: 'cf0994187eedbeb765dd931372b75d542fd121577911486605352b32c1764b1e'
   huobi:
     pk: '628fee3875f87594b24c773ca410c5e5e25ad142bf2eef5ea9fc56018064fbad'
   bittrex:
     pk: '7e72df544ce569ccd35b53a2e8411aaefebad8bb42b2ef443593663b1979ac9b'
+  bitfinex:
+    pk: 'be0a3d742ee009b1cc7e69abcaa4dc9a5960a4bcbe0c55a11b1333826bcc13cc'
