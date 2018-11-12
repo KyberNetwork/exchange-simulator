@@ -132,7 +132,7 @@ else:
     order_handler = CoreOrder()
 
 balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
-bitfinex = Bitfinex(config.EXCHANGES_CFG['bitfinex']
+bitfinex = Bitfinex(config.EXCHANGES_CFG['bitfinex'],
                     order_handler,
                     balance_handler)
 

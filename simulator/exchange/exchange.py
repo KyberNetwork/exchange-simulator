@@ -65,6 +65,12 @@ class Exchange:
         except Exception as e:
             logger.error(e)
             raise ValueError('Invalid pair {}.'.format(pair))
+
+        # eth-btc is valid
+        if base == 'eth' and quote == 'btc':
+            return
+
+        # check token-eth
         base_is_supported = any(base == t.token for t in self.supported_tokens)
         quote_is_ether = quote == 'eth'
         if (not base_is_supported) or (not quote_is_ether):

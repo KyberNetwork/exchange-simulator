@@ -33,16 +33,23 @@ class Binance(Exchange):
         order_book = self.get_order_book(pair, timestamp)
 
         ask_qty = sum(o['Quantity'] for o in order_book['Asks'])
-        ask_price = order_book['Asks'][0]['Rate']
+        if order_book['Asks']:
+            ask_price = order_book['Asks'][0]['Rate']
+        else:
+            ask_price = 0
+
         bid_qty = sum(o['Quantity'] for o in order_book['Bids'])
-        bid_price = order_book['Bids'][0]['Rate']
+        if order_book['Bids']:
+            bid_price = order_book['Bids'][0]['Rate']
+        else:
+            bid_price = 0
 
         return {
             'symbol': symbol,
-            'bidPrice': bid_price,
-            'bidQty': bid_qty,
-            'askPrice': ask_price,
-            'askQty': ask_qty
+            'bidPrice': str(bid_price),
+            'bidQty': str(bid_qty),
+            'askPrice': str(ask_price),
+            'askQty': str(ask_qty)
         }
 
     def get_account_api(self, api_key, *args, **kargs):

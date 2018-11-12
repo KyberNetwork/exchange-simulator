@@ -27,8 +27,15 @@ class Bitfinex(Exchange):
         pair = self.__symbol_to_pair(symbol)
         order_book = self.get_order_book(pair, timestamp)
 
-        ask = order_book['Asks'][0]['Rate']
-        bid = order_book['Bids'][0]['Rate']
+        if order_book['Asks']:
+            ask = order_book['Asks'][0]['Rate']
+        else:
+            ask = 0
+
+        if order_book['Bids']:
+            bid = order_book['Bids'][0]['Rate']
+        else:
+            bid = 0
 
         return {
             "mid": str((ask + bid) / 2),
