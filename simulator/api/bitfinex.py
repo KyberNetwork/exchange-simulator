@@ -72,6 +72,17 @@ def order_book(symbol):
         })
 
 
+@api.route('/v1/pubticker/<symbol>', methods=['GET'])
+def pubticker(symbol):
+    timestamp = utils.get_timestamp(request.args.to_dict())
+    try:
+        return jsonify(bitfinex.pubticker_api(symbol, timestamp))
+    except Exception as e:
+        return jsonify({
+            'message': str(e)
+        })
+
+
 @api.route('/v1/balances', methods=['POST'])
 @action()
 def balances(params):
@@ -121,7 +132,7 @@ else:
     order_handler = CoreOrder()
 
 balance_handler = BalanceHandler(rdb, config.TOKENS.keys())
-bitfinex = Bitfinex(config.EXCHANGES_CFG['bitfinex']
+bitfinex = Bitfinex(config.EXCHANGES_CFG['bitfinex'],
                     order_handler,
                     balance_handler)
 

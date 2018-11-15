@@ -23,6 +23,31 @@ class Bitfinex(Exchange):
             'bids': list(map(convert, order_book['Bids']))
         }
 
+    def pubticker_api(self, symbol, timestamp, *args, **kargs):
+        pair = self.__symbol_to_pair(symbol)
+        order_book = self.get_order_book(pair, timestamp)
+
+        if order_book['Asks']:
+            ask = order_book['Asks'][0]['Rate']
+        else:
+            ask = 0
+
+        if order_book['Bids']:
+            bid = order_book['Bids'][0]['Rate']
+        else:
+            bid = 0
+
+        return {
+            "mid": str((ask + bid) / 2),
+            "bid": str(bid),
+            "ask": str(ask),
+            "last_price": "0.0",
+            "low": "0.0",
+            "high": "0.0",
+            "volume": "0.0",
+            "timestamp": str(timestamp)
+        }
+
     def balances_api(self, api_key, *args, **kargs):
         blc = self.get_balance(api_key=api_key)
         output = []
