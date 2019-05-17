@@ -11,6 +11,7 @@ script:
 after_success:
   - docker --version
   - docker build -f Dockerfile -t kybernetwork/analytic:$TRAVIS_COMMIT .
+  - cd dev_chain_wrapper && docker build -f Dockerfile -t kybernetwork/dev_chain_wrapper:$TRAVIS_COMMIT .
 
 deploy:
   provider: script
