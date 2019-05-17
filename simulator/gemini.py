@@ -6,17 +6,11 @@ logger = utils.get_logger()
 
 
 class DataTicker:
-    # _START_SIMULATION_TIME = 1518215420000
-    _START_SIMULATION_TIME = 1518215100000
-    _START_REAL_TIME = 1524096460000
 
     def __init__(self, rdb):
         self.rdb = rdb
 
-    def _shift_time(self, timestamp):
-        return timestamp - self._START_SIMULATION_TIME + self._START_REAL_TIME
-
-    def load(self, timestamp):
+    def load(self, timestamp, symbol):
         """
             {
                 "bid": "692.09",
@@ -29,34 +23,40 @@ class DataTicker:
                 "last": "693.77"
             }
 
-            Using digix data
+            We are using binance orderbook
             TODO later we will use gemini data
         """
-
         timestamp = int(timestamp)
         timestamp = utils.normalize_timestamp(timestamp)
-        original_ts = self._shift_time(timestamp)
-        key = f'digix_{original_ts}'
 
+        base, quote = self.__symbol_to_pair(symbol)
+
+        if quote.lower() == 'usd':
+            key = f'binance_{base}_usdt_{timestamp}'.lower()
+        else:
+            key = f'binance_{base}_{quote}_{timestamp}'.lower()            
         logger.debug(f'Get rates with {key}')
 
-        result = self.rdb.get(key)
-        if not result:
+        raw_order_book = self.rdb.get(key)
+        if not raw_order_book:
             raise ValueError(f'Rates is not available at {timestamp}')
-        rates = json.loads(result)
-
-        eth_usd_rate = 0
-        for rate in rates:
-            if rate['symbol'] == 'ETHUSD':
-                eth_usd_rate = rate['price']
+        
+        order_book = json.loads(raw_order_book)
+        ask_rate = order_book['Asks'][0]['Rate']
+        bid_rate = order_book['Bids'][0]['Rate']
+        rate = (ask_rate + bid_rate) / 2
 
         return {
-            "bid": "0",
-            "ask": "0",
+            "bid": str(bid_rate),
+            "ask": str(ask_rate),
             "volume": {
-                "ETH": "0",
-                "USD": "0",
+                base.upper(): "0",
+                quote.upper(): "0",
                 "timestamp": timestamp
             },
-            "last": str(eth_usd_rate)
+            "last": str(rate)
         }
+
+    def __symbol_to_pair(self, symbol):
+        base, quote = symbol[:-3], symbol[-3:]
+        return base, quote

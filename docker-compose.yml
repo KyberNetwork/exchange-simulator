@@ -23,6 +23,6 @@ services:
       - 5800:5800 # Gemini
     environment:
       - KYBER_ENV=dev
-    command: bash -c "sleep 10s && cd /exchange-simulator/ && python setup_data.py && uwsgi --emperor /exchange-simulator/vassals"
+    command: bash -c "sleep 10s && cd /exchange-simulator/ && python setup_data.py && uwsgi --ini /exchange-simulator/uwsgi.ini && service nginx start"
 
   # 1518215420000 1518215700000

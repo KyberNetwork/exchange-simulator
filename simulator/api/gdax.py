@@ -6,6 +6,8 @@ api = Flask(__name__)
 
 logger = utils.get_logger()
 
+# gdax = pro.coinbase
+# https://api.pro.coinbase.com/products/eth-btc/ticker
 # https://api.gdax.com/products/eth-usd/ticker
 # {
 #   "trade_id": 34555486,
@@ -22,7 +24,7 @@ logger = utils.get_logger()
 def ticker(base, quote):
     try:
         timestamp = utils.get_timestamp(request.args.to_dict())
-        result = data_ticker.load(timestamp)
+        result = data_ticker.load(timestamp, base, quote)
         return jsonify(result)
     except ValueError as e:
         logger.error(str(e))
@@ -37,4 +39,4 @@ data_ticker = gdax.DataTicker(rdb)
 
 if __name__ == '__main__':
     logger.debug(f"Running in {config.MODE} mode")
-    api.run(host='0.0.0.0', port=5400, debug=True)
+    api.run(host='0.0.0.0', port=5600, debug=True)

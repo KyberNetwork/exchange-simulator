@@ -6,17 +6,11 @@ logger = utils.get_logger()
 
 
 class DataTicker:
-    # _START_SIMULATION_TIME = 1518215420000
-    _START_SIMULATION_TIME = 1518215100000
-    _START_REAL_TIME = 1524096460000
 
     def __init__(self, rdb):
         self.rdb = rdb
 
-    def _shift_time(self, timestamp):
-        return timestamp - self._START_SIMULATION_TIME + self._START_REAL_TIME
-
-    def load(self, timestamp):
+    def load(self, timestamp, base, quote):
         """
             https://api.gdax.com/products/eth-usd/ticker
 
@@ -30,33 +24,33 @@ class DataTicker:
               "time": "2018-05-22T06:59:00.989000Z"
             }
 
-            Using digix data to simulate gdax data
+            We are using binance orderbook
             TODO later we will use gdax data
         """
-
         timestamp = int(timestamp)
         timestamp = utils.normalize_timestamp(timestamp)
-        original_ts = self._shift_time(timestamp)
-        key = f'digix_{original_ts}'
 
+        if quote.lower() == 'usd':
+            quote = 'usdt'        
+
+        key = f'binance_{base}_{quote}_{timestamp}'.lower()
         logger.debug(f'Get rates with {key}')
 
-        result = self.rdb.get(key)
-        if not result:
+        raw_order_book = self.rdb.get(key)
+        if not raw_order_book:
             raise ValueError(f'Rates is not available at {timestamp}')
-        rates = json.loads(result)
-
-        eth_usd_rate = 0
-        for rate in rates:
-            if rate['symbol'] == 'ETHUSD':
-                eth_usd_rate = rate['price']
+        
+        order_book = json.loads(raw_order_book)
+        ask_rate = order_book['Asks'][0]['Rate']
+        bid_rate = order_book['Bids'][0]['Rate']
+        rate = (ask_rate+bid_rate) / 2
 
         return {
             'trade_id': 0,
-            'price': str(eth_usd_rate),
+            'price': str(rate),
             'size': '0',
-            'bid': '0',
-            'ask': '0',
+            'bid': str(bid_rate),
+            'ask': str(ask_rate),
             'volume': '0',
             'time': utils.fmt_time_from_timestamp(timestamp / 1000)
         }

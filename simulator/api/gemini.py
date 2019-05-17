@@ -7,8 +7,8 @@ api = Flask(__name__)
 logger = utils.get_logger()
 
 
-@api.route('/v1/pubticker/ethusd', methods=['GET'])
-def ticker():
+@api.route('/v1/pubticker/<symbol>', methods=['GET'])
+def ticker(symbol):
     """
         https://api.gemini.com/v1/pubticker/ethusd
         {
@@ -24,7 +24,7 @@ def ticker():
     """
     try:
         timestamp = utils.get_timestamp(request.args.to_dict())
-        result = gemini_ticker.load(timestamp)
+        result = gemini_ticker.load(timestamp, symbol)
         return jsonify(result)
     except ValueError as e:
         logger.error(str(e))
@@ -41,4 +41,4 @@ gemini_ticker = gemini.DataTicker(rdb)
 
 if __name__ == '__main__':
     logger.debug(f"Running in {config.MODE} mode")
-    api.run(host='0.0.0.0', port=5400, debug=True)
+    api.run(host='0.0.0.0', port=5800, debug=True)
