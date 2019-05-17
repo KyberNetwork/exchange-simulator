@@ -3,7 +3,7 @@
 set -euo pipefail
 
 readonly DOCKER_PASSWORD=${DOCKER_PASSWORD:-}
-readonly docker_repos=("kybernetwork/exchange-simulator" "kybernetwork/exchange-simulator")
+readonly docker_repos=("kybernetwork/exchange-simulator" "kybernetwork/dev-chain-wrapper")
 
 if [[ -z "$DOCKER_PASSWORD" ]]; then
     echo 'DOCKER_PASSWORD is not available, aborting.'
