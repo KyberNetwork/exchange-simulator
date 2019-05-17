@@ -1,0 +1,19 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+script:
+  - echo 'test is disabled'
+
+after_success:
+  - docker --version
+  - docker build -f Dockerfile -t kybernetwork/analytic:$TRAVIS_COMMIT .
+
+deploy:
+  provider: script
+  script: bash .travis/docker_push
+  on:
+    all_branches: true
