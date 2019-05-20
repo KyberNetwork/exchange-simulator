@@ -14,6 +14,10 @@ FROM python:3.6-slim
 COPY --from=python-base /root/.cache /root/.cache
 COPY --from=python-base /requirements.txt /requirements.txt
 
+RUN apt-get update && \
+	apt-get install -y libxml2 && \
+	rm -rf /var/lib/apt/lists/*
+
 COPY ./nginx.conf /etc/nginx/
 COPY ./nginx_conf/* /etc/nginx/conf.d/
 ADD . /exchange-simulator
