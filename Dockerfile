@@ -1,6 +1,6 @@
 FROM python:3.6 as python-base
 RUN apt-get update && \
-	apt-get install -y python-dev python-pip nginx && \
+	apt-get install -y python-dev python-pip && \
 	rm -rf /var/lib/apt/lists/*
 
 COPY Pipfile Pipfile.lock /
@@ -15,7 +15,7 @@ COPY --from=python-base /root/.cache /root/.cache
 COPY --from=python-base /requirements.txt /requirements.txt
 
 RUN apt-get update && \
-	apt-get install -y libxml2 && \
+	apt-get install -y libxml2 nginx && \
 	rm -rf /var/lib/apt/lists/*
 
 COPY ./nginx.conf /etc/nginx/
