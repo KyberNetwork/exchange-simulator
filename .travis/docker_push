@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -euo pipefail
+
+readonly DOCKER_PASSWORD=${DOCKER_PASSWORD:-}
+readonly docker_repos=("kybernetwork/exchange-simulator" "kybernetwork/dev-chain-wrapper")
+
+if [[ -z "$DOCKER_PASSWORD" ]]; then
+    echo 'DOCKER_PASSWORD is not available, aborting.'
+    exit 1
+fi
+
+echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+for repo in "${docker_repos[@]}"; do
+    docker tag "$repo:$TRAVIS_COMMIT" "$repo:$TRAVIS_BRANCH"
+    if [[ -n "$TRAVIS_TAG" ]]; then
+	docker tag "$repo:$TRAVIS_COMMIT" "$repo:$TRAVIS_TAG"
+    fi
+    docker push "$repo"
+done

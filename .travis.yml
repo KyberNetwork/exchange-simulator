@@ -1,0 +1,20 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+script:
+  - echo 'test is disabled'
+
+after_success:
+  - docker --version
+  - docker build -f Dockerfile -t kybernetwork/exchange-simulator:$TRAVIS_COMMIT .
+  - pushd dev_chain_wrapper && docker build -f Dockerfile -t kybernetwork/dev-chain-wrapper:$TRAVIS_COMMIT . && popd
+
+deploy:
+  provider: script
+  script: bash .travis/docker_push
+  on:
+    all_branches: true

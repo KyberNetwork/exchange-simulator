@@ -1,4 +1,4 @@
-FROM golang
+FROM golang:stretch AS build-env
 
 LABEL Name=kyber_dev_chain_wrapper Version=0.0.1
 
@@ -10,8 +10,12 @@ ADD . /go/src/github.com/KyberNetwork/wrapper
 # either manually or with a tool like "godep".)
 RUN go install github.com/KyberNetwork/wrapper
 
+FROM debian:stretch
+
+COPY --from=build-env /go/bin/wrapper /wrapper
+
 # Run the outyet command by default when the container starts.
-ENTRYPOINT /go/bin/wrapper
+ENTRYPOINT /wrapper
 
 # Document that the service listens on port 8080.
 # EXPOSE 8540
