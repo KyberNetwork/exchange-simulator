@@ -13,7 +13,7 @@ url = "https://pypi.python.org/simple"
 
 pycoin = "==0.80"
 ethereum = "==2.1.5"
-requests = "==2.18.4"
+requests = "==2.20.0"
 jsonrpc = "==1.2"
 rlp = "==0.6.0"
 Flask = "==0.12.2"
